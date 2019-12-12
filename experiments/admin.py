@@ -13,10 +13,15 @@ class SlideAdmin(admin.ModelAdmin):
     inlines = [SectionInline]
 
 
+class MeasurementAdmin(admin.ModelAdmin):
+    model = Measurement
+    # list_display = ["experiment__name", "slide__barcode_id", "technology", "measurement"]
+    list_display = ["technology", "measurement"]
+    list_filter = ("microscope",)
+
+
 class MeasurementInline(admin.StackedInline):
     model = Measurement
-    list_display = ["experiment__name", "slide__barcode_id", "technology", "measurement"]
-    list_filter = ("microscope",)
 
 
 class ExperimentAdmin(admin.ModelAdmin):
@@ -29,8 +34,10 @@ class ExperimentAdmin(admin.ModelAdmin):
 image_tracking_admin.register(Slide, SlideAdmin)
 image_tracking_admin.register(CellGenProject)
 image_tracking_admin.register(Section)
+image_tracking_admin.register(Technology)
+image_tracking_admin.register(Microscope)
 image_tracking_admin.register(Researcher)
-image_tracking_admin.register(Measurement, MeasurementInline)
+image_tracking_admin.register(Measurement, MeasurementAdmin)
 image_tracking_admin.register(TeamDirectory)
 image_tracking_admin.register(Sample)
 image_tracking_admin.register(Channel)

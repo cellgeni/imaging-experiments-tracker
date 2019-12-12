@@ -16,6 +16,20 @@ class TeamDirectory(models.Model):
         return self.name
 
 
+class Microscope(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
+class Technology(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
 class Researcher(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
@@ -73,6 +87,10 @@ class Target(models.Model):
 
 
 class ChannelTarget(models.Model):
+
+    class Meta:
+        unique_together = ("channel", "target")
+
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     target = models.ForeignKey(Target, on_delete=models.SET_NULL, null=True)
 
@@ -81,7 +99,7 @@ class ChannelTarget(models.Model):
 
 
 class Experiment(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, primary_key=True)
     project = models.ForeignKey(CellGenProject, on_delete=models.SET_NULL, null=True)
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True)
 
@@ -93,7 +111,7 @@ class Measurement(models.Model):
     slide = models.ForeignKey(Slide, on_delete=models.SET_NULL, null=True)
     researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True)
     experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True)
-    technology = models.CharField(max_length=20)
+    technology = models.ForeignKey(Technology, on_delete=models.SET_NULL, null=True)
     automated_plate_id = models.CharField(max_length=20, null=True, default=None, blank=True)
     automated_slide_num = models.IntegerField(null=True)
     image_cycle = models.IntegerField()
@@ -103,8 +121,7 @@ class Measurement(models.Model):
     low_mag_reference = models.CharField(max_length=20)
     mag_bin_overlap = models.CharField(max_length=20)
     z_planes = models.CharField(max_length=20)
-    microscope = models.CharField(max_length=20, choices=(("phenix", "Phenix"),
-                                                          ('plateloader', 'Phenix Plateloader')))
+    microscope = models.ForeignKey(Microscope, on_delete=models.SET_NULL, null=True)
     notes_1 = models.TextField(max_length=200)
     notes_2 = models.TextField(max_length=200)
 
