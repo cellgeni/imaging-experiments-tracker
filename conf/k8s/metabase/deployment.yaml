@@ -20,7 +20,7 @@ spec:
       containers:
       - image: metabase/metabase
         imagePullPolicy: IfNotPresent
-        name: metabase
+        name: imaging-tracking-metabase
         ports:
         - containerPort: 3000
           name: metabase

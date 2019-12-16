@@ -23,10 +23,10 @@ RUN pip3 install -r /home/docker/code/app/requirements.txt
 
 # setup all the configfiles
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-COPY conf/docker/nginx-app.conf /etc/nginx/sites-available/default
-COPY conf/docker/supervisor-app.conf /etc/supervisor/conf.d/
-COPY conf/docker/uwsgi.ini /home/docker/code/uwsgi.ini
-COPY conf/docker/uwsgi_params /home/docker/code/uwsgi_params
+COPY conf/server/nginx-app.conf /etc/nginx/sites-available/default
+COPY conf/server/supervisor-app.conf /etc/supervisor/conf.d/
+COPY conf/server/uwsgi.ini /home/docker/code/uwsgi.ini
+COPY conf/server/uwsgi_params /home/docker/code/uwsgi_params
 
 # add (the rest of) our code
 COPY experiments /home/docker/code/experiments
