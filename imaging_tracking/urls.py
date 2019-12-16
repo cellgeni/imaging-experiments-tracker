@@ -1,4 +1,4 @@
-"""image_tracking URL Configuration
+"""imaging_tracking URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.0/topics/http/urls/
@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.urls import path
 
-from image_tracking.admin import image_tracking_admin
+from imaging_tracking.admin import imaging_tracking_admin
 
 urlpatterns = [
-    path('admin/', image_tracking_admin.urls),
+    path('admin/', imaging_tracking_admin.urls),
 ]
