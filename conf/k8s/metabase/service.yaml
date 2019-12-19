@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: imaging-metabase
   labels:
-    app: imaging-tracking-metabase
+    app: imaging-metabase
 spec:
   type: NodePort
   ports:
   - port: 3000
     targetPort: metabase
   selector:
-    app: imaging-tracking-metabase
+    app: imaging-metabase

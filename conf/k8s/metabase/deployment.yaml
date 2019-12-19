@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: imaging-tracking-metabase
+  name: imaging-metabase
 spec:
   selector:
     matchLabels:
-      app: imaging-tracking-metabase
+      app: imaging-metabase
   replicas: 1
   template:
     metadata:
-      name: imaging-tracking-metabase
+      name: imaging-metabase
       labels:
-        app: imaging-tracking-metabase
+        app: imaging-metabase
     spec:
       volumes:
         - name: metabase-db
           persistentVolumeClaim:
-            claimName: imaging-tracking-metabase-pvc
+            claimName: imaging-metabase-pvc
       containers:
       - image: metabase/metabase
         imagePullPolicy: IfNotPresent
-        name: imaging-tracking-metabase
+        name: imaging-metabase
         ports:
         - containerPort: 3000
           name: metabase
