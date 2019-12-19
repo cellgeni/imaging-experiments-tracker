@@ -24,8 +24,7 @@ class SlideAdmin(admin.ModelAdmin):
 class MeasurementAdmin(admin.ModelAdmin):
     model = Measurement
     # list_display = ["experiment__name", "slide__barcode_id", "technology", "measurement"]
-    list_display = ["technology", "measurement"]
-    list_filter = ("microscope",)
+    list_display = ["technology", "measurement", "team_directory"]
 
 
 class MeasurementInline(admin.StackedInline):
@@ -35,7 +34,7 @@ class MeasurementInline(admin.StackedInline):
 class ExperimentAdmin(admin.ModelAdmin):
     model = Experiment
     inlines = [MeasurementInline]
-    list_display = ["name", "project", "team_directory"]
+    list_display = ["name", "project"]
     search_fields = ['slide__barcode_id', "name"]
 
 
