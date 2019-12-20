@@ -62,21 +62,28 @@ class ExternalUser(models.Model):
         return self.email
 
 
+class Tissue(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
 class Sample(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     species = models.CharField(max_length=20, choices=())
     age = models.CharField(max_length=20)
     genotype = models.CharField(max_length=20, null=True)
     background = models.CharField(max_length=20, null=True)
-    tissue = models.CharField(max_length=20)
+    tissue = models.ForeignKey(Tissue, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.id
 
 
 class Slide(models.Model):
-    automated_id = models.CharField(max_length=20)
-    barcode_id = models.CharField(max_length=20, primary_key=True)
+    barcode_id = models.CharField(max_length=20, primary_key=True, help_text="An ID of a physical slide")
+    automated_id = models.CharField(max_length=20, help_text="An ID assigned to a slide by a microscope")
 
     def __str__(self):
         return self.barcode_id
@@ -130,7 +137,7 @@ class Experiment(models.Model):
 
 
 class Measurement(models.Model):
-    slide = models.ForeignKey(Slide, on_delete=models.SET_NULL, null=True)
+    sections = models.ManyToManyField(Section)
     researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True)
     experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True)
     technology = models.ForeignKey(Technology, on_delete=models.SET_NULL, null=True)
@@ -150,7 +157,7 @@ class Measurement(models.Model):
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"{self.slide} {self.date} {self.measurement}"
+        return f"{self.sections} {self.date} {self.measurement}"
 
 
 class Pipeline(models.Model):
