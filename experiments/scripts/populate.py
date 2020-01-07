@@ -18,6 +18,10 @@ class Populator:
     def populate_researchers(self):
         Researcher.objects.get_or_create(last_name="Khodak", first_name="Anton", employee_key="A_K")[0].save()
 
+    def populate_tissues(self):
+        Tissue.objects.get_or_create(name="Kidney")[0].save()
+        Tissue.objects.get_or_create(name="Adrenal gland")[0].save()
+
     def populate_microscopes(self):
         Microscope.objects.get_or_create(name="Phenix_PlateLoader")[0].save()
         Microscope.objects.get_or_create(name="Phenix")[0].save()
@@ -61,18 +65,21 @@ class Populator:
         save({cht1, cht2, cht3, cht4, cht5, cht6})
 
     def populate_samples(self):
+        self.populate_tissues()
+        t1 = Tissue.objects.get(id=1)
+        t2 = Tissue.objects.get(id=2)
         s1 = Sample.objects.get_or_create(id="L14-KID-0-FFPE-1-S3i",
-                                   species="human",
-                                   age="Adult",
-                                   genotype="Unknown",
-                                   background="Unknown",
-                                   tissue="Kidney")
+                                          species="human",
+                                          age="Adult",
+                                          genotype="Unknown",
+                                          background="Unknown",
+                                          tissue=t1)
         s2 = Sample.objects.get_or_create(id="L14-ADR-0-FFPE-1-S3i",
-                                   species="human",
-                                   age="Adult",
-                                   genotype="Unknown",
-                                   background="Unknown",
-                                   tissue="Adrenal gland")
+                                          species="human",
+                                          age="Adult",
+                                          genotype="Unknown",
+                                          background="Unknown",
+                                          tissue=t2)
         save({s1, s2})
 
     def populate_slides(self):
@@ -96,16 +103,60 @@ class Populator:
 
     def populate_experiment(self):
         project = CellGenProject.objects.get(key="ML_HEA")
-        td = TeamDirectory.objects.get(name="t283_imaging")
-        Experiment.objects.get_or_create(name="20191220_ob5_kidney", project=project, team_directory=td)[0].save()
+        Experiment.objects.get_or_create(name="20191220_ob5_kidney", project=project)[0].save()
 
     def populate_measurements(self):
         e = Experiment.objects.get(name="20191220_ob5_kidney")
         researcher = Researcher.objects.get(employee_key="A_K")
         sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
         sl2 = Slide.objects.get(automated_id="ML_HEA_007R", barcode_id="S000000724")
+
         t = Technology.objects.get(id=1)
-        m = Microscope.objects.get(id=1)
+
+        td = TeamDirectory.objects.get(name="t283_imaging")
+
+
+        m1 = Measurement.objects.get_or_create(researcher=researcher,
+                                               experiment=e,
+                                               technology=t,
+                                               automated_plate_id="191010_174405-V",
+                                               automated_slide_num=1,
+                                               image_cycle=1,
+                                               measurement="1b",
+                                               low_mag_reference="1a",
+                                               mag_bin_overlap="20X_Bin1_7%overlap",
+                                               z_planes="28*1",
+                                               notes_1="Whole section; DAPI 520 570 650 // 425",
+                                               notes_2="Tissue section failed",
+                                               team_directory=td)
+        m2 = Measurement.objects.get_or_create(researcher=researcher,
+                                               experiment=e,
+                                               technology=t,
+                                               automated_plate_id="191010_174402-V",
+                                               automated_slide_num=1,
+                                               image_cycle=1,
+                                               measurement="1a",
+                                               low_mag_reference="1b",
+                                               mag_bin_overlap="20X_Bin1_7%overlap",
+                                               z_planes="28*1",
+                                               notes_1="Whole section; DAPI 520 570 650 // 425",
+                                               notes_2="Tissue section failed",
+                                               team_directory=td)
+        m3 = Measurement.objects.get_or_create(researcher=researcher,
+                                               experiment=e,
+                                               technology=t,
+                                               automated_plate_id="191010_174401-V",
+                                               automated_slide_num=1,
+                                               image_cycle=1,
+                                               measurement="4b",
+                                               low_mag_reference="1b",
+                                               mag_bin_overlap="20X_Bin1_7%overlap",
+                                               z_planes="25*1",
+                                               notes_1="Whole section; DAPI 520 570 650 // 425",
+                                               notes_2="Tissue section failed",
+                                               team_directory=td)
+        save({m1, m2, m3})
+
         ch1 = Channel.objects.get(name="Atto 425")
         ch2 = Channel.objects.get(name="Opal 520")
 
@@ -119,22 +170,6 @@ class Populator:
         cht5 = ChannelTarget.objects.get(channel=ch2, target=t2)
         cht6 = ChannelTarget.objects.get(channel=ch2, target=t3)
 
-        m1 = Measurement.objects.get_or_create(slide=sl1, researcher=researcher, experiment=e, technology=t, microscope=m,
-                         automated_plate_id="191010_174405-V", automated_slide_num=1, image_cycle=1,
-                         measurement="1b", low_mag_reference="1a", mag_bin_overlap="20X_Bin1_7%overlap",
-                         z_planes="28*1", notes_1="Whole section; DAPI 520 570 650 // 425",
-                         notes_2="Tissue section failed")
-        m2 = Measurement.objects.get_or_create(slide=sl2, researcher=researcher, experiment=e, technology=t, microscope=m,
-                         automated_plate_id="191010_174402-V", automated_slide_num=1, image_cycle=1,
-                         measurement="1a", low_mag_reference="1b", mag_bin_overlap="20X_Bin1_7%overlap",
-                         z_planes="28*1", notes_1="Whole section; DAPI 520 570 650 // 425",
-                         notes_2="Tissue section failed")
-        m3 = Measurement.objects.get_or_create(slide=sl1, researcher=researcher, experiment=e, technology=t, microscope_id=2,
-                         automated_plate_id="191010_174401-V", automated_slide_num=1, image_cycle=1,
-                         measurement="4b", low_mag_reference="1b", mag_bin_overlap="20X_Bin1_7%overlap",
-                         z_planes="25*1", notes_1="Whole section; DAPI 520 570 650 // 425",
-                         notes_2="Tissue section failed")
-        save({m1, m2, m3})
         m1[0].channel_target_pairs.add(cht1)
         m1[0].channel_target_pairs.add(cht2)
         m1[0].channel_target_pairs.add(cht3)
@@ -144,7 +179,19 @@ class Populator:
         m2[0].channel_target_pairs.add(cht4)
         m2[0].channel_target_pairs.add(cht5)
         m2[0].channel_target_pairs.add(cht6)
-        save({m1, m2, m3})
+
+        sc11 = Section.objects.get(number=1, slide=sl1)
+        sc12 = Section.objects.get(number=2, slide=sl1)
+        sc13 = Section.objects.get(number=3, slide=sl1)
+        sc21 = Section.objects.get(number=1, slide=sl2)
+        sc22 = Section.objects.get(number=2, slide=sl2)
+
+        m1[0].sections.add(sc11)
+        m1[0].sections.add(sc12)
+        m1[0].sections.add(sc13)
+        m2[0].sections.add(sc21)
+        m2[0].sections.add(sc22)
+        m3[0].sections.add(sc21)
 
     def populate_all(self):
         self.populate_cellgen_project()

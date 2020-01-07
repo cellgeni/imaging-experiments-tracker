@@ -1,9 +1,10 @@
+import uuid as uuid
 from django.db import models
 from django.utils import timezone
 
 
 class CellGenProject(models.Model):
-    key = models.CharField(max_length=20    )
+    key = models.CharField(max_length=20)
 
     def __str__(self):
         return self.key
@@ -82,19 +83,23 @@ class Sample(models.Model):
 
 
 class Slide(models.Model):
-    barcode_id = models.CharField(max_length=20, primary_key=True, help_text="An ID of a physical slide")
-    automated_id = models.CharField(max_length=20, help_text="An ID assigned to a slide by a microscope")
+    barcode_id = models.CharField(max_length=20, primary_key=True, help_text="This is the slide number "
+                                                                             "or ID assigned during sectioning")
+    automated_id = models.CharField(max_length=20, help_text="This is the ID entered into the Phenix when imaging. "
+                                                             "It should comprise the project code and then the slide ID "
+                                                             "from the BOND or a manual ID of the form ABXXXX "
+                                                             "where AB is the researcher's initials.")
 
     def __str__(self):
         return self.barcode_id
 
 
 class Section(models.Model):
-
     class Meta:
         unique_together = (('number', 'slide'),)
 
-    number = models.IntegerField()
+    number = models.IntegerField(help_text="In the case where there are multiple sections on the slide "
+                                           "but only one imaged, which one? (1 = top, 2 = second from top… N = bottom)")
     sample = models.ForeignKey(Sample, on_delete=models.SET_NULL, null=True)
     slide = models.ForeignKey(Slide, on_delete=models.CASCADE)
 
@@ -117,7 +122,6 @@ class Target(models.Model):
 
 
 class ChannelTarget(models.Model):
-
     class Meta:
         unique_together = ("channel", "target")
 
@@ -137,23 +141,56 @@ class Experiment(models.Model):
 
 
 class Measurement(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     sections = models.ManyToManyField(Section)
-    researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True)
-    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True)
-    technology = models.ForeignKey(Technology, on_delete=models.SET_NULL, null=True)
-    automated_plate_id = models.CharField(max_length=20, null=True, default=None, blank=True)
-    automated_slide_num = models.IntegerField(blank=True, null=True)
-    image_cycle = models.IntegerField()
-    channel_target_pairs = models.ManyToManyField(ChannelTarget)
-    date = models.DateTimeField(default=timezone.now)
-    measurement = models.CharField(max_length=20)
-    low_mag_reference = models.CharField(max_length=20, blank=True, null=True)
-    mag_bin_overlap = models.CharField(max_length=20, blank=True, null=True)
-    z_planes = models.CharField(max_length=20, blank=True, null=True)
-    notes_1 = models.TextField(max_length=200, blank=True, null=True)
-    notes_2 = models.TextField(max_length=200, blank=True, null=True)
-    export_location = models.CharField(max_length=200, blank=True, null=True)
-    archive_location = models.CharField(max_length=200, blank=True, null=True)
+    researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True,
+                                   help_text="Pre-validated list of Phenix users")
+    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True,
+                                   help_text="Pre-validated list of T283 projects")
+    technology = models.ForeignKey(Technology, on_delete=models.SET_NULL, null=True,
+                                   help_text="How was the slide stained?")
+    automated_plate_id = models.CharField(max_length=20, null=True, default=None, blank=True,
+                                          help_text="These columns are needed only "
+                                                    "when using the automated plate handler.")
+    automated_slide_num = models.IntegerField(blank=True, null=True,
+                                              help_text="These columns are needed only "
+                                                        "when using the automated plate handler.")
+    image_cycle = models.IntegerField(help_text="Every time the coverslip is removed, "
+                                                "the section restained with something, "
+                                                "the image cycle increases incrementally")
+    channel_target_pairs = models.ManyToManyField(ChannelTarget,
+                                                  help_text="Which channels are being used in imaging, "
+                                                            "and what targets do they represent? The channel name "
+                                                            "selected should exactly match "
+                                                            "the channels used on the Phenix.													")
+    date = models.DateTimeField(default=timezone.now,
+                                help_text="Date that the image was taken")
+    measurement = models.CharField(max_length=20,
+                                   help_text="Measurement number, assigned automatically by the Phenix")
+    low_mag_reference = models.CharField(max_length=20, blank=True, null=True,
+                                         help_text="A low magnification image (e.g. 5X or 10X scan "
+                                                   "of the whole slide with DAPI only) may be used as a reference "
+                                                   "for other images, in alignment and/or viewing. For other images, "
+                                                   "the related image number should be referenced.")
+    mag_bin_overlap = models.CharField(max_length=20, blank=True, null=True,
+                                       help_text="Magnification, binning level, and tile overlap for the image")
+    z_planes = models.CharField(max_length=20, blank=True, null=True,
+                                help_text="Number of z-planes x depth of each z-plane")
+    notes_1 = models.TextField(max_length=200, blank=True, null=True,
+                               help_text="Notes about the imaging process: "
+                                         "what did you image (whole slide, part of tissue, single field), "
+                                         "which channels?")
+    notes_2 = models.TextField(max_length=200, blank=True, null=True,
+                               help_text="Notes about the resulting image: "
+                                         "out of focus, poor signal in a channel, good, etc.")
+    export_location = models.CharField(max_length=200, blank=True, null=True,
+                                       help_text="If the image dataset has been exported as a measurement "
+                                                 "via data management, this is the export location. "
+                                                 "This is NOT the same as basic image exports "
+                                                 "for presentations, lab notes, etc.")
+    archive_location = models.CharField(max_length=200, blank=True, null=True,
+                                        help_text="If the image dataset has been exported as an archived measurement, "
+                                                  "this is the export location")
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
@@ -190,4 +227,3 @@ class Analysis(models.Model):
     OMERO_internal_groups = models.ManyToManyField(SangerGroup)
     OMERO_internal_users = models.ManyToManyField(SangerUser)
     OMERO_external_users = models.ManyToManyField(ExternalUser)
-

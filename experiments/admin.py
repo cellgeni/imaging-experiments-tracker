@@ -21,10 +21,24 @@ class SlideAdmin(admin.ModelAdmin):
     inlines = [SectionInline]
 
 
+def copy_measurement(modeladmin, request, queryset):
+    for obj in queryset:
+        sections = obj.sections.all()
+        channel_target_pairs = obj.channel_target_pairs.all()
+        obj.pk = None
+        obj.save()
+        obj.sections.set(sections)
+        obj.channel_target_pairs.set(channel_target_pairs)
+
+
+copy_measurement.short_description = "Copy measurement"
+
+
 class MeasurementAdmin(admin.ModelAdmin):
     model = Measurement
     # list_display = ["experiment__name", "slide__barcode_id", "technology", "measurement"]
-    list_display = ["technology", "measurement", "team_directory"]
+    # list_display = ["technology", "measurement", "team_directory"]
+    actions = [copy_measurement ]
 
 
 class MeasurementInline(admin.StackedInline):
