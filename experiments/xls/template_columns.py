@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from experiments.models import *
-from xls.constants import *
+from experiments.constants import *
 
 MAX_ROWS = 100
 
@@ -54,7 +54,7 @@ def get_columns() -> List[ImageTrackerColumn]:
                                                  'input_title': "Researcher",
                                                  'input_message': "Choose researcher"})
     project = ImageTrackerColumn(PROJECT, {'validate': 'list',
-                                                 'value': [r.employee_key for r in Researcher.objects.all()],
+                                                 'value': [r.key for r in CellGenProject.objects.all()],
                                                  'input_title': "Project",
                                                  'input_message': "Choose project"})
     slide_id = ImageTrackerColumn(SLIDE, {})
@@ -72,11 +72,11 @@ def get_columns() -> List[ImageTrackerColumn]:
         'input_title': "Channel-target pair",
         'input_message': "Choose channel-target pair"
     }
-    channel_target1 = ImageTrackerColumn(CHANNEL_TARGET + "1", channel_target_validation)
-    channel_target2 = ImageTrackerColumn(CHANNEL_TARGET + "2", channel_target_validation)
-    channel_target3 = ImageTrackerColumn(CHANNEL_TARGET + "3", channel_target_validation)
-    channel_target4 = ImageTrackerColumn(CHANNEL_TARGET + "4", channel_target_validation)
-    channel_target5 = ImageTrackerColumn(CHANNEL_TARGET + "5", channel_target_validation)
+    channel_target1 = ImageTrackerColumn(CHANNEL_TARGET1, channel_target_validation)
+    channel_target2 = ImageTrackerColumn(CHANNEL_TARGET2, channel_target_validation)
+    channel_target3 = ImageTrackerColumn(CHANNEL_TARGET3, channel_target_validation)
+    channel_target4 = ImageTrackerColumn(CHANNEL_TARGET4, channel_target_validation)
+    channel_target5 = ImageTrackerColumn(CHANNEL_TARGET5, channel_target_validation)
     date = ImageTrackerColumn(DATE, {'validate': 'date'})
     measurement = ImageTrackerColumn(MEASUREMENT, {})
     low_mag_reference = ImageTrackerColumn(LOW_MAG_REFERENCE, {})

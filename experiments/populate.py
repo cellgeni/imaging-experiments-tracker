@@ -1,7 +1,7 @@
 import os, django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
-django.setup()
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
+# django.setup()
 from experiments.models import *
 
 
@@ -66,8 +66,8 @@ class Populator:
 
     def populate_samples(self):
         self.populate_tissues()
-        t1 = Tissue.objects.get(id=1)
-        t2 = Tissue.objects.get(id=2)
+        t1 = Tissue.objects.get(name="Kidney")
+        t2 = Tissue.objects.get(name="Adrenal gland")
         s1 = Sample.objects.get_or_create(id="L14-KID-0-FFPE-1-S3i",
                                           species="human",
                                           age="Adult",
@@ -111,10 +111,8 @@ class Populator:
         sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
         sl2 = Slide.objects.get(automated_id="ML_HEA_007R", barcode_id="S000000724")
 
-        t = Technology.objects.get(id=1)
-
+        t = Technology.objects.get(name="RNAscope 4-plex")
         td = TeamDirectory.objects.get(name="t283_imaging")
-
 
         m1 = Measurement.objects.get_or_create(researcher=researcher,
                                                experiment=e,
@@ -210,6 +208,3 @@ class Populator:
 if __name__ == "__main__":
     p = Populator()
     p.populate_all()
-    # p.populate_researchers()
-    # p.populate_experiment()
-    # p.populate_measurements()
