@@ -1,4 +1,7 @@
 import uuid
+from datetime import datetime
+from typing import Tuple, List
+
 from django.db import models
 from django.utils import timezone
 
@@ -93,6 +96,12 @@ class Slide(models.Model):
     def __str__(self):
         return self.barcode_id
 
+    @classmethod
+    def get_random_slide_with_three_sections(cls) -> "Slide":
+        for slide in cls.objects.all():
+            if len(slide.section_set.all()) >= 3:
+                return slide
+
 
 class Section(models.Model):
     class Meta:
@@ -122,6 +131,8 @@ class Target(models.Model):
 
 
 class ChannelTarget(models.Model):
+    SEPARATOR = " -> "
+
     class Meta:
         unique_together = ("channel", "target")
 
@@ -129,7 +140,14 @@ class ChannelTarget(models.Model):
     target = models.ForeignKey(Target, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return str(self.channel) + " -> " + str(self.target)
+        return str(self.channel) + self.SEPARATOR + str(self.target)
+
+    @classmethod
+    def get_channel_and_target_from_str(cls, name: str) -> Tuple[str, str]:
+        if type(name) is not str or cls.SEPARATOR not in name:
+            raise ValueError(f"The string '{str}' is not a ChannelTarget string")
+        channel, target = name.split(cls.SEPARATOR)
+        return channel, target
 
 
 class Experiment(models.Model):
@@ -163,7 +181,7 @@ class Measurement(models.Model):
                                                             "and what targets do they represent? The channel name "
                                                             "selected should exactly match "
                                                             "the channels used on the Phenix.													")
-    date = models.DateTimeField(default=timezone.now,
+    date = models.DateTimeField(default=datetime.now,
                                 help_text="Date that the image was taken")
     measurement = models.CharField(max_length=20,
                                    help_text="Measurement number, assigned automatically by the Phenix")

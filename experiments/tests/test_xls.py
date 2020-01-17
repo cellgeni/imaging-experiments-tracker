@@ -1,7 +1,9 @@
 import logging
 import os
+import unittest
 import uuid
 from datetime import datetime
+from typing import Dict
 
 import pandas as pd
 from django.test import TestCase
@@ -11,16 +13,15 @@ from experiments.models import Researcher, CellGenProject, \
     Slide, ChannelTarget, Technology, Measurement, TeamDirectory, \
     Section, Target, Channel
 from experiments.populate import Populator
-from experiments.xls.import_xls import SpreadsheetImporter, ImageTrackingRow
+from experiments.xls.import_xls import SpreadsheetImporter, ImageTrackingRow, MeasurementParametersParser
 from experiments.xls.me import MeasurementM2MFields, MeasurementParameters
 from experiments.xls.sample_row import SampleRow
-
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def get_sample_info():
+def get_sample_info() -> Dict:
     return {
         UUID: str(uuid.uuid4()),
         MODE: CREATE_OR_UPDATE,
@@ -28,14 +29,14 @@ def get_sample_info():
         PROJECT: str(CellGenProject.objects.first()),
         SLIDE_BARCODE: str(Slide.objects.first()),
         AUTOMATED_PLATEID: "smth",
-        AUTOMATED_SLIDEN: "smhw",
+        AUTOMATED_SLIDEN: 2,
         TECHNOLOGY: str(Technology.objects.first()),
         IMAGE_CYCLE: 1,
         CHANNEL_TARGET1: str(ChannelTarget.objects.all()[0]),
         CHANNEL_TARGET2: str(ChannelTarget.objects.all()[1]),
         CHANNEL_TARGET3: str(ChannelTarget.objects.all()[2]),
         DATE: str(datetime.now()),
-        MEASUREMENT: 1,
+        MEASUREMENT: "1a",
         LOW_MAG_REFERENCE: "smth",
         MAG_BIN_OVERLAP: "smth",
         SECTIONS: "1,2",
@@ -48,15 +49,28 @@ def get_sample_info():
     }
 
 
+def get_info(d: Dict):
+    result = {
+        UUID: str(uuid.uuid4()),
+        MODE: CREATE_OR_UPDATE,
+    }
+    result.update(d)
+    return result
+
+
+def create_row(d: Dict):
+    return pd.Series(get_info(d))
+
+
 class SampleRowTestCase(TestCase):
     file = 'test_data/measurements_input1.xlsx'
 
-    def setUp(self):
+    def setUp(self) -> None:
         p = Populator()
         p.populate_all()
         assert Researcher.objects.first()
 
-    def test_write_row(self):
+    def test_write_row(self) -> None:
         sample_info = get_sample_info()
         assert sample_info[RESEARCHER]
         row = SampleRow(sample_info)
@@ -71,6 +85,39 @@ class SampleRowTestCase(TestCase):
 
     def tearDown(self) -> None:
         os.remove(self.file)
+
+
+class MeasurementsParameterParserTestCase(TestCase):
+
+    def setUp(self) -> None:
+        p = Populator()
+        p.populate_sections()
+        p.populate_channel_target_pairs()
+
+    def test_parse_sections(self):
+        slide = Slide.get_random_slide_with_three_sections()
+        info = {
+            SLIDE_BARCODE: str(slide),
+            SECTIONS: "1,3",
+        }
+        row = create_row(info)
+        mpp = MeasurementParametersParser(row)
+        section1 = Section.objects.get(number=1, slide=slide)
+        section3 = Section.objects.get(number=3, slide=slide)
+        assert mpp._parse_sections() == [section1, section3]
+
+    def test_parse_channel_targets(self):
+        cht1 = ChannelTarget.objects.all()[0]
+        cht2 = ChannelTarget.objects.all()[1]
+        cht3 = ChannelTarget.objects.all()[2]
+        info = {
+            CHANNEL_TARGET1: str(cht1),
+            CHANNEL_TARGET2: str(cht2),
+            CHANNEL_TARGET3: str(cht3),
+        }
+        row = create_row(info)
+        mpp = MeasurementParametersParser(row)
+        assert mpp._parse_channel_targets() == [cht1, cht2, cht3]
 
 
 class RowMeasurementTestCase(TestCase):

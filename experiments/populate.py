@@ -52,7 +52,6 @@ class Populator:
         self.populate_targets()
         ch1 = Channel.objects.get(name="Atto 425")
         ch2 = Channel.objects.get(name="Opal 520")
-
         t1 = Target.objects.get(name="MYH11")
         t2 = Target.objects.get(name="dapB")
         t3 = Target.objects.get(name="POLR2A")
@@ -90,6 +89,8 @@ class Populator:
         save({s1, s2, s3, s4})
 
     def populate_sections(self):
+        self.populate_samples()
+        self.populate_slides()
         s1 = Sample.objects.get(id="L14-KID-0-FFPE-1-S3i")
         s2 = Sample.objects.get(id="L14-ADR-0-FFPE-1-S3i")
         sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
