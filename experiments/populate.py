@@ -1,7 +1,8 @@
 import os, django
 
-# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
-# django.setup()
+if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
+    django.setup()
 from experiments.models import *
 
 
@@ -14,9 +15,11 @@ class Populator:
 
     def populate_cellgen_project(self):
         CellGenProject.objects.get_or_create(key="ML_HEA")[0].save()
+        CellGenProject.objects.get_or_create(key="KB_CAH")[0].save()
 
     def populate_researchers(self):
         Researcher.objects.get_or_create(last_name="Khodak", first_name="Anton", employee_key="A_K")[0].save()
+        Researcher.objects.get_or_create(last_name="Winslet", first_name="Mariam", employee_key="M_W")[0].save()
 
     def populate_tissues(self):
         Tissue.objects.get_or_create(name="Kidney")[0].save()
@@ -28,9 +31,11 @@ class Populator:
 
     def populate_technologies(self):
         Technology.objects.get_or_create(name="RNAscope 4-plex")[0].save()
+        Technology.objects.get_or_create(name="RNAscope 8-plex")[0].save()
 
     def populate_team_dirs(self):
         TeamDirectory.objects.get_or_create(name="t283_imaging")[0].save()
+        TeamDirectory.objects.get_or_create(name="t876_imaging")[0].save()
 
     def populate_channels(self):
         ch1 = Channel.objects.get_or_create(name="Atto 425")

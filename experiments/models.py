@@ -1,9 +1,8 @@
 import uuid
 from datetime import datetime
-from typing import Tuple, List
+from typing import Tuple
 
 from django.db import models
-from django.utils import timezone
 
 
 class CellGenProject(models.Model):
@@ -159,7 +158,7 @@ class Experiment(models.Model):
 
 
 class Measurement(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     sections = models.ManyToManyField(Section)
     researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True,
                                    help_text="Pre-validated list of Phenix users")
