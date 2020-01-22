@@ -6,9 +6,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
 django.setup()
 
 import xlsxwriter
-from xls.template_columns import *
+from experiments.xls.generate.template_columns import *
+from experiments.xls import EXCEL_TEMPLATE
 
-workbook = xlsxwriter.Workbook('measurements_input.xlsx')
+workbook = xlsxwriter.Workbook(EXCEL_TEMPLATE)
 worksheet = workbook.add_worksheet()
 
 

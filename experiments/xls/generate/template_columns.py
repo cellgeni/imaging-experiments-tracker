@@ -37,9 +37,9 @@ class ModeColumn(ImageTrackerColumn):
 
     def __init__(self):
         super().__init__(MODE, {'validate': 'list',
-                                        'value': MODES,
-                                        'input_title': "Mode",
-                                        'input_message': "Choose mode"})
+                                'value': MODES,
+                                'input_title': "Mode",
+                                'input_message': "Choose mode"})
 
     def prepopulate(self, column, worksheet):
         for row in range(1, 21):
@@ -54,18 +54,28 @@ def get_columns() -> List[ImageTrackerColumn]:
                                                  'input_title': "Researcher",
                                                  'input_message': "Choose researcher"})
     project = ImageTrackerColumn(PROJECT, {'validate': 'list',
-                                                 'value': [r.key for r in CellGenProject.objects.all()],
-                                                 'input_title': "Project",
-                                                 'input_message': "Choose project"})
-    slide_id = ImageTrackerColumn(SLIDE, {})
+                                           'value': [r.key for r in CellGenProject.objects.all()],
+                                           'input_title': "Project",
+                                           'input_message': "Choose project"})
+    slide_id = ImageTrackerColumn(SLIDE, {'validate': 'list',
+                                          'value': [s.barcode_id for s in Slide.objects.all()],
+                                          'input_title': "Slide",
+                                          'input_message': "Choose slide"})
     automated_plate_id = ImageTrackerColumn(AUTOMATED_PLATEID, {})
-    automated_sliden = ImageTrackerColumn(AUTOMATED_SLIDEN, {})
+    automated_sliden = ImageTrackerColumn(AUTOMATED_SLIDEN, {'validate': 'integer',
+                                                             'criteria': '>',
+                                                             'value': 0})
     slide_barcode = ImageTrackerColumn(SLIDE_BARCODE, {
         'validate': 'list',
         'value': [sl.barcode_id for sl in Slide.objects.all()]
     })
-    technology = ImageTrackerColumn(TECHNOLOGY, {})
-    image_cycle = ImageTrackerColumn(IMAGE_CYCLE, {})
+    technology = ImageTrackerColumn(TECHNOLOGY, {'validate': 'list',
+                                                 'value': [t.name for t in Technology.objects.all()],
+                                                 'input_title': "Technology",
+                                                 'input_message': "Choose technology"})
+    image_cycle = ImageTrackerColumn(IMAGE_CYCLE, {'validate': 'integer',
+                                                   'criteria': '<',
+                                                   'value': 10})
     channel_target_validation = {
         'validate': 'list',
         'value': [str(ct) for ct in ChannelTarget.objects.all()],
@@ -87,7 +97,10 @@ def get_columns() -> List[ImageTrackerColumn]:
     notes2 = ImageTrackerColumn(NOTES_2, {})
     export_location = ImageTrackerColumn(EXPORT_LOCATION, {})
     archive_location = ImageTrackerColumn(ARCHIVE_LOCATION, {})
-    team_dir = ImageTrackerColumn(TEAM_DIR)
+    team_dir = ImageTrackerColumn(TEAM_DIR, {'validate': 'list',
+                                             'value': [t.name for t in TeamDirectory.objects.all()],
+                                             'input_title': "Team directory",
+                                             'input_message': "Choose team directory"})
     return [uuid_column, mode_column, researcher, project,
             slide_id, automated_plate_id, automated_sliden, slide_barcode,
             technology, image_cycle, channel_target1, channel_target2, channel_target3,
