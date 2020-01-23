@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from experiments.constants import *
 from experiments.models import Measurement
+from experiments.xls import EXCEL_TEMPLATE
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,9 +23,8 @@ class ExcelRow:
             df.loc[row_num, column] = self.row[column]
 
     def write_sample(self, output_file: str, row_num: int = 0) -> None:
-        template_file = 'test_data/measurements_input.xlsx'
-        assert os.path.exists(template_file)
-        df = pd.read_excel(template_file)
+        assert os.path.exists(EXCEL_TEMPLATE)
+        df = pd.read_excel(EXCEL_TEMPLATE)
         self.write_row(df, row_num)
         df.to_excel(output_file)
         assert os.path.exists(output_file)
