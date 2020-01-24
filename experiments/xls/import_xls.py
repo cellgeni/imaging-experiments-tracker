@@ -1,4 +1,3 @@
-import logging
 import traceback
 from typing import Iterable
 
@@ -7,10 +6,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from experiments.constants import *
 from experiments.models import Measurement
+from xls import xls_logger as logger
 from xls.measurement_parameters import MeasurementParameters, MeasurementParametersParser
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class MeasurementRow:
@@ -25,7 +22,7 @@ class MeasurementRow:
         return self._row[UUID]
 
     def ignore(self) -> None:
-        logger.info(f"Row ignored: {self._row}")
+        logger.info(f"Row ignored: {self.get_uuid()}")
 
     def delete(self) -> None:
         uuid = self.get_uuid()
@@ -57,7 +54,6 @@ class MeasurementRow:
             self.create(parameters)
 
     def handle_mode(self) -> None:
-        logger.info(f"Importing row {self.get_uuid()}")
         mode = self._row[MODE]
         if mode == IGNORE:
             self.ignore()
@@ -82,7 +78,7 @@ class SpreadsheetImporter:
                 row.handle_mode()
             except Exception as e:
                 logger.error(f"Failed to import row with uuid {row.get_uuid()}")
-                traceback.print_exc()
+                logger.error(e)
 
 
 

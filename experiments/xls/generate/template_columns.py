@@ -57,17 +57,16 @@ def get_columns() -> List[ImageTrackerColumn]:
                                            'value': [r.key for r in CellGenProject.objects.all()],
                                            'input_title': "Project",
                                            'input_message': "Choose project"})
-    slide_id = ImageTrackerColumn(SLIDE, {'validate': 'list',
-                                          'value': [s.barcode_id for s in Slide.objects.all()],
-                                          'input_title': "Slide",
-                                          'input_message': "Choose slide"})
+    slide_id = ImageTrackerColumn(SLIDE, {})
     automated_plate_id = ImageTrackerColumn(AUTOMATED_PLATEID, {})
     automated_sliden = ImageTrackerColumn(AUTOMATED_SLIDEN, {'validate': 'integer',
                                                              'criteria': '>',
                                                              'value': 0})
     slide_barcode = ImageTrackerColumn(SLIDE_BARCODE, {
         'validate': 'list',
-        'value': [sl.barcode_id for sl in Slide.objects.all()]
+        'value': [sl.barcode_id for sl in Slide.objects.all()],
+        'input_title': "Slide",
+        'input_message': "Choose slide"
     })
     technology = ImageTrackerColumn(TECHNOLOGY, {'validate': 'list',
                                                  'value': [t.name for t in Technology.objects.all()],

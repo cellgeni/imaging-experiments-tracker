@@ -7,7 +7,8 @@
         <button type="submit" name="answer" id="answer-button">Upload</button>
 
     </form>
-    {{ data }}
-
+    {% for s in data %}
+    {{ s }}<br>
+    {% endfor %}
     <a href="/xls-template">Download XLS template</a>
 {% endblock content %}

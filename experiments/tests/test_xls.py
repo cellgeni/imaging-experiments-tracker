@@ -1,6 +1,5 @@
 import logging
 import os
-import unittest
 import uuid
 from datetime import datetime
 from typing import Dict
@@ -11,12 +10,13 @@ from django.test import TestCase
 from experiments.constants import *
 from experiments.models import Researcher, CellGenProject, \
     Slide, ChannelTarget, Technology, Measurement, TeamDirectory, \
-    Section, Target, Channel
+    Section
 from experiments.populate import Populator
 from experiments.xls.excel_row import ExcelRow
 from experiments.xls.import_xls import SpreadsheetImporter, MeasurementRow
 from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters
-from xls.measurement_parameters import MeasurementParametersParser
+from experiments.xls import StreamLogging, xls_logger
+from experiments.xls.measurement_parameters import MeasurementParametersParser
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -203,6 +203,25 @@ class MeasurementRowTestCase(TestCase):
         assert parameters.were_created()
 
 
+class StreamLoggingTestCase(TestCase):
+
+    def test_logging(self):
+        s1 = "a test string"
+        s2 = "another test string"
+        result = f"{s1}\n{s2}\n"
+        with StreamLogging() as stream:
+            xls_logger.info(s1)
+            xls_logger.error(s2)
+            data = stream.get_log()
+        self.assertEqual(result, data)
+
+    def test_handlers(self):
+        self.assertFalse(xls_logger.handlers)
+        with StreamLogging() as s:
+            self.assertTrue(xls_logger.handlers)
+        self.assertFalse(xls_logger.handlers)
+
+
 class SpreadsheetImportTestCase(TestCase):
     file = 'test_data/measurements_input2.xlsx'
 
@@ -263,6 +282,8 @@ class SpreadsheetImportTestCase(TestCase):
         row.write_sample(self.file, 0)
         self.import_data()
         self.assertFalse(row.is_in_database())
+
+    # def test_logging
 
     def tearDown(self) -> None:
         os.remove(self.file)

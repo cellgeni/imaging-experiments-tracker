@@ -7,10 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from experiments.constants import *
 from experiments.models import Measurement
-from experiments.xls import EXCEL_TEMPLATE
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from experiments.xls import EXCEL_TEMPLATE, xls_logger as logger
 
 
 class ExcelRow:
