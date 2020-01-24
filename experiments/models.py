@@ -1,7 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import date
 from typing import Tuple
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 
@@ -101,6 +102,13 @@ class Slide(models.Model):
             if len(slide.section_set.all()) >= 3:
                 return slide
 
+    @classmethod
+    def get_slide(cls, barcode_id):
+        try:
+            return Slide.objects.get(barcode_id=barcode_id)
+        except ObjectDoesNotExist:
+            raise ValueError(f"Slide with barcode {barcode_id} does not exist")
+
 
 class Section(models.Model):
     class Meta:
@@ -113,6 +121,14 @@ class Section(models.Model):
 
     def __str__(self):
         return f"{self.number} {self.sample} {self.slide}"
+
+    @classmethod
+    def get_section(cls, num, slide):
+        try:
+            return cls.objects.get(number=num,
+                                   slide=slide)
+        except ObjectDoesNotExist:
+            raise ValueError(f"Section number {num} does not exist for slide {slide}")
 
 
 class Channel(models.Model):
@@ -180,8 +196,8 @@ class Measurement(models.Model):
                                                             "and what targets do they represent? The channel name "
                                                             "selected should exactly match "
                                                             "the channels used on the Phenix.													")
-    date = models.DateTimeField(default=datetime.now,
-                                help_text="Date that the image was taken")
+    date = models.DateField(default=date.today,
+                            help_text="Date that the image was taken")
     measurement = models.CharField(max_length=20,
                                    help_text="Measurement number, assigned automatically by the Phenix")
     low_mag_reference = models.CharField(max_length=20, blank=True, null=True,
@@ -209,6 +225,8 @@ class Measurement(models.Model):
                                         help_text="If the image dataset has been exported as an archived measurement, "
                                                   "this is the export location")
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True)
+
+    DATE_FORMAT = "%d.%m.%Y"
 
     def __str__(self):
         return f"{self.sections} {self.date} {self.measurement}"

@@ -6,8 +6,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from experiments.constants import *
 from experiments.models import Measurement
-from xls import xls_logger as logger
-from xls.measurement_parameters import MeasurementParameters, MeasurementParametersParser
+from experiments.xls import xls_logger as logger
+from experiments.xls.measurement_parameters import MeasurementParameters, MeasurementParametersParser
 
 
 class MeasurementRow:
@@ -77,8 +77,9 @@ class SpreadsheetImporter:
             try:
                 row.handle_mode()
             except Exception as e:
-                logger.error(f"Failed to import row with uuid {row.get_uuid()}")
+                logger.error(f"Failed to import row {row.get_uuid()}")
                 logger.error(e)
+                traceback.print_exc()
 
 
 

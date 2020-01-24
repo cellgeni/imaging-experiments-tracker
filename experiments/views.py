@@ -8,9 +8,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
-from experiments.xls import EXCEL_TEMPLATE
-from xls import StreamLogging
-from xls.import_xls import SpreadsheetImporter
+from experiments.xls import EXCEL_TEMPLATE, StreamLogging
+from experiments.xls.import_xls import SpreadsheetImporter
 
 
 class XLSUploadForm(forms.Form):

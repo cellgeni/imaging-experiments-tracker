@@ -1,7 +1,7 @@
 import logging
 import os
 import uuid
-from datetime import datetime
+import datetime
 from typing import Dict
 
 import pandas as pd
@@ -28,7 +28,11 @@ class ExcelRowInfoGenerator:
         self.d = d
 
     @staticmethod
-    def get_sample_info() -> Dict:
+    def get_todays_date():
+        return datetime.date.today().strftime(Measurement.DATE_FORMAT)
+
+    @classmethod
+    def get_sample_info(cls) -> Dict:
         return {
             UUID: str(uuid.uuid4()),
             MODE: CREATE_OR_UPDATE,
@@ -42,7 +46,7 @@ class ExcelRowInfoGenerator:
             CHANNEL_TARGET1: str(ChannelTarget.objects.all()[0]),
             CHANNEL_TARGET2: str(ChannelTarget.objects.all()[1]),
             CHANNEL_TARGET3: str(ChannelTarget.objects.all()[2]),
-            DATE: str(datetime.now()),
+            DATE: cls.get_todays_date(),
             MEASUREMENT: "1a",
             LOW_MAG_REFERENCE: "smth",
             MAG_BIN_OVERLAP: "smth",
@@ -73,11 +77,11 @@ class ExcelRowTestCase(TestCase):
     def setUp(self) -> None:
         p = Populator()
         p.populate_all()
-        assert Researcher.objects.first()
+        self.assertTrue(Researcher.objects.first())
 
     def test_write_row(self) -> None:
         sample_info = ExcelRowInfoGenerator.get_sample_info()
-        assert sample_info[RESEARCHER]
+        self.assertTrue(sample_info[RESEARCHER])
         row = ExcelRow(sample_info)
         row.write_sample(self.file)
         df = pd.read_excel(self.file)
@@ -86,7 +90,7 @@ class ExcelRowTestCase(TestCase):
             logger.debug(f"Key: {key}")
             logger.debug(f"Original value: {value}")
             logger.debug(f"Spreadsheet value: {spreadsheet_value}")
-            assert value == spreadsheet_value
+            self.assertEqual(value, spreadsheet_value)
 
     def tearDown(self) -> None:
         os.remove(self.file)
@@ -124,6 +128,26 @@ class MeasurementsParameterParserTestCase(TestCase):
         mpp = MeasurementParametersParser(row)
         self.assertEqual(mpp._parse_channel_targets(), {cht1, cht2, cht3})
 
+    def test_parse_section_numbers(self):
+        self.assertEqual([1, 2, 3], MeasurementParametersParser._parse_section_numbers("1,2,3"))
+        self.assertEqual([1, 2, 3], MeasurementParametersParser._parse_section_numbers("1, 2, 3"))
+        self.assertEqual([1, 2, 3], MeasurementParametersParser._parse_section_numbers("1 , 2 ,3"))
+        self.assertEqual([1], MeasurementParametersParser._parse_section_numbers("1"))
+        self.assertEqual([1, 2], MeasurementParametersParser._parse_section_numbers("1.0, 2.0"))
+        self.assertEqual([1], MeasurementParametersParser._parse_section_numbers(1))
+        self.assertEqual([1], MeasurementParametersParser._parse_section_numbers(float(1.0)))
+        with self.assertRaises(ValueError):
+            MeasurementParametersParser._parse_section_numbers("cat, dog, 2")
+
+    def test_parse_date(self):
+        sample_date = datetime.date(2019, 2, 2)
+        self.assertEqual(sample_date, MeasurementParametersParser._parse_date("2.2.2019"))
+        self.assertEqual(sample_date, MeasurementParametersParser._parse_date("02/02/2019"))
+        wrong_dates = ["1.13.2018", "some word", "1.2.18", "1 02 2019", "2019.12.3"]
+        for wrong_date in wrong_dates:
+            with self.assertRaises(ValueError):
+                MeasurementParametersParser._parse_date(wrong_date)
+
 
 class MeasurementParametersGenerator:
 
@@ -139,7 +163,7 @@ class MeasurementParametersGenerator:
         model = Measurement(researcher=Researcher.objects.first(),
                             technology=Technology.objects.first(),
                             image_cycle=1,
-                            date=datetime.now(),
+                            date=datetime.date.today(),
                             measurement="1b",
                             low_mag_reference="kjkj",
                             mag_bin_overlap="kjk",
@@ -162,10 +186,10 @@ class MeasurementParametersTestCase(TestCase):
     def test_update_fields(self):
         parameters = MeasurementParametersGenerator.get_sample_parameters()
         uuid = parameters.create_db_object()
-        assert parameters.were_created()
+        self.assertTrue(parameters.were_created())
         sl1 = Slide.objects.first()
         sl2 = Slide.objects.last()
-        assert sl1 != sl2
+        self.assertNotEqual(sl1, sl2)
         sc11 = Section.objects.get(number=1, slide=sl1)
         sc12 = Section.objects.get(number=2, slide=sl2)
         cht1 = ChannelTarget.objects.all()[1]
@@ -174,7 +198,7 @@ class MeasurementParametersTestCase(TestCase):
                             researcher=Researcher.objects.last(),
                             technology=Technology.objects.last(),
                             image_cycle=1,
-                            date=datetime.now(),
+                            date=datetime.date(2019, 3, 4),
                             measurement="1b",
                             low_mag_reference="kjkj",
                             mag_bin_overlap="kjk",
@@ -187,8 +211,8 @@ class MeasurementParametersTestCase(TestCase):
                                          channel_target_pairs={cht1, cht5})
         new_parameters = MeasurementParameters(model, m2mfields)
         new_parameters.update_db_object()
-        assert new_parameters.were_created()
-        assert not parameters.were_created()
+        self.assertTrue(new_parameters.were_created())
+        self.assertFalse(parameters.were_created())
 
 
 class MeasurementRowTestCase(TestCase):
@@ -200,7 +224,7 @@ class MeasurementRowTestCase(TestCase):
     def test_create(self):
         parameters = MeasurementParametersGenerator.get_sample_parameters()
         MeasurementRow.create(parameters)
-        assert parameters.were_created()
+        self.assertTrue(parameters.were_created())
 
 
 class StreamLoggingTestCase(TestCase):
@@ -258,7 +282,7 @@ class SpreadsheetImportTestCase(TestCase):
             CHANNEL_TARGET1: str(ChannelTarget.objects.all()[3]),
             CHANNEL_TARGET2: str(ChannelTarget.objects.all()[4]),
             CHANNEL_TARGET3: str(ChannelTarget.objects.all()[5]),
-            DATE: str(datetime.now()),
+            DATE: ExcelRowInfoGenerator.get_todays_date(),
             MEASUREMENT: "1R",
             LOW_MAG_REFERENCE: "OTHER",
             MAG_BIN_OVERLAP: "OTHER",
@@ -278,12 +302,13 @@ class SpreadsheetImportTestCase(TestCase):
 
     def test_object_delete(self):
         row = self.create_row()
+        row.write_sample(self.file, 0)
+        self.import_data()
+        self.assertTrue(row.is_in_database())
         row.row[MODE] = DELETE
         row.write_sample(self.file, 0)
         self.import_data()
         self.assertFalse(row.is_in_database())
-
-    # def test_logging
 
     def tearDown(self) -> None:
         os.remove(self.file)

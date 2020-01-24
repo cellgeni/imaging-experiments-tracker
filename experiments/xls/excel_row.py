@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Dict
 
@@ -38,7 +37,7 @@ class ExcelRow:
         data.append((str(m.automated_plate_id), self.row[AUTOMATED_PLATEID]))
         data.append((str(m.technology), self.row[TECHNOLOGY]))
         data.append((m.image_cycle, self.row[IMAGE_CYCLE]))
-        data.append((str(m.date).replace('+00:00', ''), self.row[DATE]))
+        data.append((m.date.strftime(Measurement.DATE_FORMAT), self.row[DATE]))
         data.append((str(m.measurement), str(self.row[MEASUREMENT])))
         data.append((str(m.low_mag_reference), self.row[LOW_MAG_REFERENCE]))
         data.append((str(m.mag_bin_overlap), self.row[MAG_BIN_OVERLAP]))
