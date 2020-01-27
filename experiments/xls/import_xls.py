@@ -28,7 +28,7 @@ class MeasurementRow:
         uuid = self.get_uuid()
         try:
             Measurement.objects.get(uuid=uuid).delete()
-            logger.info(f"Measurement with uuid {uuid} deleted")
+            logger.info(f"Deleted measurement with uuid {uuid}")
         except ObjectDoesNotExist:
             logger.warning(f"Measurement with uuid {uuid} does not exist")
 

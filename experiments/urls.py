@@ -4,5 +4,5 @@ from experiments.views import MeasurementXLSImportView, XLSTemplateDownloadView
 
 urlpatterns = [
     path('import/', MeasurementXLSImportView.as_view()),
-    path('xls-template/', XLSTemplateDownloadView.as_view()),
+    path('xls-template/', XLSTemplateDownloadView.as_view(), name='xls-download'),
 ]
