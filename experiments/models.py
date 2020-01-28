@@ -178,7 +178,7 @@ class Measurement(models.Model):
     sections = models.ManyToManyField(Section)
     researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True,
                                    help_text="Pre-validated list of Phenix users")
-    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True,
+    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True, blank=True,
                                    help_text="Pre-validated list of T283 projects")
     technology = models.ForeignKey(Technology, on_delete=models.SET_NULL, null=True,
                                    help_text="How was the slide stained?")

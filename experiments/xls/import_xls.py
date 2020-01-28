@@ -77,10 +77,9 @@ class SpreadsheetImporter:
             try:
                 row.handle_mode()
             except Exception as e:
-                logger.error(f"Failed to import row {row.get_uuid()}")
+                logger.error(f"Failed to import measurement {row.get_uuid()}")
                 logger.error(e)
                 traceback.print_exc()
-
 
 
 if __name__ == "__main__":

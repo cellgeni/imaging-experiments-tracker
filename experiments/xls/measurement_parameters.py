@@ -1,15 +1,16 @@
 import datetime
-from typing import List, Set
+from typing import List, Set, Tuple
 from uuid import UUID
 
 import pandas as pd
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from experiments.constants import SLIDE_BARCODE, SECTIONS, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, DATE, \
+from experiments.constants import SLIDE_BARCODE, SECTIONS, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
+    DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
     EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement
-
+from experiments.xls import xls_logger as logger
 
 class MeasurementM2MFields:
 
@@ -42,7 +43,18 @@ class MeasurementParameters:
         self._create_m2m_fields()
         return self.model.uuid
 
+    def validate_current_model(self):
+        try:
+            # we don't validate uniqueness since a record with the same uuid can be updated
+            # and we don't have custom validation for now
+            # https://docs.djangoproject.com/en/3.0/ref/models/instances/#validating-objects
+            self.model.clean_fields()
+        except ValidationError as e:
+            logger.error(e)
+            raise ValueError(f"Some fields are invalid: {e}")
+
     def update_db_object(self) -> UUID:
+        self.validate_current_model()
         existing_record = Measurement.objects.get(uuid=self.model.uuid)
         existing_record.delete()
         return self.create_db_object()
@@ -51,6 +63,45 @@ class MeasurementParameters:
         m = Measurement.objects.get(uuid=self.model.uuid)
         return set(m.sections.all()) == self.m2m_fields.sections and \
                set(m.channel_target_pairs.all()) == self.m2m_fields.channel_target_pairs
+
+
+class DateParser:
+
+    def __init__(self, datestring: str):
+        self.check_non_null_date(datestring)
+        self.separator = self.get_separator(datestring)
+        self.datestring = datestring
+
+    def check_non_null_date(self, datestring: str) -> None:
+        # Excel transforms null values into floats like 0.0
+        if type(datestring) is not str:
+            self.raise_value_error()
+
+    @staticmethod
+    def get_separator(datestring: str) -> str:
+        if "." in datestring:
+            return "."
+        else:
+            return "/"
+
+    def raise_value_error(self):
+        raise ValueError("Date must be in format DD.MM.YYYY or DD/MM/YYYY")
+
+    def check_valid_year(self, year: int) -> None:
+        if year < 2000:
+            self.raise_value_error()
+
+    def split_date(self) -> Tuple[int, int, int]:
+        date_array = list(map(lambda x: int(x), self.datestring.split(self.separator)))
+        self.check_valid_year(date_array[2])
+        return date_array[2], date_array[1], date_array[0]
+
+    def parse(self) -> datetime.date:
+        try:
+            year, month, day = self.split_date()
+            return datetime.date(year, month, day)
+        except (AttributeError, ValueError, IndexError):
+            self.raise_value_error()
 
 
 class MeasurementParametersParser:
@@ -91,18 +142,7 @@ class MeasurementParametersParser:
 
     @staticmethod
     def _parse_date(datestring):
-        if "." in datestring:
-            separator = "."
-        else:
-            separator = "/"
-        try:
-            date_array = list(map(lambda x: int(x), datestring.split(separator)))
-            year, month, day = date_array[2], date_array[1], date_array[0]
-            if year < 2000:
-                raise ValueError
-            return datetime.date(year, month, day)
-        except (AttributeError, ValueError):
-            raise ValueError("Date must be in format DD.MM.YYYY or DD/MM/YYYY")
+        return DateParser(datestring).parse()
 
     def get_params(self) -> MeasurementParameters:
         try:
