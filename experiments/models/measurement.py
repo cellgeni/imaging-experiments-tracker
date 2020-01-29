@@ -138,9 +138,9 @@ class Measurement(models.Model):
     automated_plate_id = models.CharField(max_length=20, null=True, default=None, blank=True,
                                           help_text="These columns are needed only "
                                                     "when using the automated plate handler.")
-    automated_slide_num = models.IntegerField(blank=True, null=True,
-                                              help_text="These columns are needed only "
-                                                        "when using the automated plate handler.")
+    automated_slide_num = models.CharField(max_length=10, blank=True, null=True,
+                                           help_text="These columns are needed only "
+                                                     "when using the automated plate handler.")
     image_cycle = models.IntegerField(help_text="Every time the coverslip is removed, "
                                                 "the section restained with something, "
                                                 "the image cycle increases incrementally")

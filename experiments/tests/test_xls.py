@@ -161,6 +161,8 @@ class MeasurementParametersGenerator:
         cht2 = ChannelTarget.objects.all()[1]
         cht3 = ChannelTarget.objects.all()[2]
         model = Measurement(researcher=Researcher.objects.first(),
+                            automated_plate_id="kkjk",
+                            automated_slide_num="N/A",
                             technology=Technology.objects.first(),
                             image_cycle=1,
                             date=datetime.date.today(),

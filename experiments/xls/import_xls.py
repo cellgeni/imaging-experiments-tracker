@@ -67,6 +67,11 @@ class SpreadsheetImporter:
 
     def __init__(self, file):
         self.df = pd.read_excel(file)
+        self.convert_floats_to_ints()
+
+    def convert_floats_to_ints(self):
+        cols = [AUTOMATED_SLIDEN]
+        self.df[cols] = self.df[cols].astype('Int64')
 
     def get_rows(self) -> Iterable[MeasurementRow]:
         for _, row in self.df.iterrows():

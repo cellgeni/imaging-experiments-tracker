@@ -33,7 +33,7 @@ class ExcelRow:
             return False
         data = list()
         data.append((str(m.researcher), self.row[RESEARCHER]))
-        data.append((m.automated_slide_num, self.row[AUTOMATED_SLIDEN]))
+        data.append((m.automated_slide_num, str(self.row[AUTOMATED_SLIDEN])))
         data.append((str(m.automated_plate_id), self.row[AUTOMATED_PLATEID]))
         data.append((str(m.technology), self.row[TECHNOLOGY]))
         data.append((m.image_cycle, self.row[IMAGE_CYCLE]))
