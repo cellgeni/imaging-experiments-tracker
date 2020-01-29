@@ -1,12 +1,5 @@
 from django.db import models
 
-#
-# class Species(models.Model):
-#     name = models.CharField(max_length=20)
-#
-#     def __str__(self):
-#         return self.name
-
 
 class Tissue(models.Model):
     name = models.CharField(max_length=20)
@@ -17,8 +10,10 @@ class Tissue(models.Model):
 
 class Sample(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
-    # species = models.ForeignKey(Species, on_delete=models.SET_NULL, null=True)
-    species = models.CharField(max_length=20)
+    species = models.CharField(max_length=10, blank=True, null=True, choices=[
+        (1, 'Hca'),
+        (2, 'Mmu')
+    ])
     age = models.CharField(max_length=20)
     genotype = models.CharField(max_length=20, null=True)
     background = models.CharField(max_length=20, null=True)
