@@ -10,8 +10,10 @@ from experiments.constants import SLIDE_BARCODE, SECTIONS, CHANNEL_TARGET, UUID,
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
     EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
-    MeasurementNumber, LowMagReference
+    MeasurementNumber, LowMagReference, ZPlanes
 from experiments.xls import xls_logger as logger
+from models import MagBinOverlap
+
 
 class MeasurementM2MFields:
 
@@ -158,10 +160,10 @@ class MeasurementParametersParser:
             low_mag_ref = LowMagReference.objects.get(name=self.row[LOW_MAG_REFERENCE])
             automated_plate_id = self.row[AUTOMATED_PLATEID]
             automated_sliden = self.row[AUTOMATED_SLIDEN]
-            mag_bin_overlap = self.row[MAG_BIN_OVERLAP]
+            mag_bin_overlap = MagBinOverlap.objects.get(name=self.row[MAG_BIN_OVERLAP])
             notes1 = self.row[NOTES_1]
             notes2 = self.row[NOTES_2]
-            z_planes = self.row[ZPLANES]
+            z_planes = ZPlanes.objects.get(name=self.row[ZPLANES])
             exp_location = self.row[EXPORT_LOCATION]
             arch_location = self.row[ARCHIVE_LOCATION]
             team_dir = TeamDirectory.objects.get(name=self.row[TEAM_DIR])

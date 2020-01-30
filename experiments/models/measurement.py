@@ -140,6 +140,20 @@ class LowMagReference(models.Model):
         return self.name
 
 
+class MagBinOverlap(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
+class ZPlanes(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
 class Measurement(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     sections = models.ManyToManyField(Section)
@@ -172,9 +186,9 @@ class Measurement(models.Model):
                                                    "of the whole slide with DAPI only) may be used as a reference "
                                                    "for other images, in alignment and/or viewing. For other images, "
                                                    "the related image number should be referenced.")
-    mag_bin_overlap = models.CharField(max_length=20, blank=True, null=True,
+    mag_bin_overlap = models.ForeignKey(MagBinOverlap, models.SET_NULL, blank=True, null=True,
                                        help_text="Magnification, binning level, and tile overlap for the image")
-    z_planes = models.CharField(max_length=20, blank=True, null=True,
+    z_planes = models.ForeignKey(ZPlanes, on_delete=models.SET_NULL, blank=True, null=True,
                                 help_text="Number of z-planes x depth of each z-plane")
     notes_1 = models.TextField(max_length=200, blank=True, null=True,
                                help_text="Notes about the imaging process: "
