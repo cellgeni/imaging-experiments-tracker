@@ -133,6 +133,13 @@ class MeasurementNumber(models.Model):
         return self.name
 
 
+class LowMagReference(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
 class Measurement(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     sections = models.ManyToManyField(Section)
@@ -160,7 +167,7 @@ class Measurement(models.Model):
                             help_text="Date that the image was taken")
     measurement = models.ForeignKey(MeasurementNumber, on_delete=models.SET_NULL, null=True, blank=True,
                                    help_text="Measurement number, assigned automatically by the Phenix")
-    low_mag_reference = models.CharField(max_length=20, blank=True, null=True,
+    low_mag_reference = models.ForeignKey(LowMagReference, on_delete=models.SET_NULL, blank=True, null=True,
                                          help_text="A low magnification image (e.g. 5X or 10X scan "
                                                    "of the whole slide with DAPI only) may be used as a reference "
                                                    "for other images, in alignment and/or viewing. For other images, "

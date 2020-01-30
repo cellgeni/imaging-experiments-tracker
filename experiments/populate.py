@@ -37,6 +37,10 @@ class Populator:
         MeasurementNumber.objects.get_or_create(name="1a")[0].save()
         MeasurementNumber.objects.get_or_create(name="1b")[0].save()
 
+    def populate_low_mag_references(self):
+        LowMagReference.objects.get_or_create(name="Reference")[0].save()
+        LowMagReference.objects.get_or_create(name="1a")[0].save()
+
     def populate_team_dirs(self):
         TeamDirectory.objects.get_or_create(name="t283_imaging")[0].save()
         TeamDirectory.objects.get_or_create(name="t876_imaging")[0].save()
@@ -117,6 +121,7 @@ class Populator:
 
     def populate_measurements(self):
         self.populate_measurement_numbers()
+        self.populate_low_mag_references()
         e = Experiment.objects.get(name="20191220_ob5_kidney")
         researcher = Researcher.objects.get(employee_key="A_K")
         sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
@@ -127,7 +132,8 @@ class Populator:
 
         mn1 = MeasurementNumber.objects.get(name="1a")
         mn2 = MeasurementNumber.objects.get(name="1b")
-
+        lmr1 = LowMagReference.objects.first()
+        lmr2 = LowMagReference.objects.last()
         m1 = Measurement.objects.get_or_create(researcher=researcher,
                                                experiment=e,
                                                technology=t,
@@ -135,7 +141,7 @@ class Populator:
                                                automated_slide_num=1,
                                                image_cycle=1,
                                                measurement=mn1,
-                                               low_mag_reference="1a",
+                                               low_mag_reference=lmr1,
                                                mag_bin_overlap="20X_Bin1_7%overlap",
                                                z_planes="28*1",
                                                notes_1="Whole section; DAPI 520 570 650 // 425",
@@ -148,7 +154,7 @@ class Populator:
                                                automated_slide_num=1,
                                                image_cycle=1,
                                                measurement=mn2,
-                                               low_mag_reference="1b",
+                                               low_mag_reference=lmr2,
                                                mag_bin_overlap="20X_Bin1_7%overlap",
                                                z_planes="28*1",
                                                notes_1="Whole section; DAPI 520 570 650 // 425",
@@ -161,7 +167,7 @@ class Populator:
                                                automated_slide_num=1,
                                                image_cycle=1,
                                                measurement=mn1,
-                                               low_mag_reference="1b",
+                                               low_mag_reference=lmr2,
                                                mag_bin_overlap="20X_Bin1_7%overlap",
                                                z_planes="25*1",
                                                notes_1="Whole section; DAPI 520 570 650 // 425",
@@ -217,6 +223,7 @@ class Populator:
         self.populate_sections()
         self.populate_experiment()
         self.populate_measurement_numbers()
+        self.populate_low_mag_references()
         self.populate_measurements()
 
 
