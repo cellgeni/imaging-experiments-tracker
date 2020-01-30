@@ -33,6 +33,10 @@ class Populator:
         Technology.objects.get_or_create(name="RNAscope 4-plex")[0].save()
         Technology.objects.get_or_create(name="RNAscope 8-plex")[0].save()
 
+    def populate_measurement_numbers(self):
+        MeasurementNumber.objects.get_or_create(name="1a")[0].save()
+        MeasurementNumber.objects.get_or_create(name="1b")[0].save()
+
     def populate_team_dirs(self):
         TeamDirectory.objects.get_or_create(name="t283_imaging")[0].save()
         TeamDirectory.objects.get_or_create(name="t876_imaging")[0].save()
@@ -112,6 +116,7 @@ class Populator:
         Experiment.objects.get_or_create(name="20191220_ob5_kidney", project=project)[0].save()
 
     def populate_measurements(self):
+        self.populate_measurement_numbers()
         e = Experiment.objects.get(name="20191220_ob5_kidney")
         researcher = Researcher.objects.get(employee_key="A_K")
         sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
@@ -120,13 +125,16 @@ class Populator:
         t = Technology.objects.get(name="RNAscope 4-plex")
         td = TeamDirectory.objects.get(name="t283_imaging")
 
+        mn1 = MeasurementNumber.objects.get(name="1a")
+        mn2 = MeasurementNumber.objects.get(name="1b")
+
         m1 = Measurement.objects.get_or_create(researcher=researcher,
                                                experiment=e,
                                                technology=t,
                                                automated_plate_id="191010_174405-V",
                                                automated_slide_num=1,
                                                image_cycle=1,
-                                               measurement="1b",
+                                               measurement=mn1,
                                                low_mag_reference="1a",
                                                mag_bin_overlap="20X_Bin1_7%overlap",
                                                z_planes="28*1",
@@ -139,7 +147,7 @@ class Populator:
                                                automated_plate_id="191010_174402-V",
                                                automated_slide_num=1,
                                                image_cycle=1,
-                                               measurement="1a",
+                                               measurement=mn2,
                                                low_mag_reference="1b",
                                                mag_bin_overlap="20X_Bin1_7%overlap",
                                                z_planes="28*1",
@@ -152,7 +160,7 @@ class Populator:
                                                automated_plate_id="191010_174401-V",
                                                automated_slide_num=1,
                                                image_cycle=1,
-                                               measurement="4b",
+                                               measurement=mn1,
                                                low_mag_reference="1b",
                                                mag_bin_overlap="20X_Bin1_7%overlap",
                                                z_planes="25*1",
@@ -208,6 +216,7 @@ class Populator:
         self.populate_channel_target_pairs()
         self.populate_sections()
         self.populate_experiment()
+        self.populate_measurement_numbers()
         self.populate_measurements()
 
 

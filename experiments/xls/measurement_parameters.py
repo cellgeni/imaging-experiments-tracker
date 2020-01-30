@@ -9,7 +9,8 @@ from experiments.constants import SLIDE_BARCODE, SECTIONS, CHANNEL_TARGET, UUID,
     DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
     EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR
-from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement
+from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
+    MeasurementNumber
 from experiments.xls import xls_logger as logger
 
 class MeasurementM2MFields:
@@ -153,7 +154,7 @@ class MeasurementParametersParser:
             image_cycle = self.row[IMAGE_CYCLE]
             channel_targets = self._parse_channel_targets()
             date = self._parse_date(self.row[DATE])
-            measurement = self.row[MEASUREMENT]
+            measurement = MeasurementNumber.objects.get(name=self.row[MEASUREMENT])
             low_mag_ref = self.row[LOW_MAG_REFERENCE]
             automated_plate_id = self.row[AUTOMATED_PLATEID]
             automated_sliden = self.row[AUTOMATED_SLIDEN]

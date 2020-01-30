@@ -126,6 +126,13 @@ class Experiment(models.Model):
         return self.name
 
 
+class MeasurementNumber(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
 class Measurement(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     sections = models.ManyToManyField(Section)
@@ -151,7 +158,7 @@ class Measurement(models.Model):
                                                             "the channels used on the Phenix.													")
     date = models.DateField(default=date.today,
                             help_text="Date that the image was taken")
-    measurement = models.CharField(max_length=20,
+    measurement = models.ForeignKey(MeasurementNumber, on_delete=models.SET_NULL, null=True, blank=True,
                                    help_text="Measurement number, assigned automatically by the Phenix")
     low_mag_reference = models.CharField(max_length=20, blank=True, null=True,
                                          help_text="A low magnification image (e.g. 5X or 10X scan "

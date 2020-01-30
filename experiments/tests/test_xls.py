@@ -10,7 +10,7 @@ from django.test import TestCase
 from experiments.constants import *
 from experiments.models import Researcher, CellGenProject, \
     Slide, ChannelTarget, Technology, Measurement, TeamDirectory, \
-    Section
+    Section, MeasurementNumber
 from experiments.populate import Populator
 from experiments.xls.excel_row import ExcelRow
 from experiments.xls.import_xls import SpreadsheetImporter, MeasurementRow
@@ -47,7 +47,7 @@ class ExcelRowInfoGenerator:
             CHANNEL_TARGET2: str(ChannelTarget.objects.all()[1]),
             CHANNEL_TARGET3: str(ChannelTarget.objects.all()[2]),
             DATE: cls.get_todays_date(),
-            MEASUREMENT: "1a",
+            MEASUREMENT: str(MeasurementNumber.objects.first()),
             LOW_MAG_REFERENCE: "smth",
             MAG_BIN_OVERLAP: "smth",
             SECTIONS: "1,2",
@@ -166,7 +166,7 @@ class MeasurementParametersGenerator:
                             technology=Technology.objects.first(),
                             image_cycle=1,
                             date=datetime.date.today(),
-                            measurement="1b",
+                            measurement=MeasurementNumber.objects.get(name="1b"),
                             low_mag_reference="kjkj",
                             mag_bin_overlap="kjk",
                             notes_1="kj",
@@ -201,7 +201,7 @@ class MeasurementParametersTestCase(TestCase):
                             technology=Technology.objects.last(),
                             image_cycle=1,
                             date=datetime.date(2019, 3, 4),
-                            measurement="1b",
+                            measurement=MeasurementNumber.objects.get(name="1a"),
                             low_mag_reference="kjkj",
                             mag_bin_overlap="kjk",
                             notes_1="kj",
@@ -285,7 +285,7 @@ class SpreadsheetImportTestCase(TestCase):
             CHANNEL_TARGET2: str(ChannelTarget.objects.all()[4]),
             CHANNEL_TARGET3: str(ChannelTarget.objects.all()[5]),
             DATE: ExcelRowInfoGenerator.get_todays_date(),
-            MEASUREMENT: "1R",
+            MEASUREMENT:  str(MeasurementNumber.objects.last()),
             LOW_MAG_REFERENCE: "OTHER",
             MAG_BIN_OVERLAP: "OTHER",
             SECTIONS: "2,3",
