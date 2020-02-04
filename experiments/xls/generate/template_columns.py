@@ -57,7 +57,7 @@ def get_columns() -> List[ImageTrackerColumn]:
                                            'value': [r.key for r in CellGenProject.objects.all()],
                                            'input_title': "Project",
                                            'input_message': "Choose project"})
-    slide_id = ImageTrackerColumn(SLIDE, {})
+    slide_id = ImageTrackerColumn(SLIDE_ID, {})
     automated_plate_id = ImageTrackerColumn(AUTOMATED_PLATEID, {})
     automated_sliden = ImageTrackerColumn(AUTOMATED_SLIDEN, {'validate': 'integer',
                                                              'criteria': '>',
@@ -90,7 +90,7 @@ def get_columns() -> List[ImageTrackerColumn]:
     measurement = ImageTrackerColumn(MEASUREMENT, {})
     low_mag_reference = ImageTrackerColumn(LOW_MAG_REFERENCE, {})
     mag_bin_overlap = ImageTrackerColumn(MAG_BIN_OVERLAP, {})
-    sectionN = ImageTrackerColumn(SECTIONS, {})
+    sectionN = ImageTrackerColumn(SECTION_NUM, {})
     z_planes = ImageTrackerColumn(ZPLANES, {})
     notes1 = ImageTrackerColumn(NOTES_1, {})
     notes2 = ImageTrackerColumn(NOTES_2, {})

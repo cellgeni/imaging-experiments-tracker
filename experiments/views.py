@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.views import View
 
 from experiments.xls import EXCEL_TEMPLATE, StreamLogging
-from experiments.xls.import_xls import SpreadsheetImporter
+from experiments.xls.import_xls import RowsImporter
 
 
 class XLSUploadForm(forms.Form):
@@ -30,9 +30,9 @@ class MeasurementXLSImportView(View):
     def handle_uploaded_file(self, f: File) -> List[str]:
         filename = str(uuid.uuid4()) + ".xlsx"
         self._write_file(f, filename)
-        si = SpreadsheetImporter(filename)
+        si = RowsImporter(filename)
         with StreamLogging() as logger:
-            si.import_spreadsheet()
+            si.import_measurements()
             os.remove(filename)
             data = logger.get_log()
         log_list = data.split("\n")

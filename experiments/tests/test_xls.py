@@ -1,6 +1,5 @@
 import logging
 import os
-import uuid
 import datetime
 from typing import Dict
 
@@ -11,7 +10,7 @@ from experiments.constants import *
 from experiments.models.measurement import *
 from experiments.populate import Populator
 from experiments.xls.excel_row import ExcelRow
-from experiments.xls.import_xls import SpreadsheetImporter, MeasurementRow
+from experiments.xls.import_xls import RowsImporter, MeasurementRow
 from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters
 from experiments.xls import StreamLogging, xls_logger
 from experiments.xls.measurement_parameters import MeasurementParametersParser
@@ -48,7 +47,7 @@ class ExcelRowInfoGenerator:
             MEASUREMENT: str(MeasurementNumber.objects.first()),
             LOW_MAG_REFERENCE: str(LowMagReference.objects.first()),
             MAG_BIN_OVERLAP: str(MagBinOverlap.objects.first()),
-            SECTIONS: "1,2",
+            SECTION_NUM: "1,2",
             ZPLANES: str(ZPlanes.objects.first()),
             NOTES_1: "SMTH",
             NOTES_2: "SMTH",
@@ -105,7 +104,7 @@ class MeasurementsParameterParserTestCase(TestCase):
         slide = Slide.get_random_slide_with_three_sections()
         info = {
             SLIDE_BARCODE: str(slide),
-            SECTIONS: "1,3",
+            SECTION_NUM: "1,3",
         }
         row = ExcelRowInfoGenerator(info).create_row()
         mpp = MeasurementParametersParser(row)
@@ -248,7 +247,7 @@ class StreamLoggingTestCase(TestCase):
         self.assertFalse(xls_logger.handlers)
 
 
-class SpreadsheetImportTestCase(TestCase):
+class MeasurementsImportTestCase(TestCase):
     file = 'test_data/measurements_input2.xlsx'
 
     def setUp(self):
@@ -256,8 +255,8 @@ class SpreadsheetImportTestCase(TestCase):
         p.populate_all()
 
     def import_data(self) -> None:
-        si2 = SpreadsheetImporter(self.file)
-        si2.import_spreadsheet()
+        si2 = RowsImporter(self.file)
+        si2.import_measurements()
 
     def create_row(self) -> ExcelRow:
         row = ExcelRow(ExcelRowInfoGenerator.get_sample_info())
@@ -288,7 +287,7 @@ class SpreadsheetImportTestCase(TestCase):
             MEASUREMENT:  str(MeasurementNumber.objects.last()),
             LOW_MAG_REFERENCE: str(LowMagReference.objects.last()),
             MAG_BIN_OVERLAP: str(MagBinOverlap.objects.last()),
-            SECTIONS: "2,3",
+            SECTION_NUM: "2,3",
             ZPLANES: str(ZPlanes.objects.last()),
             NOTES_1: "NEW",
             NOTES_2: "ELSE",

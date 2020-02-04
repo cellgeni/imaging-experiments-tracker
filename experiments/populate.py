@@ -25,6 +25,10 @@ class Populator:
         Tissue.objects.get_or_create(name="Kidney")[0].save()
         Tissue.objects.get_or_create(name="Adrenal gland")[0].save()
 
+    def populate_species(self):
+        Tissue.objects.get_or_create(name="Kidney")[0].save()
+        Tissue.objects.get_or_create(name="Adrenal gland")[0].save()
+
     def populate_microscopes(self):
         Microscope.objects.get_or_create(name="Phenix_PlateLoader")[0].save()
         Microscope.objects.get_or_create(name="Phenix")[0].save()

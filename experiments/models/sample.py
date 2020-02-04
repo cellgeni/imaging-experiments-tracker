@@ -10,14 +10,14 @@ class Tissue(models.Model):
 
 class Sample(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
-    species = models.CharField(max_length=10, blank=True, null=True, choices=[
+    species = models.IntegerField(blank=True, null=True, choices=[
         (1, 'Hca'),
         (2, 'Mmu')
     ])
-    age = models.CharField(max_length=20)
-    genotype = models.CharField(max_length=20, null=True)
-    background = models.CharField(max_length=20, null=True)
-    tissue = models.ForeignKey(Tissue, on_delete=models.SET_NULL, null=True)
+    age = models.CharField(max_length=20, blank=True, null=True)
+    genotype = models.CharField(max_length=20, null=True, blank=True)
+    background = models.CharField(max_length=20, null=True, blank=True)
+    tissue = models.ForeignKey(Tissue, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.id

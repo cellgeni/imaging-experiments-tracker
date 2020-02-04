@@ -63,21 +63,25 @@ class MeasurementRow:
             self.delete()
 
 
-class SpreadsheetImporter:
+class ExcelImporter:
 
     def __init__(self, file):
         self.df = pd.read_excel(file)
+        self.df.dropna()
         self.convert_floats_to_ints()
 
     def convert_floats_to_ints(self):
         cols = [AUTOMATED_SLIDEN]
         self.df[cols] = self.df[cols].astype('Int64')
 
+
+class RowsImporter(ExcelImporter):
+
     def get_rows(self) -> Iterable[MeasurementRow]:
         for _, row in self.df.iterrows():
             yield MeasurementRow(row)
 
-    def import_spreadsheet(self) -> None:
+    def import_measurements(self) -> None:
         for row in self.get_rows():
             try:
                 row.handle_mode()
@@ -86,8 +90,12 @@ class SpreadsheetImporter:
                 logger.error(e)
                 traceback.print_exc()
 
+    def import_all(self):
+        for _, row in self.df.iterrows():
+            pass
+
 
 if __name__ == "__main__":
     file = r'../measurements_input.xlsx'
-    si = SpreadsheetImporter(file)
-    si.import_spreadsheet()
+    si = RowsImporter(file)
+    si.import_measurements()

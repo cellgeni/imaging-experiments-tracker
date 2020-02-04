@@ -5,14 +5,13 @@ from uuid import UUID
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from experiments.constants import SLIDE_BARCODE, SECTIONS, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
+from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
     DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
     EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
-    MeasurementNumber, LowMagReference, ZPlanes
+    MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap
 from experiments.xls import xls_logger as logger
-from models import MagBinOverlap
 
 
 class MeasurementM2MFields:
@@ -128,7 +127,7 @@ class MeasurementParametersParser:
     def _parse_sections(self) -> Set[Section]:
         sections = set()
         slide = Slide.get_slide(self.row[SLIDE_BARCODE])
-        section_numbers = self._parse_section_numbers(self.row[SECTIONS])
+        section_numbers = self._parse_section_numbers(self.row[SECTION_NUM])
         for num in section_numbers:
             section = Section.get_section(num, slide)
             sections.add(section)

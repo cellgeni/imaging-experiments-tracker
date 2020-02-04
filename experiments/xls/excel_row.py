@@ -20,7 +20,11 @@ class ExcelRow:
 
     def write_sample(self, output_file: str, row_num: int = 0) -> None:
         assert os.path.exists(EXCEL_TEMPLATE)
-        df = pd.read_excel(EXCEL_TEMPLATE)
+        if os.path.exists(output_file):
+            target_file = output_file
+        else:
+            target_file = EXCEL_TEMPLATE
+        df = pd.read_excel(target_file)
         self.write_row(df, row_num)
         df.to_excel(output_file)
         assert os.path.exists(output_file)
@@ -48,7 +52,7 @@ class ExcelRow:
         data.append((str(m.archive_location), self.row[ARCHIVE_LOCATION]))
         data.append((str(m.team_directory), self.row[TEAM_DIR]))
         row_channel_targets = set(filter(None, [self.row.get(ch_t) for ch_t in
-                                                 [CHANNEL_TARGET + str(x) for x in range(1, 6)]]))
+                                                [CHANNEL_TARGET + str(x) for x in range(1, 6)]]))
         measurement_channel_targets = {str(cht) for cht in m.channel_target_pairs.all()}
         data.append((row_channel_targets, measurement_channel_targets))
         for pair in data:
@@ -58,7 +62,7 @@ class ExcelRow:
         sections = m.sections.all()
         for section in sections:
             if not (section.slide_id == self.row[SLIDE_BARCODE] and
-                    str(section.number) in self.row[SECTIONS]):
+                    str(section.number) in self.row[SECTION_NUM]):
                 logger.error(f'problem with section: {section}')
                 return False
         return True

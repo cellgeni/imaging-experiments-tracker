@@ -65,7 +65,7 @@ class Slide(models.Model):
 
 class Section(models.Model):
     class Meta:
-        unique_together = (('number', 'slide'),)
+        unique_together = (('number', 'slide', 'sample'),)
 
     number = models.IntegerField(help_text="In the case where there are multiple sections on the slide "
                                            "but only one imaged, which one? (1 = top, 2 = second from top… N = bottom)")
