@@ -94,7 +94,6 @@ class SpreadsheetImportTestCase(TestCase):
 
     def _test_slide(self, row: RowT):
         slide = Slide.objects.get(barcode_id=row[SLIDE_BARCODE])
-        self.assertEqual(slide.automated_id, row[SLIDE_ID])
         self._test_sections(row, slide)
 
     def _test_channel_targets(self, row: RowT):
