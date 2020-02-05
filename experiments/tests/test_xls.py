@@ -36,6 +36,7 @@ class ExcelRowInfoGenerator:
             RESEARCHER: str(Researcher.objects.first()),
             PROJECT: str(CellGenProject.objects.first()),
             SLIDE_BARCODE: str(Slide.objects.first()),
+            SLIDE_ID: "TM_RCC_00RZ",
             AUTOMATED_PLATEID: "smth",
             AUTOMATED_SLIDEN: 2,
             TECHNOLOGY: str(Technology.objects.first()),
@@ -150,14 +151,14 @@ class MeasurementParametersGenerator:
 
     @staticmethod
     def get_sample_parameters() -> MeasurementParameters:
-        sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
-
+        sl1 = Slide.objects.get(barcode_id="S000000729")
         sc11 = Section.objects.get(number=1, slide=sl1)
         sc12 = Section.objects.get(number=2, slide=sl1)
         cht1 = ChannelTarget.objects.all()[0]
         cht2 = ChannelTarget.objects.all()[1]
         cht3 = ChannelTarget.objects.all()[2]
         model = Measurement(researcher=Researcher.objects.first(),
+                            automated_slide_id="TM_RCC_00FZ",
                             automated_plate_id="kkjk",
                             automated_slide_num="N/A",
                             technology=Technology.objects.first(),
@@ -276,6 +277,7 @@ class MeasurementsImportTestCase(TestCase):
             RESEARCHER: str(Researcher.objects.last()),
             PROJECT: str(CellGenProject.objects.last()),
             SLIDE_BARCODE: str(Slide.objects.last()),
+            SLIDE_ID: "TM_RCC_00FY",
             AUTOMATED_PLATEID: "DIFFERENT",
             AUTOMATED_SLIDEN: 5,
             TECHNOLOGY: str(Technology.objects.last()),

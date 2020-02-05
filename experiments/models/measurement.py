@@ -16,14 +16,14 @@ class CellGenProject(models.Model):
 
 
 class TeamDirectory(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
 
 
 class Technology(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=35)
 
     def __str__(self):
         return self.name
@@ -41,10 +41,6 @@ class Researcher(models.Model):
 class Slide(models.Model):
     barcode_id = models.CharField(max_length=20, primary_key=True, help_text="This is the slide number "
                                                                              "or ID assigned during sectioning")
-    automated_id = models.CharField(max_length=20, help_text="This is the ID entered into the Phenix when imaging. "
-                                                             "It should comprise the project code and then the slide ID "
-                                                             "from the BOND or a manual ID of the form ABXXXX "
-                                                             "where AB is the researcher's initials.")
 
     def __str__(self):
         return self.barcode_id
@@ -85,14 +81,14 @@ class Section(models.Model):
 
 
 class Channel(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
 
 
 class Target(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
@@ -119,7 +115,7 @@ class ChannelTarget(models.Model):
 
 
 class Experiment(models.Model):
-    name = models.CharField(max_length=20, primary_key=True)
+    name = models.CharField(max_length=30, primary_key=True)
     project = models.ForeignKey(CellGenProject, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
@@ -134,21 +130,21 @@ class MeasurementNumber(models.Model):
 
 
 class LowMagReference(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
 
 
 class MagBinOverlap(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
 
 
 class ZPlanes(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=30)
 
     def __str__(self):
         return self.name
@@ -163,10 +159,15 @@ class Measurement(models.Model):
                                    help_text="Pre-validated list of T283 projects")
     technology = models.ForeignKey(Technology, on_delete=models.SET_NULL, null=True,
                                    help_text="How was the slide stained?")
-    automated_plate_id = models.CharField(max_length=20, null=True, default=None, blank=True,
+    automated_slide_id = models.CharField(max_length=20, null=True, blank=True,
+                                          help_text="This is the ID entered into the Phenix when imaging. "
+                                                    "It should comprise the project code and then the slide ID "
+                                                    "from the BOND or a manual ID of the form ABXXXX "
+                                                    "where AB is the researcher's initials.")
+    automated_plate_id = models.CharField(max_length=30, null=True, default=None, blank=True,
                                           help_text="These columns are needed only "
                                                     "when using the automated plate handler.")
-    automated_slide_num = models.CharField(max_length=10, blank=True, null=True,
+    automated_slide_num = models.CharField(max_length=20, blank=True, null=True,
                                            help_text="These columns are needed only "
                                                      "when using the automated plate handler.")
     image_cycle = models.IntegerField(help_text="Every time the coverslip is removed, "
@@ -180,16 +181,16 @@ class Measurement(models.Model):
     date = models.DateField(default=date.today,
                             help_text="Date that the image was taken")
     measurement = models.ForeignKey(MeasurementNumber, on_delete=models.SET_NULL, null=True, blank=True,
-                                   help_text="Measurement number, assigned automatically by the Phenix")
+                                    help_text="Measurement number, assigned automatically by the Phenix")
     low_mag_reference = models.ForeignKey(LowMagReference, on_delete=models.SET_NULL, blank=True, null=True,
-                                         help_text="A low magnification image (e.g. 5X or 10X scan "
-                                                   "of the whole slide with DAPI only) may be used as a reference "
-                                                   "for other images, in alignment and/or viewing. For other images, "
-                                                   "the related image number should be referenced.")
+                                          help_text="A low magnification image (e.g. 5X or 10X scan "
+                                                    "of the whole slide with DAPI only) may be used as a reference "
+                                                    "for other images, in alignment and/or viewing. For other images, "
+                                                    "the related image number should be referenced.")
     mag_bin_overlap = models.ForeignKey(MagBinOverlap, models.SET_NULL, blank=True, null=True,
-                                       help_text="Magnification, binning level, and tile overlap for the image")
+                                        help_text="Magnification, binning level, and tile overlap for the image")
     z_planes = models.ForeignKey(ZPlanes, on_delete=models.SET_NULL, blank=True, null=True,
-                                help_text="Number of z-planes x depth of each z-plane")
+                                 help_text="Number of z-planes x depth of each z-plane")
     notes_1 = models.TextField(max_length=200, blank=True, null=True,
                                help_text="Notes about the imaging process: "
                                          "what did you image (whole slide, part of tissue, single field), "

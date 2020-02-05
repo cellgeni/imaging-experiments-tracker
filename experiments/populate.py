@@ -93,13 +93,13 @@ class Populator:
         t1 = Tissue.objects.get(name="Kidney")
         t2 = Tissue.objects.get(name="Adrenal gland")
         s1 = Sample.objects.get_or_create(id="L14-KID-0-FFPE-1-S3i",
-                                          species="human",
+                                          species=1,
                                           age="Adult",
                                           genotype="Unknown",
                                           background="Unknown",
                                           tissue=t1)
         s2 = Sample.objects.get_or_create(id="L14-ADR-0-FFPE-1-S3i",
-                                          species="human",
+                                          species=2,
                                           age="Adult",
                                           genotype="Unknown",
                                           background="Unknown",
@@ -107,10 +107,10 @@ class Populator:
         save({s1, s2})
 
     def populate_slides(self):
-        s1 = Slide.objects.get_or_create(automated_id="ML_HEA_007Q", barcode_id="S000000729")
-        s2 = Slide.objects.get_or_create(automated_id="ML_HEA_007R", barcode_id="S000000724")
-        s3 = Slide.objects.get_or_create(automated_id="ML_HEA_007S", barcode_id="S000000725")
-        s4 = Slide.objects.get_or_create(automated_id="ML_HEA_007P", barcode_id="S000000726")
+        s1 = Slide.objects.get_or_create(barcode_id="S000000729")
+        s2 = Slide.objects.get_or_create(barcode_id="S000000724")
+        s3 = Slide.objects.get_or_create(barcode_id="S000000725")
+        s4 = Slide.objects.get_or_create(barcode_id="S000000726")
         save({s1, s2, s3, s4})
 
     def populate_sections(self):
@@ -118,8 +118,8 @@ class Populator:
         self.populate_slides()
         s1 = Sample.objects.get(id="L14-KID-0-FFPE-1-S3i")
         s2 = Sample.objects.get(id="L14-ADR-0-FFPE-1-S3i")
-        sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
-        sl2 = Slide.objects.get(automated_id="ML_HEA_007R", barcode_id="S000000724")
+        sl1 = Slide.objects.get(barcode_id="S000000729")
+        sl2 = Slide.objects.get(barcode_id="S000000724")
         sc11 = Section.objects.get_or_create(number=1, sample=s1, slide=sl1)
         sc12 = Section.objects.get_or_create(number=2, sample=s1, slide=sl1)
         sc13 = Section.objects.get_or_create(number=3, sample=s1, slide=sl1)
@@ -138,8 +138,8 @@ class Populator:
         self.populate_mag_bin_overlap()
         e = Experiment.objects.get(name="20191220_ob5_kidney")
         researcher = Researcher.objects.get(employee_key="A_K")
-        sl1 = Slide.objects.get(automated_id="ML_HEA_007Q", barcode_id="S000000729")
-        sl2 = Slide.objects.get(automated_id="ML_HEA_007R", barcode_id="S000000724")
+        sl1 = Slide.objects.get(barcode_id="S000000729")
+        sl2 = Slide.objects.get(barcode_id="S000000724")
 
         t = Technology.objects.get(name="RNAscope 4-plex")
         td = TeamDirectory.objects.get(name="t283_imaging")
@@ -155,6 +155,7 @@ class Populator:
         m1 = Measurement.objects.get_or_create(researcher=researcher,
                                                experiment=e,
                                                technology=t,
+                                               automated_slide_id="TM_RCC_00FZ",
                                                automated_plate_id="191010_174405-V",
                                                automated_slide_num=1,
                                                image_cycle=1,
@@ -168,6 +169,7 @@ class Populator:
         m2 = Measurement.objects.get_or_create(researcher=researcher,
                                                experiment=e,
                                                technology=t,
+                                               automated_slide_id="TM_RCC_00FW",
                                                automated_plate_id="191010_174402-V",
                                                automated_slide_num=1,
                                                image_cycle=1,
@@ -181,6 +183,7 @@ class Populator:
         m3 = Measurement.objects.get_or_create(researcher=researcher,
                                                experiment=e,
                                                technology=t,
+                                               automated_slide_id="TM_RCC_00FR",
                                                automated_plate_id="191010_174401-V",
                                                automated_slide_num=1,
                                                image_cycle=1,

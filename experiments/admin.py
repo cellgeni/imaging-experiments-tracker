@@ -16,8 +16,8 @@ class SectionInline(admin.StackedInline):
 
 class SlideAdmin(admin.ModelAdmin):
     model = Slide
-    list_display = ["barcode_id", "automated_id"]
-    search_fields = ["barcode_id", "automated_id"]
+    list_display = ["barcode_id"]
+    search_fields = ["barcode_id"]
     inlines = [SectionInline]
 
 

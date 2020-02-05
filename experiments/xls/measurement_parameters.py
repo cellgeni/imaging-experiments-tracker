@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
     DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
-    EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR
+    EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, SLIDE_ID
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
     MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap
 from experiments.xls import xls_logger as logger
@@ -157,6 +157,7 @@ class MeasurementParametersParser:
             date = self._parse_date(self.row[DATE])
             measurement = MeasurementNumber.objects.get(name=self.row[MEASUREMENT])
             low_mag_ref = LowMagReference.objects.get(name=self.row[LOW_MAG_REFERENCE])
+            automated_slide_id = self.row[SLIDE_ID]
             automated_plate_id = self.row[AUTOMATED_PLATEID]
             automated_sliden = self.row[AUTOMATED_SLIDEN]
             mag_bin_overlap = MagBinOverlap.objects.get(name=self.row[MAG_BIN_OVERLAP])
@@ -171,6 +172,7 @@ class MeasurementParametersParser:
         model = Measurement(uuid=uuid,
                             researcher=researcher,
                             technology=technology,
+                            automated_slide_id=automated_slide_id,
                             automated_plate_id=automated_plate_id,
                             automated_slide_num=automated_sliden,
                             mag_bin_overlap=mag_bin_overlap,
