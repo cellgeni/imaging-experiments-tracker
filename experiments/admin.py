@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from experiments.analysis import submit_analysis
 from experiments.models import *
 from imaging_tracking.admin import imaging_tracking_admin
 
@@ -38,7 +39,7 @@ class MeasurementAdmin(admin.ModelAdmin):
     model = Measurement
     # list_display = ["experiment__name", "slide__barcode_id", "technology", "measurement"]
     # list_display = ["technology", "measurement", "team_directory"]
-    actions = [copy_measurement ]
+    actions = [copy_measurement]
 
 
 class MeasurementInline(admin.StackedInline):
@@ -52,6 +53,20 @@ class ExperimentAdmin(admin.ModelAdmin):
     search_fields = ['slide__barcode_id', "name"]
 
 
+class AnalysisAdmin(admin.ModelAdmin):
+    model = Analysis
+    actions = ['start']
+    list_display = ["pk", "submitted_on", "status"]
+
+    def start(self, request, queryset):
+        for obj in queryset:
+            submit_analysis(obj)
+        message = f"{len(queryset)} analyses started. "
+        self.message_user(request, message)
+
+    start.short_description = "Start analysis"
+
+
 imaging_tracking_admin.register(Slide, SlideAdmin)
 imaging_tracking_admin.register(CellGenProject)
 imaging_tracking_admin.register(Technology)
@@ -63,3 +78,12 @@ imaging_tracking_admin.register(Sample, SampleAdmin)
 imaging_tracking_admin.register(Channel)
 imaging_tracking_admin.register(Target)
 imaging_tracking_admin.register(Experiment, ExperimentAdmin)
+imaging_tracking_admin.register(PipelineVersion)
+imaging_tracking_admin.register(Registration)
+imaging_tracking_admin.register(Stiching)
+imaging_tracking_admin.register(OmeroDataset)
+imaging_tracking_admin.register(OmeroProject)
+imaging_tracking_admin.register(SangerGroup)
+imaging_tracking_admin.register(SangerUser)
+imaging_tracking_admin.register(ExternalUser)
+imaging_tracking_admin.register(Analysis, AnalysisAdmin)

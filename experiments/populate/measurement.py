@@ -6,12 +6,7 @@ if __name__ == "__main__":
 from experiments.models import *
 
 
-def save(arr):
-    for a in arr:
-        a[0].save()
-
-
-class Populator:
+class MeasurementsPopulator:
 
     def populate_cellgen_project(self):
         CellGenProject.objects.get_or_create(key="ML_HEA")[0].save()
@@ -60,7 +55,6 @@ class Populator:
     def populate_channels(self):
         ch1 = Channel.objects.get_or_create(name="Atto 425")
         ch2 = Channel.objects.get_or_create(name="Opal 520")
-        save({ch1, ch2})
 
     def populate_targets(self):
         t1 = Target.objects.get_or_create(name="MYH11")
@@ -70,7 +64,6 @@ class Populator:
         t5 = Target.objects.get_or_create(name="TTN")
         t6 = Target.objects.get_or_create(name="KCNJ8")
         t7 = Target.objects.get_or_create(name="ACKR1")
-        save({t1, t2, t3, t4, t5, t6, t7})
 
     def populate_channel_target_pairs(self):
         self.populate_channels()
@@ -86,7 +79,6 @@ class Populator:
         cht4 = ChannelTarget.objects.get_or_create(channel=ch2, target=t1)
         cht5 = ChannelTarget.objects.get_or_create(channel=ch2, target=t2)
         cht6 = ChannelTarget.objects.get_or_create(channel=ch2, target=t3)
-        save({cht1, cht2, cht3, cht4, cht5, cht6})
 
     def populate_samples(self):
         self.populate_tissues()
@@ -104,14 +96,12 @@ class Populator:
                                           genotype="Unknown",
                                           background="Unknown",
                                           tissue=t2)
-        save({s1, s2})
 
     def populate_slides(self):
         s1 = Slide.objects.get_or_create(barcode_id="S000000729")
         s2 = Slide.objects.get_or_create(barcode_id="S000000724")
         s3 = Slide.objects.get_or_create(barcode_id="S000000725")
         s4 = Slide.objects.get_or_create(barcode_id="S000000726")
-        save({s1, s2, s3, s4})
 
     def populate_sections(self):
         self.populate_samples()
@@ -125,7 +115,6 @@ class Populator:
         sc13 = Section.objects.get_or_create(number=3, sample=s1, slide=sl1)
         sc21 = Section.objects.get_or_create(number=1, sample=s2, slide=sl2)
         sc22 = Section.objects.get_or_create(number=2, sample=s2, slide=sl2)
-        save({sc11, sc12, sc13, sc21, sc22})
 
     def populate_experiment(self):
         project = CellGenProject.objects.get(key="ML_HEA")
@@ -194,7 +183,6 @@ class Populator:
                                                notes_1="Whole section; DAPI 520 570 650 // 425",
                                                notes_2="Tissue section failed",
                                                team_directory=td)
-        save({m1, m2, m3})
 
         ch1 = Channel.objects.get(name="Atto 425")
         ch2 = Channel.objects.get(name="Opal 520")
@@ -251,5 +239,5 @@ class Populator:
 
 
 if __name__ == "__main__":
-    p = Populator()
+    p = MeasurementsPopulator()
     p.populate_all()

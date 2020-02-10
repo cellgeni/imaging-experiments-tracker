@@ -8,7 +8,7 @@ from django.test import TestCase
 
 from experiments.constants import *
 from experiments.models.measurement import *
-from experiments.populate import Populator
+from experiments.populate import MeasurementsPopulator
 from experiments.xls.excel_row import ExcelRow
 from experiments.xls.import_xls import RowsImporter, MeasurementRow
 from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters
@@ -73,7 +73,7 @@ class ExcelRowTestCase(TestCase):
     file = 'test_data/measurements_input1.xlsx'
 
     def setUp(self) -> None:
-        p = Populator()
+        p = MeasurementsPopulator()
         p.populate_all()
         self.assertTrue(Researcher.objects.first())
 
@@ -97,7 +97,7 @@ class ExcelRowTestCase(TestCase):
 class MeasurementsParameterParserTestCase(TestCase):
 
     def setUp(self) -> None:
-        p = Populator()
+        p = MeasurementsPopulator()
         p.populate_sections()
         p.populate_channel_target_pairs()
 
@@ -181,7 +181,7 @@ class MeasurementParametersGenerator:
 class MeasurementParametersTestCase(TestCase):
 
     def setUp(self):
-        p = Populator()
+        p = MeasurementsPopulator()
         p.populate_all()
 
     def test_update_fields(self):
@@ -220,7 +220,7 @@ class MeasurementParametersTestCase(TestCase):
 class MeasurementRowTestCase(TestCase):
 
     def setUp(self):
-        p = Populator()
+        p = MeasurementsPopulator()
         p.populate_all()
 
     def test_create(self):
@@ -252,7 +252,7 @@ class MeasurementsImportTestCase(TestCase):
     file = 'test_data/measurements_input2.xlsx'
 
     def setUp(self):
-        p = Populator()
+        p = MeasurementsPopulator()
         p.populate_all()
 
     def import_data(self) -> None:

@@ -6,6 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from experiments.models.sample import Sample
+from experiments.models.base import NameModel
 
 
 class CellGenProject(models.Model):
@@ -15,18 +16,12 @@ class CellGenProject(models.Model):
         return self.key
 
 
-class TeamDirectory(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name
+class TeamDirectory(NameModel):
+    pass
 
 
-class Technology(models.Model):
-    name = models.CharField(max_length=35)
-
-    def __str__(self):
-        return self.name
+class Technology(NameModel):
+    pass
 
 
 class Researcher(models.Model):
@@ -80,18 +75,12 @@ class Section(models.Model):
             raise ValueError(f"Section number {num} does not exist for slide {slide}")
 
 
-class Channel(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
+class Channel(NameModel):
+    pass
 
 
-class Target(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
+class Target(NameModel):
+    pass
 
 
 class ChannelTarget(models.Model):
@@ -114,40 +103,24 @@ class ChannelTarget(models.Model):
         return channel, target
 
 
-class Experiment(models.Model):
-    name = models.CharField(max_length=30, primary_key=True)
+class Experiment(NameModel):
     project = models.ForeignKey(CellGenProject, on_delete=models.SET_NULL, null=True)
 
-    def __str__(self):
-        return self.name
+
+class MeasurementNumber(NameModel):
+    pass
 
 
-class MeasurementNumber(models.Model):
-    name = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.name
+class LowMagReference(NameModel):
+    pass
 
 
-class LowMagReference(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
+class MagBinOverlap(NameModel):
+    pass
 
 
-class MagBinOverlap(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
-
-
-class ZPlanes(models.Model):
-    name = models.CharField(max_length=30)
-
-    def __str__(self):
-        return self.name
+class ZPlanes(NameModel):
+    pass
 
 
 class Measurement(models.Model):
