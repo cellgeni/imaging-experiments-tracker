@@ -141,7 +141,7 @@ class MeasurementsParameterParserTestCase(TestCase):
         sample_date = datetime.date(2019, 2, 2)
         self.assertEqual(sample_date, MeasurementParametersParser._parse_date("2.2.2019"))
         self.assertEqual(sample_date, MeasurementParametersParser._parse_date("02/02/2019"))
-        wrong_dates = ["1.13.2018", "some word", "1.2.18", "1 02 2019", "2019.12.3", '0.0', 0.0, 0]
+        wrong_dates = ["1.13.2018", "some word", "1 02 2019", "2019.12.3", '0.0', 0.0, 0]
         for wrong_date in wrong_dates:
             with self.assertRaises(ValueError):
                 MeasurementParametersParser._parse_date(wrong_date)

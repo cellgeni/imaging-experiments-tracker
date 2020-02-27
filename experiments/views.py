@@ -12,6 +12,7 @@ from django.views import View
 from experiments.xls import EXCEL_TEMPLATE, StreamLogging
 from experiments.xls.import_xls import RowsImporter
 from experiments.xls.column_importer import ColumnImporter
+from xls.generate.generate_template import ImageTrackerWriter
 
 
 class XLSUploadForm(forms.Form):
@@ -77,7 +78,9 @@ class ColumnsXLSImportView(XLSImportView):
 class XLSTemplateDownloadView(View):
 
     def get(self, request, *args, **kwargs):
-        with open(EXCEL_TEMPLATE, "rb") as excel:
+        file = EXCEL_TEMPLATE
+        ImageTrackerWriter.generate_template(file)
+        with open(file, "rb") as excel:
             data = excel.read()
         response = HttpResponse(data, content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment; filename=xls_template.xlsx'
