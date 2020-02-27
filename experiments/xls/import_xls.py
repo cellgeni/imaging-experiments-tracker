@@ -1,4 +1,5 @@
 import traceback
+import uuid
 from typing import Iterable
 
 import pandas as pd
@@ -17,9 +18,10 @@ class MeasurementRow:
 
     def __init__(self, row: pd.Series):
         self._row = row
+        self._uuid = self._row.get(UUID, uuid.uuid4())
 
     def get_uuid(self):
-        return self._row[UUID]
+        return self._uuid
 
     def ignore(self) -> None:
         logger.info(f"Row ignored: {self.get_uuid()}")

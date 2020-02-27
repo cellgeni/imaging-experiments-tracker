@@ -179,7 +179,7 @@ class Measurement(models.Model):
     archive_location = models.CharField(max_length=200, blank=True, null=True,
                                         help_text="If the image dataset has been exported as an archived measurement, "
                                                   "this is the export location")
-    team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True)
+    team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True, blank=True)
 
     DATE_FORMAT = "%d.%m.%Y"
 

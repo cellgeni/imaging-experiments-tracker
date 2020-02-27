@@ -63,9 +63,11 @@ class MeasurementXLSImportView(XLSImportView):
 class ColumnsXLSImportView(XLSImportView):
 
     def handle_data(self, filename):
-        si = ColumnImporter(filename)
+        ci = ColumnImporter(filename)
+        ri = RowsImporter(filename)
         with StreamLogging() as logger:
-            si.import_all_columns()
+            ci.import_all_columns()
+            ri.import_measurements()
             os.remove(filename)
             data = logger.get_log()
         log_list = data.split("\n")

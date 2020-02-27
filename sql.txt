@@ -1,0 +1,30 @@
+select experiments_researcher.employee_key, mes.id as measurement_id, mes.uuid,
+experiments_technology.name as technology, mes.automated_slide_id, mes.automated_plate_id, mes.automated_slide_num,
+mes.image_cycle,
+string_agg(distinct concat(experiments_sample.id, ' ', experiments_tissue.name), '; ') as samples,
+string_agg(distinct concat(experiments_channel.name, ' -> ', experiments_target.name), '; ') as channel_targets,
+mes.date, mn.name as measurement_number, lmr.name as low_mag_reference, mbo.name as mag_bin_overlap, zplanes.name as zplanes, mes.notes_1, mes.notes_2, mes.export_location,
+mes.archive_location, td.name as team_directory
+from experiments_measurement as mes
+join experiments_measurement_sections as ems on ems.measurement_id = mes.id
+join experiments_section as sec on ems.section_id = sec.id
+join experiments_slide as sl on sec.slide_id = sl.barcode_id
+join experiments_sample on sec.sample_id = experiments_sample.id
+join experiments_tissue on experiments_sample.tissue_id = experiments_tissue.id
+join experiments_researcher on mes.researcher_id = experiments_researcher.employee_key
+join experiments_technology on mes.technology_id = experiments_technology.id
+join experiments_measurement_channel_target_pairs as mctp on mctp.measurement_id = mes.id
+join experiments_channeltarget as cht on mctp.channeltarget_id = cht.id
+join experiments_channel on cht.channel_id = experiments_channel.id
+join experiments_target on cht.target_id = experiments_target.id
+join experiments_measurementnumber as mn on mn.id = mes.measurement_id
+join experiments_lowmagreference as lmr on lmr.id = mes.low_mag_reference_id
+join experiments_magbinoverlap as mbo on mbo.id = mes.mag_bin_overlap_id
+join experiments_zplanes as zplanes on zplanes.id = mes.z_planes_id
+join experiments_teamdirectory as td on td.id = mes.team_directory_id
+where true [[ and {{sample_id}} ]] [[ and {{tissue}} ]]
+group by mes.id, experiments_researcher.employee_key, mes.uuid,
+experiments_technology.name, mes.automated_slide_id, mes.automated_plate_id, mes.automated_slide_num,
+mes.image_cycle,
+mes.date, mn.name, lmr.name, mbo.name, zplanes.name, mes.notes_1, mes.notes_2, mes.export_location,
+mes.archive_location, td.name;

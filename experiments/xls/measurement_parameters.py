@@ -1,9 +1,9 @@
-import datetime
-from typing import List, Set, Tuple
+from typing import List, Set, Union
 from uuid import UUID
 
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from pandas._libs.tslibs.timestamps import Timestamp
 
 from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
     DATE, \
@@ -12,6 +12,7 @@ from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UU
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
     MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap
 from experiments.xls import xls_logger as logger
+from experiments.xls.date_parsers import DateParserFactory
 
 
 class MeasurementM2MFields:
@@ -67,45 +68,6 @@ class MeasurementParameters:
                set(m.channel_target_pairs.all()) == self.m2m_fields.channel_target_pairs
 
 
-class DateParser:
-
-    def __init__(self, datestring: str):
-        self.check_non_null_date(datestring)
-        self.separator = self.get_separator(datestring)
-        self.datestring = datestring
-
-    def check_non_null_date(self, datestring: str) -> None:
-        # Excel transforms null values into floats like 0.0
-        if type(datestring) is not str:
-            self.raise_value_error()
-
-    @staticmethod
-    def get_separator(datestring: str) -> str:
-        if "." in datestring:
-            return "."
-        else:
-            return "/"
-
-    def raise_value_error(self):
-        raise ValueError("Date must be in format DD.MM.YYYY or DD/MM/YYYY")
-
-    def check_valid_year(self, year: int) -> None:
-        if year < 2000:
-            self.raise_value_error()
-
-    def split_date(self) -> Tuple[int, int, int]:
-        date_array = list(map(lambda x: int(x), self.datestring.split(self.separator)))
-        self.check_valid_year(date_array[2])
-        return date_array[2], date_array[1], date_array[0]
-
-    def parse(self) -> datetime.date:
-        try:
-            year, month, day = self.split_date()
-            return datetime.date(year, month, day)
-        except (AttributeError, ValueError, IndexError):
-            self.raise_value_error()
-
-
 class MeasurementParametersParser:
 
     def __init__(self, row: pd.Series):
@@ -143,8 +105,14 @@ class MeasurementParametersParser:
         return result
 
     @staticmethod
-    def _parse_date(datestring):
-        return DateParser(datestring).parse()
+    def _parse_date(datestring: Union[str, Timestamp]):
+        return DateParserFactory.get_parser(datestring).parse()
+
+    def _parse_team_dir(self) -> Union[TeamDirectory, None]:
+        name = self.row.get(TEAM_DIR, '')
+        if not name:
+            return None
+        return TeamDirectory.objects.get(name=name)
 
     def get_params(self) -> MeasurementParameters:
         try:
@@ -166,7 +134,7 @@ class MeasurementParametersParser:
             z_planes = ZPlanes.objects.get(name=self.row[ZPLANES])
             exp_location = self.row[EXPORT_LOCATION]
             arch_location = self.row[ARCHIVE_LOCATION]
-            team_dir = TeamDirectory.objects.get(name=self.row[TEAM_DIR])
+            team_dir = self._parse_team_dir()
         except ObjectDoesNotExist as e:
             raise ValueError(f"{e}")
         model = Measurement(uuid=uuid,
