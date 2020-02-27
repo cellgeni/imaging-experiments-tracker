@@ -14,7 +14,7 @@ spec:
         app: imaging-tracker
     spec:
       containers:
-      - image: quay.io/cellgeni/imaging-tracker:0.2.0
+      - image: quay.io/cellgeni/imaging-tracker:0.3.1
         imagePullPolicy: IfNotPresent
         name: imaging-tracker
         env:
