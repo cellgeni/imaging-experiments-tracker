@@ -31,6 +31,7 @@ COPY conf/server/uwsgi_params /home/docker/code/uwsgi_params
 # add (the rest of) our code
 COPY experiments /home/docker/code/experiments
 COPY imaging_tracking /home/docker/code/imaging_tracking
+COPY templates /home/docker/code/templates
 COPY manage.py /home/docker/code/manage.py
 
 WORKDIR /home/docker/code
