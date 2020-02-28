@@ -259,7 +259,7 @@ class MeasurementsImportTestCase(TestCase):
         si2 = RowsImporter(self.file)
         si2.import_measurements()
 
-    def create_row(self) -> ExcelRow:
+    def import_sample_row_into_db(self) -> ExcelRow:
         row = ExcelRow(ExcelRowInfoGenerator.get_sample_info())
         row.write_sample(self.file)
         self.import_data()
@@ -267,10 +267,10 @@ class MeasurementsImportTestCase(TestCase):
         return row
 
     def test_object_creation(self):
-        self.create_row()
+        self.import_sample_row_into_db()
 
     def test_object_update(self):
-        row = self.create_row()
+        row = self.import_sample_row_into_db()
         new_row_info = {
             UUID: row.row[UUID],
             MODE: CREATE_OR_UPDATE,
@@ -304,7 +304,7 @@ class MeasurementsImportTestCase(TestCase):
         self.assertFalse(row.is_in_database())
 
     def test_object_delete(self):
-        row = self.create_row()
+        row = self.import_sample_row_into_db()
         row.write_sample(self.file, 0)
         self.import_data()
         self.assertTrue(row.is_in_database())

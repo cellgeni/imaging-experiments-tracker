@@ -3,23 +3,20 @@ import uuid
 from abc import abstractmethod
 from typing import List
 
-from django import forms
 from django.core.files import File
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
+from experiments.forms import XLSUploadForm, UUIDGeneratorForm
 from experiments.xls import EXCEL_TEMPLATE, StreamLogging
-from experiments.xls.import_xls import RowsImporter
 from experiments.xls.column_importer import ColumnImporter
-from xls.generate.generate_template import ImageTrackerWriter
-
-
-class XLSUploadForm(forms.Form):
-    file = forms.FileField()
+from experiments.xls.generate.generate_template import ImageTrackerWriter
+from experiments.xls.import_xls import RowsImporter
 
 
 class XLSImportView(View):
+    template_name = "xls.html"
 
     def get(self, request, *args, **kwargs):
         form = XLSUploadForm()
@@ -39,14 +36,14 @@ class XLSImportView(View):
         self._write_file(f, filename)
         return self.handle_data(filename)
 
-    def post(self,  request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         form = XLSUploadForm(request.POST, request.FILES)
         if form.is_valid():
             data = self.handle_uploaded_file(request.FILES['file'])
         else:
             data = ["form invalid"]
-        return render(request, 'xls.html', {'form': form,
-                                            'data': data})
+        return render(request, self.template_name, {'form': form,
+                                                    'data': data})
 
 
 class MeasurementXLSImportView(XLSImportView):
@@ -85,3 +82,21 @@ class XLSTemplateDownloadView(View):
         response = HttpResponse(data, content_type='application/vnd.ms-excel')
         response['Content-Disposition'] = 'attachment; filename=xls_template.xlsx'
         return response
+
+
+class UUIDGeneratorView(View):
+    """
+    Generates a given number of UUIDs that users can then copy-paste in their Excel spreadsheets to uniquely
+    identify measurements
+    """
+    template_name = "uuids.html"
+
+    def get(self, request, *args, **kwargs):
+        form = UUIDGeneratorForm(request.GET)
+        if form.is_valid():
+            uuids = [uuid.uuid4() for x in range(int(request.GET['quantity']))]
+        else:
+            uuids = []
+            form = UUIDGeneratorForm()
+        return render(request, self.template_name, {'form': form,
+                                                    'uuids': uuids})
