@@ -4,7 +4,7 @@ from functools import wraps
 import pandas as pd
 
 from experiments.xls import xls_logger as logger
-from experiments.xls.import_xls import ExcelImporter
+from xls import ExcelImporter
 from experiments.constants import *
 from experiments.models import *
 
@@ -22,7 +22,7 @@ def log_errors(func):
     return f
 
 
-class ColumnImporter(ExcelImporter):
+class ColumnExcelImporter(ExcelImporter):
 
     def import_researchers(self):
         self.df[RESEARCHER].apply(lambda key: Researcher.objects.get_or_create(employee_key=key))

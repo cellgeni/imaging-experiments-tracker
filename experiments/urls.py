@@ -6,8 +6,8 @@ from experiments.views import MeasurementXLSImportView, XLSTemplateDownloadView,
 
 urlpatterns = [
     path('', RedirectView.as_view(url='/import/'), name='go-to-import'),
-    path('import/', MeasurementXLSImportView.as_view()),
+    path('import/', MeasurementXLSImportView.as_view(), name='upload-xls'),
     path('columns/', ColumnsXLSImportView.as_view()),
-    path('xls-template/', XLSTemplateDownloadView.as_view(), name='xls-download'),
+    path('xls-template/', XLSTemplateDownloadView.as_view(), name='xls-template'),
     path('uuids/', UUIDGeneratorView.as_view(), name='uuids-generate'),
 ]

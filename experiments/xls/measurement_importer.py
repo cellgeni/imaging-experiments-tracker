@@ -9,6 +9,10 @@ from experiments.constants import *
 from experiments.models import Measurement
 from experiments.xls import xls_logger as logger
 from experiments.xls.measurement_parameters import MeasurementParameters, MeasurementParametersParser
+from xls import ExcelImporter
+
+REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE,
+                    IMAGE_CYCLE, DATE, MAG_BIN_OVERLAP, SECTION_NUM}
 
 
 class MeasurementRow:
@@ -65,19 +69,14 @@ class MeasurementRow:
             self.delete()
 
 
-class ExcelImporter:
+class MeasurementsExcelImporter(ExcelImporter):
 
     def __init__(self, file):
-        self.df = pd.read_excel(file)
-        self.df.dropna()
-        self.convert_floats_to_ints()
-
-    def convert_floats_to_ints(self):
-        cols = [AUTOMATED_SLIDEN]
-        self.df[cols] = self.df[cols].astype('Int64')
-
-
-class RowsImporter(ExcelImporter):
+        super().__init__(file)
+        absent_required_columns = REQUIRED_COLUMNS.difference(set(self.df.columns))
+        if absent_required_columns:
+            logger.error(f"Required columns are absent from the spreadsheet or named incorrectly: {absent_required_columns}")
+            raise ValueError()
 
     def get_rows(self) -> Iterable[MeasurementRow]:
         for _, row in self.df.iterrows():
@@ -95,9 +94,3 @@ class RowsImporter(ExcelImporter):
     def import_all(self):
         for _, row in self.df.iterrows():
             pass
-
-
-if __name__ == "__main__":
-    file = r'../measurements_input.xlsx'
-    si = RowsImporter(file)
-    si.import_measurements()

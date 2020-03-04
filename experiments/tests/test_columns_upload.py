@@ -3,7 +3,7 @@ from typing import Dict, Tuple, Iterable
 from django.test import TestCase
 
 from constants import *
-from experiments.xls.column_importer import ColumnImporter
+from experiments.xls.column_importer import ColumnExcelImporter
 from experiments.xls.excel_row import ExcelRow
 from experiments.models import *
 
@@ -67,13 +67,13 @@ class SpreadsheetImportTestCase(TestCase):
         }
 
     def import_data(self) -> None:
-        si2 = ColumnImporter(self.file)
+        si2 = ColumnExcelImporter(self.file)
         si2.import_all_columns()
 
     def create_rows(self, rows: Iterable[RowT]):
         for i, r in enumerate(rows):
             row = ExcelRow(r)
-            row.write_sample(self.file, i)
+            row.write_in_file(self.file, i)
         self.import_data()
 
     def _test_samples(self, row: RowT):

@@ -1,10 +1,11 @@
-from typing import List, Set, Union
+from typing import List, Set, Union, Dict, Callable
 from uuid import UUID
 
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from pandas._libs.tslibs.timestamps import Timestamp
 
+from django.db import models
 from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
     DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
@@ -13,6 +14,13 @@ from experiments.models import Section, Slide, ChannelTarget, Researcher, Techno
     MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap
 from experiments.xls import xls_logger as logger
 from experiments.xls.date_parsers import DateParserFactory
+
+
+MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
+    ZPLANES: lambda name: ZPlanes.objects.get(name=name),
+    TECHNOLOGY: lambda name: Technology.objects.get(name=name),
+    LOW_MAG_REFERENCE: lambda name: LowMagReference.objects.get(name=name),
+}
 
 
 class MeasurementM2MFields:
@@ -108,35 +116,55 @@ class MeasurementParametersParser:
     def _parse_date(datestring: Union[str, Timestamp]):
         return DateParserFactory.get_parser(datestring).parse()
 
-    def _parse_team_dir(self) -> Union[TeamDirectory, None]:
+    def _parse_team_dir(self) -> Union[TeamDirectory,   None]:
         name = self.row.get(TEAM_DIR, '')
         if not name:
             return None
         return TeamDirectory.objects.get(name=name)
 
+    def _parse_optional_column(self, column: str) -> Union[models.Model, None]:
+        name = self.row.get(column, '')
+        if pd.isnull(name):
+            return None
+        return MODELS_MAPPING[column](name)
+
+    def _parse_automated_sliden(self, automated_plateid: str) -> str:
+        slide_n = self.row.get(AUTOMATED_SLIDEN, None)
+        if automated_plateid and not slide_n:
+            raise ValueError("Automated slide number is required if automated plate ID is provided")
+        return slide_n
+
     def get_params(self) -> MeasurementParameters:
+        # required fields
         try:
             uuid = self.row[UUID]
             researcher = Researcher.objects.get(employee_key=self.row[RESEARCHER])
-            sections = self._parse_sections()
-            technology = Technology.objects.get(name=self.row[TECHNOLOGY])
             image_cycle = self.row[IMAGE_CYCLE]
+            mag_bin_overlap = MagBinOverlap.objects.get(name=self.row[MAG_BIN_OVERLAP])
+            automated_slide_id = self.row[SLIDE_ID]
+            exp_location = self.row[EXPORT_LOCATION]
+            measurement = MeasurementNumber.objects.get(name=self.row[MEASUREMENT])
+            sections = self._parse_sections()
             channel_targets = self._parse_channel_targets()
             date = self._parse_date(self.row[DATE])
-            measurement = MeasurementNumber.objects.get(name=self.row[MEASUREMENT])
-            low_mag_ref = LowMagReference.objects.get(name=self.row[LOW_MAG_REFERENCE])
-            automated_slide_id = self.row[SLIDE_ID]
-            automated_plate_id = self.row[AUTOMATED_PLATEID]
-            automated_sliden = self.row[AUTOMATED_SLIDEN]
-            mag_bin_overlap = MagBinOverlap.objects.get(name=self.row[MAG_BIN_OVERLAP])
-            notes1 = self.row[NOTES_1]
-            notes2 = self.row[NOTES_2]
-            z_planes = ZPlanes.objects.get(name=self.row[ZPLANES])
-            exp_location = self.row[EXPORT_LOCATION]
-            arch_location = self.row[ARCHIVE_LOCATION]
+
+            # optional fields
+            technology = self._parse_optional_column(TECHNOLOGY)
+            low_mag_ref = self._parse_optional_column(LOW_MAG_REFERENCE)
+            z_planes = self._parse_optional_column(ZPLANES)
+            automated_plate_id = self.row.get(AUTOMATED_PLATEID, None)
+            automated_sliden = self._parse_automated_sliden(automated_plate_id)
+            notes1 = self.row.get(NOTES_1, None)
+            notes2 = self.row.get(NOTES_2, None)
+            arch_location = self.row.get(ARCHIVE_LOCATION, None)
             team_dir = self._parse_team_dir()
-        except ObjectDoesNotExist as e:
+        except KeyError as e:
+            raise ValueError(f"A required column is absent: {e}")
+        except (ValueError, ObjectDoesNotExist) as e:
             raise ValueError(f"{e}")
+
+
+
         model = Measurement(uuid=uuid,
                             researcher=researcher,
                             technology=technology,

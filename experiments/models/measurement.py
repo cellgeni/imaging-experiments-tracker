@@ -98,7 +98,7 @@ class ChannelTarget(models.Model):
     @classmethod
     def get_channel_and_target_from_str(cls, name: str) -> Tuple[str, str]:
         if type(name) is not str or cls.SEPARATOR not in name:
-            raise ValueError(f"The string '{str}' is not a ChannelTarget string")
+            raise ValueError(f"The string '{name}' is not a ChannelTarget string")
         channel, target = name.split(cls.SEPARATOR)
         return channel, target
 

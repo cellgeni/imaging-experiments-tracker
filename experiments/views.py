@@ -1,4 +1,3 @@
-import os
 import uuid
 from abc import abstractmethod
 from typing import List
@@ -9,10 +8,9 @@ from django.shortcuts import render
 from django.views import View
 
 from experiments.forms import XLSUploadForm, UUIDGeneratorForm
-from experiments.xls import EXCEL_TEMPLATE, StreamLogging
-from experiments.xls.column_importer import ColumnImporter
+from experiments.xls import EXCEL_TEMPLATE
 from experiments.xls.generate.generate_template import ImageTrackerWriter
-from experiments.xls.import_xls import RowsImporter
+from xls.file_importers import FileImporterMode, FileImporterFactory
 
 
 class XLSImportView(View):
@@ -27,49 +25,36 @@ class XLSImportView(View):
             for chunk in f.chunks():
                 destination.write(chunk)
 
-    @abstractmethod
-    def handle_data(self, filename):
-        pass
-
-    def handle_uploaded_file(self, f: File) -> List[str]:
+    def dump_file_on_disk_import_it_and_get_import_log(self, f: File) -> List[str]:
         filename = str(uuid.uuid4()) + ".xlsx"
         self._write_file(f, filename)
-        return self.handle_data(filename)
+        mode = self.get_mode()
+        return FileImporterFactory.get_importer(mode)(filename).import_and_get_log()
+
+    @abstractmethod
+    def get_mode(self) -> FileImporterMode:
+        pass
 
     def post(self, request, *args, **kwargs):
         form = XLSUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            data = self.handle_uploaded_file(request.FILES['file'])
+            log = self.dump_file_on_disk_import_it_and_get_import_log(request.FILES['file'])
         else:
-            data = ["form invalid"]
+            log = ["form invalid"]
         return render(request, self.template_name, {'form': form,
-                                                    'data': data})
+                                                    'log': log})
 
 
 class MeasurementXLSImportView(XLSImportView):
 
-    def handle_data(self, filename):
-        si = RowsImporter(filename)
-        with StreamLogging() as logger:
-            si.import_measurements()
-            os.remove(filename)
-            data = logger.get_log()
-        log_list = data.split("\n")
-        return log_list
+    def get_mode(self) -> FileImporterMode:
+        return FileImporterMode.MEASUREMENTS
 
 
 class ColumnsXLSImportView(XLSImportView):
 
-    def handle_data(self, filename):
-        ci = ColumnImporter(filename)
-        ri = RowsImporter(filename)
-        with StreamLogging() as logger:
-            ci.import_all_columns()
-            ri.import_measurements()
-            os.remove(filename)
-            data = logger.get_log()
-        log_list = data.split("\n")
-        return log_list
+    def get_mode(self) -> FileImporterMode:
+        return FileImporterMode.EVERYTHING
 
 
 class XLSTemplateDownloadView(View):

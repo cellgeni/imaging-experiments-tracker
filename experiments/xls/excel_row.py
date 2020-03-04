@@ -1,8 +1,9 @@
 import os
-from typing import Dict
+from typing import Dict, List, Any
 
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import QuerySet
 
 from experiments.constants import *
 from experiments.models import Measurement
@@ -14,55 +15,64 @@ class ExcelRow:
     def __init__(self, row: Dict):
         self.row = row
 
-    def write_row(self, df: pd.DataFrame, row_num: int) -> None:
+    def write_in_dataframe(self, df: pd.DataFrame, row_num: int) -> None:
         for column in self.row.keys():
             df.loc[row_num, column] = self.row[column]
 
-    def write_sample(self, output_file: str, row_num: int = 0) -> None:
+    def write_in_file(self, output_file: str, row_num: int = 0) -> None:
         assert os.path.exists(EXCEL_TEMPLATE)
         if os.path.exists(output_file):
             target_file = output_file
         else:
             target_file = EXCEL_TEMPLATE
         df = pd.read_excel(target_file)
-        self.write_row(df, row_num)
+        self.write_in_dataframe(df, row_num)
         df.to_excel(output_file)
         assert os.path.exists(output_file)
 
-    def is_in_database(self) -> bool:
-        try:
-            m = Measurement.objects.get(uuid=self.row[UUID])
-        except ObjectDoesNotExist:
-            logger.info(f"Object with uuid {self.row[UUID]} is not in the database")
-            return False
-        data = list()
-        data.append((str(m.researcher), self.row[RESEARCHER]))
-        data.append((m.automated_slide_num, str(self.row[AUTOMATED_SLIDEN])))
-        data.append((str(m.automated_plate_id), self.row[AUTOMATED_PLATEID]))
-        data.append((str(m.technology), self.row[TECHNOLOGY]))
-        data.append((m.image_cycle, self.row[IMAGE_CYCLE]))
-        data.append((m.date.strftime(Measurement.DATE_FORMAT), self.row[DATE]))
-        data.append((str(m.measurement), str(self.row[MEASUREMENT])))
-        data.append((str(m.low_mag_reference), self.row[LOW_MAG_REFERENCE]))
-        data.append((str(m.mag_bin_overlap), self.row[MAG_BIN_OVERLAP]))
-        data.append((str(m.z_planes), self.row[ZPLANES]))
-        data.append((str(m.notes_1), self.row[NOTES_1]))
-        data.append((str(m.notes_2), self.row[NOTES_2]))
-        data.append((str(m.export_location), self.row[EXPORT_LOCATION]))
-        data.append((str(m.archive_location), self.row[ARCHIVE_LOCATION]))
-        data.append((str(m.team_directory), self.row[TEAM_DIR]))
-        row_channel_targets = set(filter(None, [self.row.get(ch_t) for ch_t in
-                                                [CHANNEL_TARGET + str(x) for x in range(1, 6)]]))
-        measurement_channel_targets = {str(cht) for cht in m.channel_target_pairs.all()}
-        data.append((row_channel_targets, measurement_channel_targets))
-        for pair in data:
-            if pair[0] != pair[1]:
-                logger.error(f'Unequal pair: {pair}')
-                return False
-        sections = m.sections.all()
+    def _compare_sections(self, sections: QuerySet) -> bool:
         for section in sections:
             if not (section.slide_id == self.row[SLIDE_BARCODE] and
                     str(section.number) in self.row[SECTION_NUM]):
                 logger.error(f'problem with section: {section}')
                 return False
         return True
+
+    @staticmethod
+    def is_empty(s: Any):
+        return s is None or s == "" or s == "nan" or s == "None" or pd.isna(s)
+
+    def _compare_pairs(self, pairs: List) -> bool:
+        for pair in pairs:
+            if not (self.is_empty(pair[0]) and self.is_empty(pair[1])) and pair[0] != pair[1]:
+                logger.error(f'Unequal pair: {pair}')
+                return False
+        return True
+
+    def is_in_database(self) -> bool:
+        try:
+            m = Measurement.objects.get(uuid=self.row.get(UUID))
+        except ObjectDoesNotExist:
+            logger.info(f"Object with uuid {self.row.get(UUID)} is not in the database")
+            return False
+        data = list()
+        data.append((str(m.researcher), self.row.get(RESEARCHER)))
+        data.append((m.automated_slide_num, str(self.row.get(AUTOMATED_SLIDEN))))
+        data.append((str(m.automated_plate_id), self.row.get(AUTOMATED_PLATEID)))
+        data.append((str(m.technology), self.row.get(TECHNOLOGY)))
+        data.append((m.image_cycle, self.row.get(IMAGE_CYCLE)))
+        data.append((m.date.strftime(Measurement.DATE_FORMAT), self.row.get(DATE)))
+        data.append((str(m.measurement), str(self.row.get(MEASUREMENT))))
+        data.append((str(m.low_mag_reference), self.row.get(LOW_MAG_REFERENCE)))
+        data.append((str(m.mag_bin_overlap), self.row.get(MAG_BIN_OVERLAP)))
+        data.append((str(m.z_planes), self.row.get(ZPLANES)))
+        data.append((str(m.notes_1), self.row.get(NOTES_1)))
+        data.append((str(m.notes_2), self.row.get(NOTES_2)))
+        data.append((str(m.export_location), self.row.get(EXPORT_LOCATION)))
+        data.append((str(m.archive_location), self.row.get(ARCHIVE_LOCATION)))
+        data.append((str(m.team_directory), self.row.get(TEAM_DIR)))
+        row_channel_targets = set(filter(None, [self.row.get(ch_t) for ch_t in
+                                                [CHANNEL_TARGET + str(x) for x in range(1, 6)]]))
+        measurement_channel_targets = {str(cht) for cht in m.channel_target_pairs.all()}
+        data.append((row_channel_targets, measurement_channel_targets))
+        return self._compare_pairs(data) and self._compare_sections(m.sections.all())

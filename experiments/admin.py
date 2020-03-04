@@ -25,6 +25,12 @@ class SlideAdmin(admin.ModelAdmin):
 class MeasurementAdmin(admin.ModelAdmin):
     model = Measurement
     actions = ['copy_measurement']
+    list_display = ["uuid", "researcher", "experiment", "technology", "automated_slide_id",
+                    "automated_plate_id", "automated_slide_num", "image_cycle",
+                    "date", "measurement", "low_mag_reference", "mag_bin_overlap", "z_planes",
+                    "notes_1", "notes_2", "export_location", "archive_location", "team_directory"]
+    search_fields = ["uuid"]
+
 
     def copy_measurement(self, request, queryset):
         for obj in queryset:

@@ -10,10 +10,13 @@ from experiments.constants import *
 from experiments.models.measurement import *
 from experiments.populate import MeasurementsPopulator
 from experiments.xls.excel_row import ExcelRow
-from experiments.xls.import_xls import RowsImporter, MeasurementRow
+from experiments.xls.measurement_importer import MeasurementsExcelImporter, MeasurementRow
 from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters
-from experiments.xls import StreamLogging, xls_logger
+from experiments.xls import xls_logger
+from xls.stream_logging import StreamLogging
 from experiments.xls.measurement_parameters import MeasurementParametersParser
+from experiments.xls.file_importers import FileImporterFactory, FileImporterMode
+from xls.file_importers import MeasurementsFileImporter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -81,7 +84,7 @@ class ExcelRowTestCase(TestCase):
         sample_info = ExcelRowInfoGenerator.get_sample_info()
         self.assertTrue(sample_info[RESEARCHER])
         row = ExcelRow(sample_info)
-        row.write_sample(self.file)
+        row.write_in_file(self.file)
         df = pd.read_excel(self.file)
         for key, value in sample_info.items():
             spreadsheet_value = df.loc[0, key]
@@ -145,6 +148,12 @@ class MeasurementsParameterParserTestCase(TestCase):
         for wrong_date in wrong_dates:
             with self.assertRaises(ValueError):
                 MeasurementParametersParser._parse_date(wrong_date)
+    #
+    # def test_parse_optional_columns(self):
+    #     pass
+    #
+    # def test_parse_required_columns(self):
+    #     pass
 
 
 class MeasurementParametersGenerator:
@@ -250,21 +259,25 @@ class StreamLoggingTestCase(TestCase):
 
 class MeasurementsImportTestCase(TestCase):
     file = 'test_data/measurements_input2.xlsx'
+    importer = MeasurementsFileImporter(file)
 
     def setUp(self):
         p = MeasurementsPopulator()
         p.populate_all()
 
-    def import_data(self) -> None:
-        si2 = RowsImporter(self.file)
-        si2.import_measurements()
+    def write_row_dict_in_file(self, row_dict: Dict) -> ExcelRow:
+        row = ExcelRow(row_dict)
+        row.write_in_file(self.file)
+        return row
 
-    def import_sample_row_into_db(self) -> ExcelRow:
-        row = ExcelRow(ExcelRowInfoGenerator.get_sample_info())
-        row.write_sample(self.file)
-        self.import_data()
+    def import_row_dict_into_db(self, row_dict: Dict) -> ExcelRow:
+        row = self.write_row_dict_in_file(row_dict)
+        self.importer.import_file()
         self.assertTrue(row.is_in_database())
         return row
+
+    def import_sample_row_into_db(self) -> ExcelRow:
+        return self.import_row_dict_into_db(ExcelRowInfoGenerator.get_sample_info())
 
     def test_object_creation(self):
         self.import_sample_row_into_db()
@@ -286,7 +299,7 @@ class MeasurementsImportTestCase(TestCase):
             CHANNEL_TARGET2: str(ChannelTarget.objects.all()[4]),
             CHANNEL_TARGET3: str(ChannelTarget.objects.all()[5]),
             DATE: ExcelRowInfoGenerator.get_todays_date(),
-            MEASUREMENT:  str(MeasurementNumber.objects.last()),
+            MEASUREMENT: str(MeasurementNumber.objects.last()),
             LOW_MAG_REFERENCE: str(LowMagReference.objects.last()),
             MAG_BIN_OVERLAP: str(MagBinOverlap.objects.last()),
             SECTION_NUM: "2,3",
@@ -298,20 +311,41 @@ class MeasurementsImportTestCase(TestCase):
             TEAM_DIR: str(TeamDirectory.objects.last()),
         }
         new_row = ExcelRow(new_row_info)
-        new_row.write_sample(self.file, 0)
-        self.import_data()
+        new_row.write_in_file(self.file, 0)
+        self.importer.import_file()
         self.assertTrue(new_row.is_in_database())
         self.assertFalse(row.is_in_database())
 
     def test_object_delete(self):
         row = self.import_sample_row_into_db()
-        row.write_sample(self.file, 0)
-        self.import_data()
+        row.write_in_file(self.file, 0)
+        self.importer.import_file()
         self.assertTrue(row.is_in_database())
         row.row[MODE] = DELETE
-        row.write_sample(self.file, 0)
-        self.import_data()
+        row.write_in_file(self.file, 0)
+        self.importer.import_file()
         self.assertFalse(row.is_in_database())
+
+    def test_row_with_only_required_columns(self):
+        row = {
+            UUID: uuid.uuid4(),
+            MODE: CREATE_OR_UPDATE,
+            RESEARCHER: str(Researcher.objects.last()),
+            PROJECT: str(CellGenProject.objects.last()),
+            SLIDE_BARCODE: str(Slide.objects.last()),
+            SLIDE_ID: "TM_RCC_00FY",
+            AUTOMATED_PLATEID: "DIFFERENT",
+            AUTOMATED_SLIDEN: 5,
+            IMAGE_CYCLE: 1,
+            CHANNEL_TARGET1: str(ChannelTarget.objects.all()[3]),
+            DATE: ExcelRowInfoGenerator.get_todays_date(),
+            MEASUREMENT: str(MeasurementNumber.objects.last()),
+            MAG_BIN_OVERLAP: str(MagBinOverlap.objects.last()),
+            SECTION_NUM: "2,3",
+            EXPORT_LOCATION: "/OTHER/MOTHER",
+            TEAM_DIR: str(TeamDirectory.objects.last()),
+        }
+        self.import_row_dict_into_db(row)
 
     def tearDown(self) -> None:
         os.remove(self.file)
