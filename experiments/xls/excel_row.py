@@ -11,6 +11,7 @@ from experiments.xls import EXCEL_TEMPLATE, xls_logger as logger
 
 
 class ExcelRow:
+    default_template = EXCEL_TEMPLATE
 
     def __init__(self, row: Dict):
         self.row = row
@@ -20,15 +21,14 @@ class ExcelRow:
             df.loc[row_num, column] = self.row[column]
 
     def write_in_file(self, output_file: str, row_num: int = 0) -> None:
-        assert os.path.exists(EXCEL_TEMPLATE)
-        if os.path.exists(output_file):
-            target_file = output_file
-        else:
-            target_file = EXCEL_TEMPLATE
+        target_file = self.get_target_file(output_file)
         df = pd.read_excel(target_file)
         self.write_in_dataframe(df, row_num)
         df.to_excel(output_file)
-        assert os.path.exists(output_file)
+
+    def get_target_file(self, output_file: str):
+        assert os.path.exists(self.default_template)
+        return output_file if os.path.exists(output_file) else self.default_template
 
     def _compare_sections(self, sections: QuerySet) -> bool:
         for section in sections:

@@ -1,6 +1,6 @@
+import datetime
 import logging
 import os
-import datetime
 from typing import Dict
 
 import pandas as pd
@@ -9,14 +9,13 @@ from django.test import TestCase
 from experiments.constants import *
 from experiments.models.measurement import *
 from experiments.populate import MeasurementsPopulator
-from experiments.xls.excel_row import ExcelRow
-from experiments.xls.measurement_importer import MeasurementsExcelImporter, MeasurementRow
-from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters
 from experiments.xls import xls_logger
-from xls.stream_logging import StreamLogging
-from experiments.xls.measurement_parameters import MeasurementParametersParser
-from experiments.xls.file_importers import FileImporterFactory, FileImporterMode
-from xls.file_importers import MeasurementsFileImporter
+from experiments.xls.excel_row import ExcelRow
+from experiments.xls.file_importers import MeasurementsFileImporter
+from experiments.xls.measurement_importer import MeasurementRow
+from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters, \
+    MeasurementParametersParser
+from experiments.xls.stream_logging import StreamLogging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -148,12 +147,6 @@ class MeasurementsParameterParserTestCase(TestCase):
         for wrong_date in wrong_dates:
             with self.assertRaises(ValueError):
                 MeasurementParametersParser._parse_date(wrong_date)
-    #
-    # def test_parse_optional_columns(self):
-    #     pass
-    #
-    # def test_parse_required_columns(self):
-    #     pass
 
 
 class MeasurementParametersGenerator:

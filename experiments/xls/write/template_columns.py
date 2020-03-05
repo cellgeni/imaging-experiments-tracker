@@ -37,13 +37,13 @@ class ModeColumn(ImageTrackerColumn):
 
     def __init__(self):
         super().__init__(MODE, {'validate': 'list',
-                                'value': MODES,
+                                'value': [mode.value for mode in MeasurementModes],
                                 'input_title': "Mode",
                                 'input_message': "Choose mode"})
 
     def prepopulate(self, column, worksheet):
         for row in range(1, 21):
-            worksheet.write(row, column, IGNORE)
+            worksheet.write(row, column, MeasurementModes.IGNORE)
 
 
 def get_columns() -> List[ImageTrackerColumn]:

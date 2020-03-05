@@ -1,3 +1,5 @@
+import enum
+
 UUID = "UUID"
 MODE = "Mode"
 RESEARCHER = "Researcher"
@@ -50,7 +52,7 @@ TEAM_DIR = "Team_dir"
 IGNORE = "Ignore"
 CREATE_OR_UPDATE = "Create or update"
 DELETE = "Delete"
-MODES = [IGNORE, CREATE_OR_UPDATE, DELETE]
+
 CHANNEL_TARGET_MAPPING = {
     CHANNEL1: TARGET1,
     CHANNEL2: TARGET2,
@@ -63,3 +65,9 @@ SAMPLE_MAPPING = {
     SAMPLE2: TISSUE2,
     SAMPLE3: TISSUE3
 }
+
+
+class MeasurementModes(enum.Enum):
+    CREATE_OR_UPDATE = "Create or update"
+    IGNORE = "Ignore"
+    DELETE = "Delete"

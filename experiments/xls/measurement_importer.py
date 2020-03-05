@@ -60,12 +60,12 @@ class MeasurementRow:
             self.create(parameters)
 
     def handle_mode(self) -> None:
-        mode = self._row[MODE]
-        if mode == IGNORE:
+        mode = MeasurementModes(self._row[MODE])
+        if mode == MeasurementModes.IGNORE:
             self.ignore()
-        elif mode == CREATE_OR_UPDATE:
+        elif mode == MeasurementModes.CREATE_OR_UPDATE:
             self.create_or_update()
-        elif mode == DELETE:
+        elif mode == MeasurementModes.DELETE:
             self.delete()
 
 

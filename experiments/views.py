@@ -9,8 +9,10 @@ from django.views import View
 
 from experiments.forms import XLSUploadForm, UUIDGeneratorForm
 from experiments.xls import EXCEL_TEMPLATE
-from experiments.xls.generate.generate_template import ImageTrackerWriter
-from xls.file_importers import FileImporterMode, FileImporterFactory
+from experiments.xls.file_importers import FileImporterMode, FileImporterFactory
+from experiments.xls.write.generate_template import ImageTrackerWriter
+from experiments.xls.write.writer import ExcelFileWriter
+from xls.write.inject_uuids_and_modes import ColumnInjector
 
 
 class XLSImportView(View):
@@ -20,14 +22,8 @@ class XLSImportView(View):
         form = XLSUploadForm()
         return render(request, 'xls.html', {'form': form})
 
-    def _write_file(self, f, filename):
-        with open(filename, 'wb+') as destination:
-            for chunk in f.chunks():
-                destination.write(chunk)
-
     def dump_file_on_disk_import_it_and_get_import_log(self, f: File) -> List[str]:
-        filename = str(uuid.uuid4()) + ".xlsx"
-        self._write_file(f, filename)
+        filename = ExcelFileWriter.dump_file_on_disk(f)
         mode = self.get_mode()
         return FileImporterFactory.get_importer(mode)(filename).import_and_get_log()
 
@@ -40,7 +36,7 @@ class XLSImportView(View):
         if form.is_valid():
             log = self.dump_file_on_disk_import_it_and_get_import_log(request.FILES['file'])
         else:
-            log = ["form invalid"]
+            log = ["Invalid submission"]
         return render(request, self.template_name, {'form': form,
                                                     'log': log})
 
@@ -57,16 +53,28 @@ class ColumnsXLSImportView(XLSImportView):
         return FileImporterMode.EVERYTHING
 
 
-class XLSTemplateDownloadView(View):
+class ExcelDownloadView(View):
+    """
+    Generic view to serve as a base for other views that return an Excel file
+    """
+
+    def serve_excel(self, file: str, request) -> HttpResponse:
+        with open(file, "rb") as excel:
+            data = excel.read()
+        response = HttpResponse(data, content_type='application/vnd.ms-excel')
+        response['Content-Disposition'] = f'attachment; filename={file}'
+        return response
+
+
+class XLSTemplateDownloadView(ExcelDownloadView):
+    """
+    Generates an Excel template with prevalidated fields to upload new measurements
+    """
 
     def get(self, request, *args, **kwargs):
         file = EXCEL_TEMPLATE
         ImageTrackerWriter.generate_template(file)
-        with open(file, "rb") as excel:
-            data = excel.read()
-        response = HttpResponse(data, content_type='application/vnd.ms-excel')
-        response['Content-Disposition'] = 'attachment; filename=xls_template.xlsx'
-        return response
+        return self.serve_excel(file, request)
 
 
 class UUIDGeneratorView(View):
@@ -85,3 +93,25 @@ class UUIDGeneratorView(View):
             form = UUIDGeneratorForm()
         return render(request, self.template_name, {'form': form,
                                                     'uuids': uuids})
+
+
+class UUIDAndCreateModeInjectorView(XLSImportView, ExcelDownloadView):
+    """
+    Accepts an Excel file and returns the same file with UUID and Mode columns populated
+    Mode column has value "Create or update" for all measurements
+    """
+
+    def inject_columns(self, request) -> HttpResponse:
+        filename = request.FILES['file'].name.replace(" ", "_")
+        ExcelFileWriter.dump_file_on_disk(request.FILES['file'], filename)
+        ColumnInjector(filename).inject_uuid_mode_columns()
+        return self.serve_excel(filename, request)
+
+    def post(self, request, *args, **kwargs):
+        form = XLSUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            return self.inject_columns(request)
+        else:
+            log = ["form invalid"]
+        return render(request, self.template_name, {'form': form,
+                                                    'log': log})

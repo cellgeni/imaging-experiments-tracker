@@ -31,7 +31,6 @@ class MeasurementAdmin(admin.ModelAdmin):
                     "notes_1", "notes_2", "export_location", "archive_location", "team_directory"]
     search_fields = ["uuid"]
 
-
     def copy_measurement(self, request, queryset):
         for obj in queryset:
             sections = obj.sections.all()

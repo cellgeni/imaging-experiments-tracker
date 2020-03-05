@@ -6,7 +6,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
 django.setup()
 
 import xlsxwriter
-from experiments.xls.generate.template_columns import *
+from experiments.xls.write.template_columns import *
 from experiments.xls import EXCEL_TEMPLATE
 
 
