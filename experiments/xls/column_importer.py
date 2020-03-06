@@ -3,8 +3,7 @@ from functools import wraps
 
 import pandas as pd
 
-from experiments.xls import xls_logger as logger
-from xls import ExcelImporter
+from experiments.xls import xls_logger as logger, ExcelImporter
 from experiments.constants import *
 from experiments.models import *
 

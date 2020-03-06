@@ -7,9 +7,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from experiments.constants import *
 from experiments.models import Measurement
-from experiments.xls import xls_logger as logger
+from experiments.xls import xls_logger as logger, ExcelImporter
 from experiments.xls.measurement_parameters import MeasurementParameters, MeasurementParametersParser
-from xls import ExcelImporter
 
 REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE,
                     IMAGE_CYCLE, DATE, MAG_BIN_OVERLAP, SECTION_NUM}

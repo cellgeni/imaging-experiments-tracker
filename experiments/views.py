@@ -12,7 +12,7 @@ from experiments.xls import EXCEL_TEMPLATE
 from experiments.xls.file_importers import FileImporterMode, FileImporterFactory
 from experiments.xls.write.generate_template import ImageTrackerWriter
 from experiments.xls.write.writer import ExcelFileWriter
-from xls.write.inject_uuids_and_modes import ColumnInjector
+from experiments.xls.write.inject_uuids_and_modes import ColumnInjector
 
 
 class XLSImportView(View):

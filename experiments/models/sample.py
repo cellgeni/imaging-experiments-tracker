@@ -7,9 +7,8 @@ class Tissue(models.Model):
     def __str__(self):
         return self.name
 
-
 class Sample(models.Model):
-    id = models.CharField(max_length=20, primary_key=True)
+    id = models.CharField(max_length=40, primary_key=True)
     species = models.IntegerField(blank=True, null=True, choices=[
         (1, 'Hca'),
         (2, 'Mmu')

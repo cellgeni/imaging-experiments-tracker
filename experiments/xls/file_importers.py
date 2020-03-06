@@ -3,7 +3,7 @@ import os
 from abc import abstractmethod
 from typing import List, Type
 
-from xls.stream_logging import StreamLogging
+from experiments.xls.stream_logging import StreamLogging
 from experiments.xls.column_importer import ColumnExcelImporter
 from experiments.xls.measurement_importer import MeasurementsExcelImporter
 
@@ -56,6 +56,7 @@ class FileImporterFactory:
     @classmethod
     def get_importer(cls, mode: FileImporterMode) -> Type[FileImporter]:
         if mode == FileImporterMode.EVERYTHING:
-            return MeasurementsFileImporter
-        elif mode == FileImporterMode.MEASUREMENTS:
             return EverythingFileImporter
+        elif mode == FileImporterMode.MEASUREMENTS:
+            return MeasurementsFileImporter
+
