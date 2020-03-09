@@ -1,11 +1,15 @@
 import traceback
 from functools import wraps
+from typing import Union, Dict
 
 import pandas as pd
+from django.db import models
 
-from experiments.xls import xls_logger as logger, ExcelImporter
 from experiments.constants import *
 from experiments.models import *
+from experiments.xls import xls_logger as logger, ExcelImporter
+from experiments.xls.measurement_parameters import MODELS_MAPPING
+from experiments.xls.excel_row import ExcelRow
 
 
 def log_errors(func):
@@ -21,48 +25,74 @@ def log_errors(func):
     return f
 
 
+class SamplesImporter:
+
+    def __init__(self, row: Union[pd.Series, Dict[str, str]]):
+        self.row = row
+
+    def get_column(self, column: str, suffix: str) -> Union[models.Model, None]:
+        value = self.row.get(column + suffix)
+        return MODELS_MAPPING[column](value) if not ExcelRow.is_empty(value) else None
+
+    def import_samples(self) -> None:
+        for s_column in SAMPLES:
+            s = self.row.get(s_column)
+            if not s:
+                raise ValueError(f"Sample id is missing")
+            suffix = s_column[-2:]
+            tissue = self.get_column(TISSUE, suffix)
+            background = self.get_column(BACKGROUND, suffix)
+            genotype = self.get_column(GENOTYPE, suffix)
+            age = self.get_column(AGE, suffix)
+            sample = Sample.objects.get_or_create(id=s)[0]
+            sample.tissue = tissue
+            sample.age = age
+            sample.background = background
+            sample.genotype = genotype
+            sample.save()
+
+
 class ColumnExcelImporter(ExcelImporter):
 
-    def import_researchers(self):
+    def import_researchers(self) -> None:
         self.df[RESEARCHER].apply(lambda key: Researcher.objects.get_or_create(employee_key=key))
 
-    def import_project(self):
+    def import_project(self) -> None:
         self.df[PROJECT].apply(lambda key: CellGenProject.objects.get_or_create(key=key))
 
-    def import_low_mag_reference(self):
+    def import_low_mag_reference(self) -> None:
         self.df[LOW_MAG_REFERENCE].apply(lambda key: LowMagReference.objects.get_or_create(name=key))
 
-    def import_technology(self):
+    def import_technology(self) -> None:
         self.df[TECHNOLOGY].apply(lambda name: Technology.objects.get_or_create(name=name))
 
-    def import_measurement_numbers(self):
+    def import_measurement_numbers(self) -> None:
         self.df[MEASUREMENT].apply(lambda name: MeasurementNumber.objects.get_or_create(name=name))
 
-    def import_mag_bin_overlap(self):
+    def import_mag_bin_overlap(self) -> None:
         self.df[MAG_BIN_OVERLAP].apply(lambda name: MagBinOverlap.objects.get_or_create(name=name))
 
-    def import_zplanes(self):
+    def import_zplanes(self) -> None:
         self.df[ZPLANES].apply(lambda name: ZPlanes.objects.get_or_create(name=name))
 
     @log_errors
-    def import_sections(self, row: pd.Series, slide: Slide):
-        for s_column in SAMPLE_MAPPING.keys():
+    def import_sections(self, row: pd.Series, slide: Slide) -> None:
+        for s_column in SAMPLES:
             sample_id = row.get(s_column)
             if sample_id:
                 sample = Sample.objects.get_or_create(id=sample_id)[0]
                 Section.objects.update_or_create(number=int(s_column[-1]), sample=sample, slide=slide)
 
     @log_errors
-    def import_slides(self, row: pd.Series):
+    def import_slides(self, row: pd.Series) -> None:
         try:
             slide = Slide.objects.get_or_create(barcode_id=row[SLIDE_BARCODE])[0]
             self.import_sections(row, slide)
         except KeyError as e:
             logger.error(f"The column name should be {SLIDE_BARCODE}")
 
-
     @log_errors
-    def import_channel_targets(self, row: pd.Series):
+    def import_channel_targets(self, row: pd.Series) -> None:
         for ch_name, t_name in CHANNEL_TARGET_MAPPING.items():
             ch = row.get(ch_name)
             t = row.get(t_name)
@@ -76,22 +106,12 @@ class ColumnExcelImporter(ExcelImporter):
                 raise ValueError(f"One of the channel or target values is missing, channel: {ch}, target: {t}")
 
     @log_errors
-    def import_samples(self, row: pd.Series):
-        for s_column, t_column in SAMPLE_MAPPING.items():
-            s = row.get(s_column)
-            t = row.get(t_column)
-            if s and t:
-                tissue = Tissue.objects.get_or_create(name=t)[0]
-                sample = Sample.objects.get_or_create(id=s)[0]
-                sample.tissue = tissue
-                sample.save()
-            elif not (s or t):
-                pass
-            else:
-                raise ValueError(f"One of the sample or tissue values is missing, sample: {s}, tissue: {t}")
+    def import_samples(self, row: pd.Series) -> None:
+        s = SamplesImporter(row)
+        s.import_samples()
 
     @log_errors
-    def import_column(self, column):
+    def import_column(self, column: str) -> None:
         if column == RESEARCHER:
             self.import_researchers()
         elif column == PROJECT:
@@ -108,7 +128,7 @@ class ColumnExcelImporter(ExcelImporter):
             self.import_zplanes()
         logger.info(f"Imported {column}")
 
-    def import_row(self, i, row, column):
+    def import_row(self, i: int, row: pd.Series, column: str) -> None:
         try:
             if column == SLIDE_BARCODE:
                 self.import_slides(row)
@@ -118,7 +138,7 @@ class ColumnExcelImporter(ExcelImporter):
                 self.import_channel_targets(row)
         except Exception as e:
             traceback.print_exc()
-            logger.error(f"A problem importing row {i+1}, error: {e}")
+            logger.error(f"A problem importing row {i + 1}, error: {e}")
 
     def import_all_columns(self):
         for column in [RESEARCHER, PROJECT, TECHNOLOGY, LOW_MAG_REFERENCE, MAG_BIN_OVERLAP, MEASUREMENT, ZPLANES]:

@@ -6,6 +6,44 @@ if __name__ == "__main__":
 from experiments.models import *
 
 
+class SamplesPopulator:
+
+    def populate_tissues(self):
+        Tissue.objects.get_or_create(name="Kidney")[0].save()
+        Tissue.objects.get_or_create(name="Adrenal gland")[0].save()
+
+    def populate_ages(self):
+        Age.objects.get_or_create(name="GA 8.2")[0].save()
+        Age.objects.get_or_create(name="Fetal")[0].save()
+
+    def populate_backgrounds(self):
+        Background.objects.get_or_create(name="Unknown")[0].save()
+
+    def populate_genotypes(self):
+        Genotype.objects.get_or_create(name="Unknown")[0].save()
+
+    def populate_samples(self):
+        self.populate_tissues()
+        t1 = Tissue.objects.get(name="Kidney")
+        t2 = Tissue.objects.get(name="Adrenal gland")
+        b = Background.objects.first()
+        g = Genotype.objects.first()
+        a1 = Age.objects.first()
+        a2 = Age.objects.last()
+        s1 = Sample.objects.get_or_create(id="L14-KID-0-FFPE-1-S3i",
+                                          species=1,
+                                          age=a1,
+                                          genotype=g,
+                                          background=b,
+                                          tissue=t1)
+        s2 = Sample.objects.get_or_create(id="L14-ADR-0-FFPE-1-S3i",
+                                          species=2,
+                                          age=a2,
+                                          genotype=g,
+                                          background=b,
+                                          tissue=t2)
+
+
 class MeasurementsPopulator:
 
     def populate_cellgen_project(self):
@@ -15,10 +53,6 @@ class MeasurementsPopulator:
     def populate_researchers(self):
         Researcher.objects.get_or_create(last_name="Khodak", first_name="Anton", employee_key="A_K")[0].save()
         Researcher.objects.get_or_create(last_name="Winslet", first_name="Mariam", employee_key="M_W")[0].save()
-
-    def populate_tissues(self):
-        Tissue.objects.get_or_create(name="Kidney")[0].save()
-        Tissue.objects.get_or_create(name="Adrenal gland")[0].save()
 
     def populate_species(self):
         Tissue.objects.get_or_create(name="Kidney")[0].save()
@@ -80,23 +114,6 @@ class MeasurementsPopulator:
         cht5 = ChannelTarget.objects.get_or_create(channel=ch2, target=t2)
         cht6 = ChannelTarget.objects.get_or_create(channel=ch2, target=t3)
 
-    def populate_samples(self):
-        self.populate_tissues()
-        t1 = Tissue.objects.get(name="Kidney")
-        t2 = Tissue.objects.get(name="Adrenal gland")
-        s1 = Sample.objects.get_or_create(id="L14-KID-0-FFPE-1-S3i",
-                                          species=1,
-                                          age="Adult",
-                                          genotype="Unknown",
-                                          background="Unknown",
-                                          tissue=t1)
-        s2 = Sample.objects.get_or_create(id="L14-ADR-0-FFPE-1-S3i",
-                                          species=2,
-                                          age="Adult",
-                                          genotype="Unknown",
-                                          background="Unknown",
-                                          tissue=t2)
-
     def populate_slides(self):
         s1 = Slide.objects.get_or_create(barcode_id="S000000729")
         s2 = Slide.objects.get_or_create(barcode_id="S000000724")
@@ -104,7 +121,8 @@ class MeasurementsPopulator:
         s4 = Slide.objects.get_or_create(barcode_id="S000000726")
 
     def populate_sections(self):
-        self.populate_samples()
+        sp = SamplesPopulator()
+        sp.populate_samples()
         self.populate_slides()
         s1 = Sample.objects.get(id="L14-KID-0-FFPE-1-S3i")
         s2 = Sample.objects.get(id="L14-ADR-0-FFPE-1-S3i")
@@ -226,7 +244,8 @@ class MeasurementsPopulator:
         self.populate_microscopes()
         self.populate_technologies()
         self.populate_team_dirs()
-        self.populate_samples()
+        sp = SamplesPopulator()
+        sp.populate_samples()
         self.populate_slides()
         self.populate_channel_target_pairs()
         self.populate_sections()

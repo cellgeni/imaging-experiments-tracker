@@ -9,9 +9,9 @@ from django.db import models
 from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
     DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
-    EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, SLIDE_ID
+    EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, SLIDE_ID, TISSUE, BACKGROUND, GENOTYPE, AGE
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
-    MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap
+    MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap, Tissue, Background, Genotype, Age
 from experiments.xls import xls_logger as logger
 from experiments.xls.date_parsers import DateParserFactory
 
@@ -20,7 +20,11 @@ MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
     ZPLANES: lambda name: ZPlanes.objects.get(name=name),
     TECHNOLOGY: lambda name: Technology.objects.get(name=name),
     LOW_MAG_REFERENCE: lambda name: LowMagReference.objects.get(name=name),
-    TEAM_DIR: lambda name: TeamDirectory.objects.get(name=name)
+    TEAM_DIR: lambda name: TeamDirectory.objects.get(name=name),
+    TISSUE: lambda name: Tissue.objects.get_or_create(name=name)[0],
+    BACKGROUND: lambda name: Background.objects.get_or_create(name=name)[0],
+    GENOTYPE: lambda name: Genotype.objects.get_or_create(name=name)[0],
+    AGE: lambda name: Age.objects.get_or_create(name=name)[0]
 }
 
 

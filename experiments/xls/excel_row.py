@@ -24,7 +24,7 @@ class ExcelRow:
         target_file = self.get_target_file(output_file)
         df = pd.read_excel(target_file)
         self.write_in_dataframe(df, row_num)
-        df.to_excel(output_file)
+        df.to_excel(output_file, index=False)
 
     def get_target_file(self, output_file: str):
         assert os.path.exists(self.default_template)
