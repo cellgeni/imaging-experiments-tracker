@@ -153,7 +153,7 @@ class MeasurementsParameterParserTestCase(TestCase):
         self.assertEqual([1, 2], MeasurementParametersParser._parse_section_numbers("1.0, 2.0"))
         self.assertEqual([1], MeasurementParametersParser._parse_section_numbers(1))
         self.assertEqual([1], MeasurementParametersParser._parse_section_numbers(float(1.0)))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValidationError):
             MeasurementParametersParser._parse_section_numbers("cat, dog, 2")
 
     def test_parse_date(self):
@@ -179,7 +179,7 @@ class MeasurementParametersGenerator:
         model = Measurement(researcher=Researcher.objects.first(),
                             automated_slide_id="TM_RCC_00FZ",
                             automated_plate_id="kkjk",
-                            automated_slide_num="N/A",
+                            automated_slide_num=1,
                             technology=Technology.objects.first(),
                             image_cycle=1,
                             date=datetime.date.today(),
@@ -362,13 +362,13 @@ class MeasurementsImportTestCase(TransactionTestCase):
         row = self.import_row_dict_into_db(row.row)
         self.assertFalse(row.is_in_database())
 
-    # def test_row_with_automated_plate_id_and_automated_slide_num(self):
-    #     row = self.import_sample_row_into_db()
-    #     self.assertTrue(row.is_in_database())
-    #     Measurement.objects.get(uuid=row.row[UUID]).delete()
-    #     row.row.pop(AUTOMATED_SLIDEN)
-    #     row = self.import_row_dict_into_db(row.row)
-    #     self.assertFalse(row.is_in_database())
+    def test_row_with_automated_plate_id_and_automated_slide_num(self):
+        row = self.import_sample_row_into_db()
+        self.assertTrue(row.is_in_database())
+        Measurement.objects.get(uuid=row.row[UUID]).delete()
+        row.row.pop(AUTOMATED_SLIDEN)
+        row = self.import_row_dict_into_db(row.row)
+        self.assertFalse(row.is_in_database())
 
     def tearDown(self) -> None:
         os.remove(self.file)

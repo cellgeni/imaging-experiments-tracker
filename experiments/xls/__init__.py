@@ -15,8 +15,4 @@ class ExcelImporter:
 
     def __init__(self, file):
         self.df = pd.read_excel(file)
-        self.convert_floats_to_ints()
-
-    def convert_floats_to_ints(self):
-        cols = [AUTOMATED_SLIDEN]
-        self.df[cols] = self.df[cols].astype('Int64')
+        self.df = self.df.replace({pd.np.nan: None})

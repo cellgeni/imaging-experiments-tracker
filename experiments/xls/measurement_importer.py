@@ -3,7 +3,7 @@ import uuid
 from typing import Iterable
 
 import pandas as pd
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 
 from experiments.constants import *
@@ -11,7 +11,7 @@ from experiments.models import Measurement
 from experiments.xls import xls_logger as logger, ExcelImporter
 from experiments.xls.measurement_parameters import MeasurementParameters, MeasurementParametersParser
 
-REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE,
+REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE, TECHNOLOGY,
                     IMAGE_CYCLE, DATE, MAG_BIN_OVERLAP, SECTION_NUM}
 
 
@@ -42,7 +42,7 @@ class MeasurementRow:
     def create(parameters: MeasurementParameters) -> None:
         try:
             uuid = parameters.create_db_object()
-        except IntegrityError as e:
+        except (IntegrityError, ValidationError) as e:
             logger.error(f"Failed to create measurement with uuid {parameters.model.uuid}")
             logger.error(e)
         else:
@@ -78,6 +78,7 @@ class MeasurementsExcelImporter(ExcelImporter):
 
     def __init__(self, file):
         super().__init__(file)
+        # TODO: add tests for this
         absent_required_columns = REQUIRED_COLUMNS.difference(set(self.df.columns))
         if absent_required_columns:
             logger.error(

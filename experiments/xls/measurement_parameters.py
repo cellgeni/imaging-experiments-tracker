@@ -55,20 +55,13 @@ class MeasurementParameters:
 
     def create_db_object(self, validate=True) -> UUID:
         if validate:
-            self.validate_current_model()
+            self.model.full_clean()
         self.model.save()
         self._create_m2m_fields()
         return self.model.uuid
 
-    def validate_current_model(self):
-        try:
-            self.model.clean_fields()
-        except ValidationError as e:
-            logger.error(e)
-            raise ValueError(f"Some fields are invalid: {e}")
-
     def update_db_object(self) -> UUID:
-        self.validate_current_model()
+        self.model.full_clean(exclude=['uuid'])
         existing_record = Measurement.objects.get(uuid=self.model.uuid)
         existing_record.delete()
         return self.create_db_object(validate=False)
@@ -95,7 +88,7 @@ class MeasurementParametersParser:
         try:
             return list(map(lambda s: int(float(s)), sections_string.split(",")))
         except ValueError:
-            raise ValueError("The sections string must be whole comma-separated numbers, e.g. '1,2,3' ")
+            raise ValidationError("The sections string must be whole comma-separated numbers, e.g. '1,2,3' ")
 
     def _parse_sections(self) -> Set[Section]:
         sections = set()
@@ -131,7 +124,7 @@ class MeasurementParametersParser:
     def _parse_automated_sliden(self, automated_plateid: str) -> str:
         slide_n = self.row.get(AUTOMATED_SLIDEN, None)
         if automated_plateid and not slide_n:
-            raise ValueError("Automated slide number is required if automated plate ID is provided")
+            raise ValidationError("Automated slide number is required if automated plate ID is provided")
         return slide_n
 
     def get_params(self) -> MeasurementParameters:
@@ -146,9 +139,9 @@ class MeasurementParametersParser:
             sections = self._parse_sections()
             channel_targets = self._parse_channel_targets()
             date = self._parse_date(self.row[DATE])
+            technology = MODELS_MAPPING[TECHNOLOGY](self.row[TECHNOLOGY])  # todo change this to parse_column
 
             # optional fields
-            technology = self._parse_optional_column(TECHNOLOGY)
             low_mag_ref = self._parse_optional_column(LOW_MAG_REFERENCE)
             z_planes = self._parse_optional_column(ZPLANES)
             automated_plate_id = self.row.get(AUTOMATED_PLATEID)
@@ -159,7 +152,7 @@ class MeasurementParametersParser:
             arch_location = self.row.get(ARCHIVE_LOCATION)
             team_dir = self._parse_optional_column(TEAM_DIR)
         except KeyError as e:
-            raise ValueError(f"A required column is absent: {e}")
+            raise ValidationError(f"A required column is absent: {e}")
         except (ValueError, ObjectDoesNotExist) as e:
             raise ValueError(f"{e}")
 

@@ -2,7 +2,7 @@ import uuid
 from datetime import date
 from typing import Tuple
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 
 from experiments.models.base import NameModel
@@ -188,6 +188,10 @@ class Measurement(models.Model):
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True, blank=True)
 
     DATE_FORMAT = "%d.%m.%Y"
+
+    def clean(self):
+        if bool(self.automated_plate_id) != bool(self.automated_slide_num):
+            raise ValidationError('Both of the automated plate id and automated slide number must be present')
 
     def __str__(self):
         return f"{self.sections} {self.date} {self.measurement}"

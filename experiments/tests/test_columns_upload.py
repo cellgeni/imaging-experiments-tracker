@@ -19,7 +19,7 @@ class SpreadsheetImportTestCase(TestCase):
                    SLIDE_ID: "TM_RCC_00FZ",
                    SLIDE_BARCODE: "TB14-2530-2-4",
                    AUTOMATED_PLATEID: "191118_214002-V",
-                   AUTOMATED_SLIDEN: "N/A",
+                   AUTOMATED_SLIDEN: "1",
                    TISSUE1: "Kidney (normal)",
                    SAMPLE1: "L14-KID-0-FFPE-2-S4",
                    TISSUE2: "HEART",
