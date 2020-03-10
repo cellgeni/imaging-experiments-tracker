@@ -53,16 +53,15 @@ class MeasurementParameters:
         self._create_sections()
         self._create_channel_target_pairs()
 
-    def create_db_object(self) -> UUID:
+    def create_db_object(self, validate=True) -> UUID:
+        if validate:
+            self.validate_current_model()
         self.model.save()
         self._create_m2m_fields()
         return self.model.uuid
 
     def validate_current_model(self):
         try:
-            # we don't validate uniqueness since a record with the same uuid can be updated
-            # and we don't have custom validation for now
-            # https://docs.djangoproject.com/en/3.0/ref/models/instances/#validating-objects
             self.model.clean_fields()
         except ValidationError as e:
             logger.error(e)
@@ -72,7 +71,7 @@ class MeasurementParameters:
         self.validate_current_model()
         existing_record = Measurement.objects.get(uuid=self.model.uuid)
         existing_record.delete()
-        return self.create_db_object()
+        return self.create_db_object(validate=False)
 
     def were_created(self) -> bool:
         m = Measurement.objects.get(uuid=self.model.uuid)

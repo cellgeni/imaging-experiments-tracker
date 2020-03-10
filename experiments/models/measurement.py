@@ -132,18 +132,18 @@ class Measurement(models.Model):
 
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     sections = models.ManyToManyField(Section)
-    researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True,
+    researcher = models.ForeignKey(Researcher, on_delete=models.CASCADE,
                                    help_text="Pre-validated list of Phenix users")
-    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True, blank=True,
+    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, blank=True, null=True,
                                    help_text="Pre-validated list of T283 projects")
-    technology = models.ForeignKey(Technology, on_delete=models.SET_NULL, null=True,
+    technology = models.ForeignKey(Technology, on_delete=models.CASCADE,
                                    help_text="How was the slide stained?")
-    automated_slide_id = models.CharField(max_length=20, null=True, blank=True,
+    automated_slide_id = models.CharField(max_length=20,
                                           help_text="This is the ID entered into the Phenix when imaging. "
                                                     "It should comprise the project code and then the slide ID "
                                                     "from the BOND or a manual ID of the form ABXXXX "
                                                     "where AB is the researcher's initials.")
-    automated_plate_id = models.CharField(max_length=30, null=True, default=None, blank=True,
+    automated_plate_id = models.CharField(max_length=30, null=True, blank=True,
                                           help_text="These columns are needed only "
                                                     "when using the automated plate handler.")
     automated_slide_num = models.CharField(max_length=20, blank=True, null=True,
@@ -159,14 +159,14 @@ class Measurement(models.Model):
                                                             "the channels used on the Phenix.													")
     date = models.DateField(default=date.today,
                             help_text="Date that the image was taken")
-    measurement = models.ForeignKey(MeasurementNumber, on_delete=models.SET_NULL, null=True, blank=True,
+    measurement = models.ForeignKey(MeasurementNumber, on_delete=models.CASCADE,
                                     help_text="Measurement number, assigned automatically by the Phenix")
     low_mag_reference = models.ForeignKey(LowMagReference, on_delete=models.SET_NULL, blank=True, null=True,
                                           help_text="A low magnification image (e.g. 5X or 10X scan "
                                                     "of the whole slide with DAPI only) may be used as a reference "
                                                     "for other images, in alignment and/or viewing. For other images, "
                                                     "the related image number should be referenced.")
-    mag_bin_overlap = models.ForeignKey(MagBinOverlap, models.SET_NULL, blank=True, null=True,
+    mag_bin_overlap = models.ForeignKey(MagBinOverlap, models.CASCADE,
                                         help_text="Magnification, binning level, and tile overlap for the image")
     z_planes = models.ForeignKey(ZPlanes, on_delete=models.SET_NULL, blank=True, null=True,
                                  help_text="Number of z-planes x depth of each z-plane")

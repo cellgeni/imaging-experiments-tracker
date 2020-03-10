@@ -10,7 +10,7 @@ from experiments.constants import *
 from experiments.models.measurement import *
 from experiments.populate import MeasurementsPopulator
 from experiments.xls import xls_logger
-from experiments.xls.excel_row import ExcelRow
+from experiments.xls.excel_row import ExcelRow, RowT
 from experiments.xls.file_importers import MeasurementsFileImporter
 from experiments.xls.measurement_importer import MeasurementRow
 from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters, \
@@ -38,6 +38,7 @@ class ExcelRowInfoGenerator:
             RESEARCHER: str(Researcher.objects.first()),
             PROJECT: str(CellGenProject.objects.first()),
             SLIDE_BARCODE: str(Slide.objects.first()),
+            SLIDE_ID: "TM_RCC_00FY",
             AUTOMATED_PLATEID: "smth",
             AUTOMATED_SLIDEN: 2,
             TECHNOLOGY: str(Technology.objects.first()),
@@ -216,6 +217,7 @@ class MeasurementParametersTestCase(TestCase):
         model = Measurement(uuid=uuid,
                             researcher=Researcher.objects.last(),
                             technology=Technology.objects.last(),
+                            automated_slide_id="TM_RCC_02FZ",
                             image_cycle=1,
                             date=datetime.date(2019, 3, 4),
                             measurement=MeasurementNumber.objects.get(name="1a"),
@@ -233,6 +235,8 @@ class MeasurementParametersTestCase(TestCase):
         new_parameters.update_db_object()
         self.assertTrue(new_parameters.were_created())
         self.assertFalse(parameters.were_created())
+
+
 
 
 class MeasurementRowTestCase(TestCase):
@@ -274,25 +278,26 @@ class MeasurementsImportTestCase(TransactionTestCase):
         p = MeasurementsPopulator()
         p.populate_all()
 
-    def write_row_dict_in_file(self, row_dict: Dict) -> ExcelRow:
+    def write_row_dict_in_file(self, row_dict: RowT) -> ExcelRow:
         row = ExcelRow(row_dict)
         row.write_in_file(self.file)
         return ExcelRow(row_dict)
 
-    def import_row_dict_into_db(self, row_dict: Dict) -> ExcelRow:
+    def import_row_dict_into_db(self, row_dict: RowT) -> ExcelRow:
         row = self.write_row_dict_in_file(row_dict)
         self.importer.import_file()
-        self.assertTrue(row.is_in_database())
         return row
 
     def import_sample_row_into_db(self) -> ExcelRow:
         return self.import_row_dict_into_db(ExcelRowInfoGenerator.get_sample_info())
 
     def test_object_creation(self):
-        self.import_sample_row_into_db()
+        row = self.import_sample_row_into_db()
+        self.assertTrue(row.is_in_database())
 
     def test_object_update(self):
         row = self.import_sample_row_into_db()
+        self.assertTrue(row.is_in_database())
         new_row_info = {
             UUID: row.row[UUID],
             MODE: CREATE_OR_UPDATE,
@@ -318,29 +323,26 @@ class MeasurementsImportTestCase(TransactionTestCase):
             TEAM_DIR: str(TeamDirectory.objects.last()),
         }
         new_row = ExcelRow(new_row_info)
-        new_row.write_in_file(self.file, 0)
-        self.importer.import_file()
+        self.import_row_dict_into_db(new_row_info)
         self.assertTrue(new_row.is_in_database())
         self.assertFalse(row.is_in_database())
 
     def test_object_delete(self):
         row = self.import_sample_row_into_db()
-        row.write_in_file(self.file, 0)
-        self.importer.import_file()
         self.assertTrue(row.is_in_database())
         row.row[MODE] = DELETE
-        row.write_in_file(self.file, 0)
-        self.importer.import_file()
+        row = self.import_row_dict_into_db(row.row)
         self.assertFalse(row.is_in_database())
 
     def test_row_with_only_required_columns(self):
-        row = {
+        row_dict = {
             UUID: uuid.uuid4(),
             MODE: CREATE_OR_UPDATE,
             RESEARCHER: str(Researcher.objects.last()),
             PROJECT: str(CellGenProject.objects.last()),
             SLIDE_BARCODE: str(Slide.objects.last()),
-            SLIDE_ID: "TM_RCC_00FY",
+            TECHNOLOGY: str(Technology.objects.first()),
+            SLIDE_ID: "TM_RCC_004Y",
             IMAGE_CYCLE: 1,
             CHANNEL_TARGET1: str(ChannelTarget.objects.all()[3]),
             DATE: ExcelRowInfoGenerator.get_todays_date(),
@@ -350,22 +352,23 @@ class MeasurementsImportTestCase(TransactionTestCase):
             EXPORT_LOCATION: "/OTHER/MOTHER",
             TEAM_DIR: str(TeamDirectory.objects.last()),
         }
-        self.import_row_dict_into_db(row)
+        row = self.import_row_dict_into_db(row_dict)
+        self.assertTrue(row.is_in_database())
 
     def test_inserting_duplicate_measurement(self):
-        row_dict = ExcelRowInfoGenerator.get_sample_info()
-        self.import_row_dict_into_db(row_dict)
-        row_dict[UUID] = uuid.uuid4()
-        row = self.write_row_dict_in_file(row_dict)
-        self.importer.import_file()
+        row = self.import_sample_row_into_db()
+        self.assertTrue(row.is_in_database())
+        row.row[UUID] = uuid.uuid4()
+        row = self.import_row_dict_into_db(row.row)
         self.assertFalse(row.is_in_database())
 
-    # def test_row_with_automated_slide_id_and_automated_plate_id(self):
-    #     row_dict = ExcelRowInfoGenerator.get_sample_info()
-    #     row_dict[SLIDE_ID] = "TM_RCC_00RZ"
-    #     row = self.write_row_dict_in_file(row_dict)
-    #     with self.assertRaises(IntegrityError):
-    #         self.importer.import_file()
+    # def test_row_with_automated_plate_id_and_automated_slide_num(self):
+    #     row = self.import_sample_row_into_db()
+    #     self.assertTrue(row.is_in_database())
+    #     Measurement.objects.get(uuid=row.row[UUID]).delete()
+    #     row.row.pop(AUTOMATED_SLIDEN)
+    #     row = self.import_row_dict_into_db(row.row)
+    #     self.assertFalse(row.is_in_database())
 
     def tearDown(self) -> None:
         os.remove(self.file)
