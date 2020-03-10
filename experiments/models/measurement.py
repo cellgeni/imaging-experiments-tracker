@@ -5,8 +5,8 @@ from typing import Tuple
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
-from experiments.models.sample import Sample
 from experiments.models.base import NameModel
+from experiments.models.sample import Sample
 
 
 class CellGenProject(models.Model):
@@ -124,6 +124,12 @@ class ZPlanes(NameModel):
 
 
 class Measurement(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['automated_slide_id', 'automated_plate_id',
+                                            'measurement', 'date'], name="unique_measurement")
+        ]
+
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     sections = models.ManyToManyField(Section)
     researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True,

@@ -4,8 +4,7 @@ import os
 from typing import Dict
 
 import pandas as pd
-from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 from experiments.constants import *
 from experiments.models.measurement import *
@@ -91,6 +90,23 @@ class ExcelRowTestCase(TestCase):
             logger.debug(f"Original value: {value}")
             logger.debug(f"Spreadsheet value: {spreadsheet_value}")
             self.assertEqual(value, spreadsheet_value)
+
+    def _write_in_file(self, row: Dict[str, str]):
+        row = ExcelRow(row)
+        row.write_in_file(self.file, 0)
+
+    def test_overwriting_old_values(self):
+        row1 = {SLIDE_ID: "val1"}
+        self._write_in_file(row1)
+        df = pd.read_excel(self.file)
+        self.assertEqual(df.loc[0, SLIDE_ID], "val1")
+        row2 = {AUTOMATED_PLATEID: "val2",
+                AUTOMATED_SLIDEN: "val3"}
+        self._write_in_file(row2)
+        df = pd.read_excel(self.file)
+        self.assertEqual(df.loc[0, AUTOMATED_PLATEID], "val2")
+        self.assertEqual(df.loc[0, AUTOMATED_SLIDEN], "val3")
+        self.assertTrue(pd.isnull(df.loc[0, SLIDE_ID]))
 
     def tearDown(self) -> None:
         os.remove(self.file)
@@ -250,7 +266,7 @@ class StreamLoggingTestCase(TestCase):
         self.assertFalse(xls_logger.handlers)
 
 
-class MeasurementsImportTestCase(TestCase):
+class MeasurementsImportTestCase(TransactionTestCase):
     file = 'test_data/measurements_input2.xlsx'
     importer = MeasurementsFileImporter(file)
 
@@ -335,6 +351,14 @@ class MeasurementsImportTestCase(TestCase):
             TEAM_DIR: str(TeamDirectory.objects.last()),
         }
         self.import_row_dict_into_db(row)
+
+    def test_inserting_duplicate_measurement(self):
+        row_dict = ExcelRowInfoGenerator.get_sample_info()
+        self.import_row_dict_into_db(row_dict)
+        row_dict[UUID] = uuid.uuid4()
+        row = self.write_row_dict_in_file(row_dict)
+        self.importer.import_file()
+        self.assertFalse(row.is_in_database())
 
     # def test_row_with_automated_slide_id_and_automated_plate_id(self):
     #     row_dict = ExcelRowInfoGenerator.get_sample_info()

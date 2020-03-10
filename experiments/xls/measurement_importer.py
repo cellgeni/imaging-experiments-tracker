@@ -4,6 +4,7 @@ from typing import Iterable
 
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 
 from experiments.constants import *
 from experiments.models import Measurement
@@ -39,8 +40,13 @@ class MeasurementRow:
 
     @staticmethod
     def create(parameters: MeasurementParameters) -> None:
-        uuid = parameters.create_db_object()
-        logger.info(f"Created measurement with uuid {uuid}")
+        try:
+            uuid = parameters.create_db_object()
+        except IntegrityError as e:
+            logger.error(f"Failed to create measurement with uuid {parameters.model.uuid}")
+            logger.error(e)
+        else:
+            logger.info(f"Created measurement with uuid {uuid}")
 
     def update(self, parameters: MeasurementParameters) -> None:
         uuid = parameters.update_db_object()
@@ -55,7 +61,7 @@ class MeasurementRow:
         try:
             measurement = Measurement.objects.get(uuid=self.get_uuid())
             self.update(parameters)
-        except ObjectDoesNotExist:
+        except Measurement.DoesNotExist:
             self.create(parameters)
 
     def handle_mode(self) -> None:
@@ -74,7 +80,8 @@ class MeasurementsExcelImporter(ExcelImporter):
         super().__init__(file)
         absent_required_columns = REQUIRED_COLUMNS.difference(set(self.df.columns))
         if absent_required_columns:
-            logger.error(f"Required columns are absent from the spreadsheet or named incorrectly: {absent_required_columns}")
+            logger.error(
+                f"Required columns are absent from the spreadsheet or named incorrectly: {absent_required_columns}")
             raise ValueError()
 
     def get_rows(self) -> Iterable[MeasurementRow]:

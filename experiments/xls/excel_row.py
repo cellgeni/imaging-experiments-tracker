@@ -72,7 +72,7 @@ class ExcelRowComparator:
     def is_in_database(self) -> bool:
         try:
             m = Measurement.objects.get(uuid=self.row.get(UUID))
-        except ObjectDoesNotExist:
+        except Measurement.DoesNotExist:
             logger.info(f"Object with uuid {self.row.get(UUID)} is not in the database")
             return False
         data = list()
@@ -105,9 +105,11 @@ class ExcelRow:
 
     def __init__(self, row: RowT):
         self.row = row
+        self.comparator = ExcelRowComparator(row)
+        self.writer = ExcelRowWriter(row)
 
     def is_in_database(self) -> bool:
-        return ExcelRowComparator(self.row).is_in_database()
+        return self.comparator.is_in_database()
 
     def write_in_file(self, output_file: str, row_num: int = 0) -> None:
-        return ExcelRowWriter(self.row).write_in_file(output_file, row_num)
+        return self.writer.write_in_file(output_file, row_num)
