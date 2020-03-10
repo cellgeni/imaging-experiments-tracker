@@ -1,14 +1,12 @@
 import os
-from typing import Dict, Iterable
+from typing import Iterable
 
 from django.test import TestCase
 
 from constants import *
 from experiments.models import *
 from experiments.xls.column_importer import ColumnExcelImporter, SamplesImporter
-from experiments.xls.excel_row import ExcelRow
-
-RowT = Dict[str, str]
+from experiments.xls.excel_row import ExcelRowWriter, RowT
 
 
 class SpreadsheetImportTestCase(TestCase):
@@ -77,7 +75,7 @@ class SpreadsheetImportTestCase(TestCase):
 
     def create_rows(self, rows: Iterable[RowT]):
         for i, r in enumerate(rows):
-            row = ExcelRow(r)
+            row = ExcelRowWriter(r)
             row.write_in_file(self.file, i)
         self.import_data()
 

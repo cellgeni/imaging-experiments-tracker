@@ -9,34 +9,46 @@ from experiments.constants import *
 from experiments.models import Measurement
 from experiments.xls import EXCEL_TEMPLATE, xls_logger as logger
 
+RowT = Dict[str, str]
 
-class ExcelRow:
+
+class ExcelRowWriter:
+    """
+    Writes a dictionary of column-values into an Excel file
+    """
     default_template = EXCEL_TEMPLATE
 
-    def __init__(self, row: Dict):
+    def __init__(self, row: RowT):
         self.row = row
 
-    def write_in_dataframe(self, df: pd.DataFrame, row_num: int) -> None:
-        for column in self.row.keys():
-            df.loc[row_num, column] = self.row[column]
+    def _write_in_dataframe(self, df: pd.DataFrame, row_num: int) -> pd.DataFrame:
+        row = pd.Series(self.row)
+        if len(df) <= row_num:
+            df = df.append(row, ignore_index=True)
+        else:
+            df.loc[row_num] = row
+        return df
+        # for column in self.row.keys():
+        #     df.loc[row_num, column] = self.row[column]
 
-    def write_in_file(self, output_file: str, row_num: int = 0) -> None:
-        target_file = self.get_target_file(output_file)
-        df = pd.read_excel(target_file)
-        self.write_in_dataframe(df, row_num)
-        df.to_excel(output_file, index=False)
-
-    def get_target_file(self, output_file: str):
+    def _get_target_file(self, output_file: str):
         assert os.path.exists(self.default_template)
         return output_file if os.path.exists(output_file) else self.default_template
 
-    def _compare_sections(self, sections: QuerySet) -> bool:
-        for section in sections:
-            if not (section.slide_id == self.row[SLIDE_BARCODE] and
-                    str(section.number) in self.row[SECTION_NUM]):
-                logger.error(f'problem with section: {section}')
-                return False
-        return True
+    def write_in_file(self, output_file: str, row_num: int = 0) -> None:
+        target_file = self._get_target_file(output_file)
+        df = pd.read_excel(target_file)
+        df = self._write_in_dataframe(df, row_num)
+        df.to_excel(output_file, index=False)
+
+
+class ExcelRowComparator:
+    """
+    Checks whether a dictionary of column-values corresponds to an entry in the database
+    """
+
+    def __init__(self, row: RowT):
+        self.row = row
 
     @staticmethod
     def is_empty(s: Any):
@@ -46,6 +58,14 @@ class ExcelRow:
         for pair in pairs:
             if not (self.is_empty(pair[0]) and self.is_empty(pair[1])) and pair[0] != pair[1]:
                 logger.error(f'Unequal pair: {pair}')
+                return False
+        return True
+
+    def _compare_sections(self, sections: QuerySet) -> bool:
+        for section in sections:
+            if not (section.slide_id == self.row[SLIDE_BARCODE] and
+                    str(section.number) in self.row[SECTION_NUM]):
+                logger.error(f'problem with section: {section}')
                 return False
         return True
 
@@ -76,3 +96,18 @@ class ExcelRow:
         measurement_channel_targets = {str(cht) for cht in m.channel_target_pairs.all()}
         data.append((row_channel_targets, measurement_channel_targets))
         return self._compare_pairs(data) and self._compare_sections(m.sections.all())
+
+
+class ExcelRow:
+    """
+    A mediator for common operations on a dictionary of column-values
+    """
+
+    def __init__(self, row: RowT):
+        self.row = row
+
+    def is_in_database(self) -> bool:
+        return ExcelRowComparator(self.row).is_in_database()
+
+    def write_in_file(self, output_file: str, row_num: int = 0) -> None:
+        return ExcelRowWriter(self.row).write_in_file(output_file, row_num)

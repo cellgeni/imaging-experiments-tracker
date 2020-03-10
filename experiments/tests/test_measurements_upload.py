@@ -4,6 +4,7 @@ import os
 from typing import Dict
 
 import pandas as pd
+from django.db import IntegrityError
 from django.test import TestCase
 
 from experiments.constants import *
@@ -38,7 +39,6 @@ class ExcelRowInfoGenerator:
             RESEARCHER: str(Researcher.objects.first()),
             PROJECT: str(CellGenProject.objects.first()),
             SLIDE_BARCODE: str(Slide.objects.first()),
-            SLIDE_ID: "TM_RCC_00RZ",
             AUTOMATED_PLATEID: "smth",
             AUTOMATED_SLIDEN: 2,
             TECHNOLOGY: str(Technology.objects.first()),
@@ -261,7 +261,7 @@ class MeasurementsImportTestCase(TestCase):
     def write_row_dict_in_file(self, row_dict: Dict) -> ExcelRow:
         row = ExcelRow(row_dict)
         row.write_in_file(self.file)
-        return row
+        return ExcelRow(row_dict)
 
     def import_row_dict_into_db(self, row_dict: Dict) -> ExcelRow:
         row = self.write_row_dict_in_file(row_dict)
@@ -284,8 +284,6 @@ class MeasurementsImportTestCase(TestCase):
             PROJECT: str(CellGenProject.objects.last()),
             SLIDE_BARCODE: str(Slide.objects.last()),
             SLIDE_ID: "TM_RCC_00FY",
-            AUTOMATED_PLATEID: "DIFFERENT",
-            AUTOMATED_SLIDEN: 5,
             TECHNOLOGY: str(Technology.objects.last()),
             IMAGE_CYCLE: 1,
             CHANNEL_TARGET1: str(ChannelTarget.objects.all()[3]),
@@ -327,8 +325,6 @@ class MeasurementsImportTestCase(TestCase):
             PROJECT: str(CellGenProject.objects.last()),
             SLIDE_BARCODE: str(Slide.objects.last()),
             SLIDE_ID: "TM_RCC_00FY",
-            AUTOMATED_PLATEID: "DIFFERENT",
-            AUTOMATED_SLIDEN: 5,
             IMAGE_CYCLE: 1,
             CHANNEL_TARGET1: str(ChannelTarget.objects.all()[3]),
             DATE: ExcelRowInfoGenerator.get_todays_date(),
@@ -339,6 +335,13 @@ class MeasurementsImportTestCase(TestCase):
             TEAM_DIR: str(TeamDirectory.objects.last()),
         }
         self.import_row_dict_into_db(row)
+
+    # def test_row_with_automated_slide_id_and_automated_plate_id(self):
+    #     row_dict = ExcelRowInfoGenerator.get_sample_info()
+    #     row_dict[SLIDE_ID] = "TM_RCC_00RZ"
+    #     row = self.write_row_dict_in_file(row_dict)
+    #     with self.assertRaises(IntegrityError):
+    #         self.importer.import_file()
 
     def tearDown(self) -> None:
         os.remove(self.file)

@@ -15,7 +15,6 @@ from experiments.models import Section, Slide, ChannelTarget, Researcher, Techno
 from experiments.xls import xls_logger as logger
 from experiments.xls.date_parsers import DateParserFactory
 
-
 MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
     ZPLANES: lambda name: ZPlanes.objects.get(name=name),
     TECHNOLOGY: lambda name: Technology.objects.get(name=name),
@@ -164,8 +163,6 @@ class MeasurementParametersParser:
             raise ValueError(f"A required column is absent: {e}")
         except (ValueError, ObjectDoesNotExist) as e:
             raise ValueError(f"{e}")
-
-
 
         model = Measurement(uuid=uuid,
                             researcher=researcher,

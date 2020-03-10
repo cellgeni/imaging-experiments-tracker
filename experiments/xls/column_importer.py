@@ -3,13 +3,12 @@ from functools import wraps
 from typing import Union, Dict
 
 import pandas as pd
-from django.db import models
 
 from experiments.constants import *
 from experiments.models import *
 from experiments.xls import xls_logger as logger, ExcelImporter
+from experiments.xls.excel_row import ExcelRowComparator
 from experiments.xls.measurement_parameters import MODELS_MAPPING
-from experiments.xls.excel_row import ExcelRow
 
 
 def log_errors(func):
@@ -32,7 +31,7 @@ class SamplesImporter:
 
     def get_column(self, column: str, suffix: str) -> Union[models.Model, None]:
         value = self.row.get(column + suffix)
-        return MODELS_MAPPING[column](value) if not ExcelRow.is_empty(value) else None
+        return MODELS_MAPPING[column](value) if not ExcelRowComparator.is_empty(value) else None
 
     def import_samples(self) -> None:
         for s_column in SAMPLES:
