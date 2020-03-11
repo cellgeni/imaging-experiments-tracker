@@ -36,19 +36,18 @@ class SamplesImporter:
     def import_samples(self) -> None:
         for s_column in SAMPLES:
             s = self.row.get(s_column)
-            if not s:
-                raise ValueError(f"Sample id is missing")
-            suffix = s_column[-2:]
-            tissue = self.get_column(TISSUE, suffix)
-            background = self.get_column(BACKGROUND, suffix)
-            genotype = self.get_column(GENOTYPE, suffix)
-            age = self.get_column(AGE, suffix)
-            sample = Sample.objects.get_or_create(id=s)[0]
-            sample.tissue = tissue
-            sample.age = age
-            sample.background = background
-            sample.genotype = genotype
-            sample.save()
+            if s:
+                suffix = s_column[-2:]
+                tissue = self.get_column(TISSUE, suffix)
+                background = self.get_column(BACKGROUND, suffix)
+                genotype = self.get_column(GENOTYPE, suffix)
+                age = self.get_column(AGE, suffix)
+                sample = Sample.objects.get_or_create(id=s)[0]
+                sample.tissue = tissue
+                sample.age = age
+                sample.background = background
+                sample.genotype = genotype
+                sample.save()
 
 
 class ColumnExcelImporter(ExcelImporter):

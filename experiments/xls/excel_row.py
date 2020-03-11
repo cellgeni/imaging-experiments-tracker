@@ -28,8 +28,6 @@ class ExcelRowWriter:
         else:
             df.loc[row_num] = row
         return df
-        # for column in self.row.keys():
-        #     df.loc[row_num, column] = self.row[column]
 
     def _get_target_file(self, output_file: str):
         assert os.path.exists(self.default_template)

@@ -4,6 +4,7 @@ from typing import Tuple
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
+from django.utils import timezone
 
 from experiments.models.base import NameModel
 from experiments.models.sample import Sample
@@ -127,7 +128,7 @@ class Measurement(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['automated_slide_id', 'automated_plate_id',
-                                            'measurement', 'date'], name="unique_measurement")
+                                            'measurement', 'date'], name="unique_measurement"),
         ]
 
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
@@ -186,12 +187,32 @@ class Measurement(models.Model):
                                         help_text="If the image dataset has been exported as an archived measurement, "
                                                   "this is the export location")
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True, blank=True)
+    imported_on = models.DateTimeField(default=timezone.now)
 
     DATE_FORMAT = "%d.%m.%Y"
 
-    def clean(self):
+    def _check_slide_num_set_with_plate_id(self):
         if bool(self.automated_plate_id) != bool(self.automated_slide_num):
             raise ValidationError('Both of the automated plate id and automated slide number must be present')
+
+    def _check_unique_if_plate_id_is_null(self):
+        """
+        unique together does not treat nulls as expected (null != null), so we need to add one extra check
+        to prevent null plate_ids to be treated as unique entries
+        https://code.djangoproject.com/ticket/28545
+        """
+        if not self.automated_plate_id:
+            duplicates = Measurement.objects.filter(measurement=self.measurement,
+                                                    automated_slide_id=self.automated_slide_id,
+                                                    date=self.date,
+                                                    automated_plate_id=self.automated_plate_id)
+            if duplicates:
+                raise ValidationError('Measurement with this '
+                                      'Automated slide id, Automated plate id, Measurement and Date already exists.')
+
+    def clean(self):
+        self._check_slide_num_set_with_plate_id()
+        self._check_unique_if_plate_id_is_null()
 
     def __str__(self):
         return f"{self.sections} {self.date} {self.measurement}"

@@ -281,7 +281,7 @@ class MeasurementsImportTestCase(TransactionTestCase):
     def write_row_dict_in_file(self, row_dict: RowT) -> ExcelRow:
         row = ExcelRow(row_dict)
         row.write_in_file(self.file)
-        return ExcelRow(row_dict)
+        return row
 
     def import_row_dict_into_db(self, row_dict: RowT) -> ExcelRow:
         row = self.write_row_dict_in_file(row_dict)
@@ -359,8 +359,18 @@ class MeasurementsImportTestCase(TransactionTestCase):
         row = self.import_sample_row_into_db()
         self.assertTrue(row.is_in_database())
         row.row[UUID] = uuid.uuid4()
-        row = self.import_row_dict_into_db(row.row)
-        self.assertFalse(row.is_in_database())
+        row2 = self.import_row_dict_into_db(row.row)
+        self.assertFalse(row2.is_in_database())
+
+        row.row.pop(AUTOMATED_PLATEID)
+        row.row.pop(AUTOMATED_SLIDEN)
+        row3 = self.import_row_dict_into_db(row.row)
+        self.assertTrue(row3.is_in_database())
+        row3.row[UUID] = uuid.uuid4()
+        row4 = self.import_row_dict_into_db(row3.row)
+        self.assertFalse(row4.is_in_database())
+
+
 
     def test_row_with_automated_plate_id_and_automated_slide_num(self):
         row = self.import_sample_row_into_db()

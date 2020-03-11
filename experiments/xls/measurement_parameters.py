@@ -153,7 +153,7 @@ class MeasurementParametersParser:
             team_dir = self._parse_optional_column(TEAM_DIR)
         except KeyError as e:
             raise ValidationError(f"A required column is absent: {e}")
-        except (ValueError, ObjectDoesNotExist) as e:
+        except (ValidationError, ObjectDoesNotExist) as e:
             raise ValueError(f"{e}")
 
         model = Measurement(uuid=uuid,
