@@ -29,6 +29,8 @@ class MeasurementAdmin(admin.ModelAdmin):
                     "automated_plate_id", "automated_slide_num", "image_cycle",
                     "date", "measurement", "low_mag_reference", "mag_bin_overlap", "z_planes",
                     "notes_1", "notes_2", "export_location", "archive_location", "team_directory"]
+    list_filter = ["researcher", "experiment", "technology", "automated_slide_id", "date",
+                   "low_mag_reference", "mag_bin_overlap", "z_planes"]
     search_fields = ["uuid"]
 
     def copy_measurement(self, request, queryset):

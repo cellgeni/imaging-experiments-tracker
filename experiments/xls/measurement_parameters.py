@@ -3,16 +3,15 @@ from uuid import UUID
 
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db import models
 from pandas._libs.tslibs.timestamps import Timestamp
 
-from django.db import models
 from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
     DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
     EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, SLIDE_ID, TISSUE, BACKGROUND, GENOTYPE, AGE
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
     MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap, Tissue, Background, Genotype, Age
-from experiments.xls import xls_logger as logger
 from experiments.xls.date_parsers import DateParserFactory
 
 MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {

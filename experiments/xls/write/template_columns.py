@@ -43,7 +43,7 @@ class ModeColumn(ImageTrackerColumn):
 
     def prepopulate(self, column, worksheet):
         for row in range(1, 21):
-            worksheet.write(row, column, MeasurementModes.IGNORE)
+            worksheet.write(row, column, MeasurementModes.IGNORE.value)
 
 
 def get_columns() -> List[ImageTrackerColumn]:
