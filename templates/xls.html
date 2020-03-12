@@ -16,16 +16,6 @@
             <button class="btn btn-primary" type="submit" id="uuid-upload-button">Upload</button>
         </form>
     </div>
-    <div class="file-upload-block">
-        <h5>Upload measurements from template XLS file</h5>
-        <form action="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form }}
-            <button class="btn btn-primary" type="submit" id="measurements-upload-button">Upload</button>
-        </form>
-    </div>
-    <a class="nav-link" href={% url 'xls-template' %}>Download XLS template</a>
-    <a class="nav-link" href={% url 'uuids-generate' %}>Generate UUIDs</a>
 
     {% for log_entry in log %}
         {{ log_entry }}<br>
