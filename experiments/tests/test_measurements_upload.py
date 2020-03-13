@@ -11,7 +11,7 @@ from experiments.models.measurement import *
 from experiments.populate import MeasurementsPopulator
 from experiments.xls import xls_logger
 from experiments.xls.excel_row import ExcelRow, RowT
-from experiments.xls.file_importers import MeasurementsFileImporter
+from experiments.xls.file_importers import MeasurementsFileImporter, EverythingFileImporter, FileImporter
 from experiments.xls.measurement_importer import MeasurementRow
 from experiments.xls.measurement_parameters import MeasurementM2MFields, MeasurementParameters, \
     MeasurementParametersParser
@@ -237,8 +237,6 @@ class MeasurementParametersTestCase(TestCase):
         self.assertFalse(parameters.were_created())
 
 
-
-
 class MeasurementRowTestCase(TestCase):
 
     def setUp(self):
@@ -270,13 +268,9 @@ class StreamLoggingTestCase(TestCase):
         self.assertFalse(xls_logger.handlers)
 
 
-class MeasurementsImportTestCase(TransactionTestCase):
+class MeasurementsImportBase(TransactionTestCase):
     file = 'test_data/measurements_input2.xlsx'
-    importer = MeasurementsFileImporter(file)
-
-    def setUp(self):
-        p = MeasurementsPopulator()
-        p.populate_all()
+    importer = FileImporter(file)
 
     def write_row_dict_in_file(self, row_dict: RowT) -> ExcelRow:
         row = ExcelRow(row_dict)
@@ -290,6 +284,15 @@ class MeasurementsImportTestCase(TransactionTestCase):
 
     def import_sample_row_into_db(self) -> ExcelRow:
         return self.import_row_dict_into_db(ExcelRowInfoGenerator.get_sample_info())
+
+
+class MeasurementsImportTestCase(MeasurementsImportBase):
+    file = 'test_data/measurements_input2.xlsx'
+    importer = MeasurementsFileImporter(file)
+
+    def setUp(self):
+        p = MeasurementsPopulator()
+        p.populate_all()
 
     def test_object_creation(self):
         row = self.import_sample_row_into_db()
@@ -370,8 +373,6 @@ class MeasurementsImportTestCase(TransactionTestCase):
         row4 = self.import_row_dict_into_db(row3.row)
         self.assertFalse(row4.is_in_database())
 
-
-
     def test_row_with_automated_plate_id_and_automated_slide_num(self):
         row = self.import_sample_row_into_db()
         self.assertTrue(row.is_in_database())
@@ -382,3 +383,42 @@ class MeasurementsImportTestCase(TransactionTestCase):
 
     def tearDown(self) -> None:
         os.remove(self.file)
+
+
+class MeasurementsAndColumnsImportTestCase(MeasurementsImportBase):
+    file = 'test_data/measurements_input2.xlsx'
+    importer = EverythingFileImporter(file)
+
+    def test_object_creation(self):
+        row_info = {
+            UUID: str(uuid.uuid4()),
+            MODE: CREATE_OR_UPDATE,
+            RESEARCHER: "r1",
+            PROJECT: "p1",
+            SLIDE_BARCODE: "barcode",
+            SLIDE_ID: "TM_RCC_00FY",
+            TECHNOLOGY: "technology",
+            IMAGE_CYCLE: 1,
+            SAMPLE1: "kj",
+            SAMPLE2: "KJ",
+            TISSUE2: "tis",
+            AGE2: "new",
+            CHANNEL1: 'ch1',
+            CHANNEL2: 'ch2',
+            TARGET1: 't1',
+            TARGET2: 't2',
+            DATE: ExcelRowInfoGenerator.get_todays_date(),
+            MEASUREMENT: "87",
+            LOW_MAG_REFERENCE: "lmr",
+            MAG_BIN_OVERLAP: "mbo",
+            SECTION_NUM: "1, 2",
+            ZPLANES: "zplanes",
+            NOTES_1: "NEW",
+            NOTES_2: "ELSE",
+            EXPORT_LOCATION: "/OTHER/MOTHER",
+            ARCHIVE_LOCATION: "/OTHER/FATHER",
+            TEAM_DIR: "team28",
+        }
+        row = ExcelRow(row_info)
+        self.import_row_dict_into_db(row_info)
+        self.assertTrue(row.is_in_database())

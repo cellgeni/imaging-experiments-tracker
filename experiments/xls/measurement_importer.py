@@ -11,9 +11,6 @@ from experiments.models import Measurement
 from experiments.xls import xls_logger as logger, ExcelImporter
 from experiments.xls.measurement_parameters import MeasurementParameters, MeasurementParametersParser
 
-REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE, TECHNOLOGY,
-                    IMAGE_CYCLE, DATE, MAG_BIN_OVERLAP, SECTION_NUM}
-
 
 class MeasurementRow:
     """
@@ -79,7 +76,7 @@ class MeasurementsExcelImporter(ExcelImporter):
     def __init__(self, file):
         super().__init__(file)
         # TODO: add tests for this
-        absent_required_columns = REQUIRED_COLUMNS.difference(set(self.df.columns))
+        absent_required_columns = Measurement.REQUIRED_COLUMNS.difference(set(self.df.columns))
         if absent_required_columns:
             logger.error(
                 f"Required columns are absent from the spreadsheet or named incorrectly: {absent_required_columns}")

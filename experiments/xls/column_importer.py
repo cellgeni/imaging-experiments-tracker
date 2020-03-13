@@ -73,6 +73,9 @@ class ColumnExcelImporter(ExcelImporter):
     def import_zplanes(self) -> None:
         self.df[ZPLANES].apply(lambda name: ZPlanes.objects.get_or_create(name=name))
 
+    def import_team_dir(self) -> None:
+        self.df[TEAM_DIR].apply(lambda name: TeamDirectory.objects.get_or_create(name=name))
+
     @log_errors
     def import_sections(self, row: pd.Series, slide: Slide) -> None:
         for s_column in SAMPLES:
@@ -124,6 +127,8 @@ class ColumnExcelImporter(ExcelImporter):
             self.import_mag_bin_overlap()
         elif column == ZPLANES:
             self.import_zplanes()
+        elif column == TEAM_DIR:
+            self.import_team_dir()
         logger.info(f"Imported {column}")
 
     def import_row(self, i: int, row: pd.Series, column: str) -> None:
@@ -134,12 +139,13 @@ class ColumnExcelImporter(ExcelImporter):
                 self.import_samples(row)
             elif column == CHANNEL_TARGET:
                 self.import_channel_targets(row)
+            logger.info(f"Imported {column}")
         except Exception as e:
             traceback.print_exc()
             logger.error(f"A problem importing row {i + 1}, error: {e}")
 
     def import_all_columns(self):
-        for column in [RESEARCHER, PROJECT, TECHNOLOGY, LOW_MAG_REFERENCE, MAG_BIN_OVERLAP, MEASUREMENT, ZPLANES]:
+        for column in Measurement.COLUMNS:
             self.import_column(column)
         for i, row in self.df.iterrows():
             for column in [SLIDE_BARCODE, SAMPLE, CHANNEL_TARGET]:

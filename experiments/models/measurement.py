@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from experiments.models.base import NameModel
 from experiments.models.sample import Sample
-
+from experiments.constants import *
 
 class CellGenProject(models.Model):
     key = models.CharField(max_length=20)
@@ -190,6 +190,9 @@ class Measurement(models.Model):
     imported_on = models.DateTimeField(default=timezone.now)
 
     DATE_FORMAT = "%d.%m.%Y"
+    COLUMNS = [RESEARCHER, PROJECT, TECHNOLOGY, LOW_MAG_REFERENCE, MAG_BIN_OVERLAP, MEASUREMENT, ZPLANES, TEAM_DIR]
+    REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE, TECHNOLOGY,
+                        IMAGE_CYCLE, DATE, MAG_BIN_OVERLAP, SECTION_NUM}
 
     def _check_slide_num_set_with_plate_id(self):
         if bool(self.automated_plate_id) != bool(self.automated_slide_num):
