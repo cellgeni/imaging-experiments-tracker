@@ -47,8 +47,8 @@ class SamplesPopulator:
 class MeasurementsPopulator:
 
     def populate_cellgen_project(self):
-        CellGenProject.objects.get_or_create(key="ML_HEA")[0].save()
-        CellGenProject.objects.get_or_create(key="KB_CAH")[0].save()
+        Project.objects.get_or_create(key="ML_HEA")[0].save()
+        Project.objects.get_or_create(key="KB_CAH")[0].save()
 
     def populate_researchers(self):
         Researcher.objects.get_or_create(last_name="Khodak", first_name="Anton", employee_key="A_K")[0].save()
@@ -134,16 +134,14 @@ class MeasurementsPopulator:
         sc21 = Section.objects.get_or_create(number=1, sample=s2, slide=sl2)
         sc22 = Section.objects.get_or_create(number=2, sample=s2, slide=sl2)
 
-    def populate_experiment(self):
-        project = CellGenProject.objects.get(key="ML_HEA")
-        Experiment.objects.get_or_create(name="20191220_ob5_kidney", project=project)[0].save()
 
     def populate_measurements(self):
         self.populate_measurement_numbers()
         self.populate_low_mag_references()
         self.populate_zplanes()
         self.populate_mag_bin_overlap()
-        e = Experiment.objects.get(name="20191220_ob5_kidney")
+        p1 = Project.objects.get(key="ML_HEA")
+        p2 = Project.objects.get(key="KB_CAH")
         researcher = Researcher.objects.get(employee_key="A_K")
         sl1 = Slide.objects.get(barcode_id="S000000729")
         sl2 = Slide.objects.get(barcode_id="S000000724")
@@ -160,7 +158,7 @@ class MeasurementsPopulator:
         z1 = ZPlanes.objects.first()
         z2 = ZPlanes.objects.last()
         m1 = Measurement.objects.get_or_create(researcher=researcher,
-                                               experiment=e,
+                                               project=p1,
                                                technology=t,
                                                automated_slide_id="TM_RCC_00FZ",
                                                automated_plate_id="191010_174405-V",
@@ -174,7 +172,7 @@ class MeasurementsPopulator:
                                                notes_2="Tissue section failed",
                                                team_directory=td)
         m2 = Measurement.objects.get_or_create(researcher=researcher,
-                                               experiment=e,
+                                               project=p2,
                                                technology=t,
                                                automated_slide_id="TM_RCC_00FW",
                                                automated_plate_id="191010_174402-V",
@@ -188,7 +186,7 @@ class MeasurementsPopulator:
                                                notes_2="Tissue section failed",
                                                team_directory=td)
         m3 = Measurement.objects.get_or_create(researcher=researcher,
-                                               experiment=e,
+                                               project=p2,
                                                technology=t,
                                                automated_slide_id="TM_RCC_00FR",
                                                automated_plate_id="191010_174401-V",
@@ -249,7 +247,6 @@ class MeasurementsPopulator:
         self.populate_slides()
         self.populate_channel_target_pairs()
         self.populate_sections()
-        self.populate_experiment()
         self.populate_measurement_numbers()
         self.populate_low_mag_references()
         self.populate_zplanes()

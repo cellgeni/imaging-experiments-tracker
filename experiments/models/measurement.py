@@ -10,7 +10,8 @@ from experiments.models.base import NameModel
 from experiments.models.sample import Sample
 from experiments.constants import *
 
-class CellGenProject(models.Model):
+
+class Project(models.Model):
     key = models.CharField(max_length=20)
 
     def __str__(self):
@@ -105,7 +106,7 @@ class ChannelTarget(models.Model):
 
 
 class Experiment(NameModel):
-    project = models.ForeignKey(CellGenProject, on_delete=models.SET_NULL, null=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
 
 
 class MeasurementNumber(NameModel):
@@ -135,8 +136,8 @@ class Measurement(models.Model):
     sections = models.ManyToManyField(Section)
     researcher = models.ForeignKey(Researcher, on_delete=models.CASCADE,
                                    help_text="Pre-validated list of Phenix users")
-    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, blank=True, null=True,
-                                   help_text="Pre-validated list of T283 projects")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True,
+                                help_text="Pre-validated list of T283 projects")
     technology = models.ForeignKey(Technology, on_delete=models.CASCADE,
                                    help_text="How was the slide stained?")
     automated_slide_id = models.CharField(max_length=20,

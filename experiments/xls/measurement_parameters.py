@@ -9,9 +9,9 @@ from pandas._libs.tslibs.timestamps import Timestamp
 from experiments.constants import SLIDE_BARCODE, SECTION_NUM, CHANNEL_TARGET, UUID, RESEARCHER, TECHNOLOGY, IMAGE_CYCLE, \
     DATE, \
     MEASUREMENT, LOW_MAG_REFERENCE, AUTOMATED_PLATEID, AUTOMATED_SLIDEN, MAG_BIN_OVERLAP, NOTES_1, NOTES_2, ZPLANES, \
-    EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, SLIDE_ID, TISSUE, BACKGROUND, GENOTYPE, AGE
+    EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, SLIDE_ID, TISSUE, BACKGROUND, GENOTYPE, AGE, PROJECT
 from experiments.models import Section, Slide, ChannelTarget, Researcher, Technology, TeamDirectory, Measurement, \
-    MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap, Tissue, Background, Genotype, Age
+    MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap, Tissue, Background, Genotype, Age, Project
 from experiments.xls.date_parsers import DateParserFactory
 
 MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
@@ -134,6 +134,7 @@ class MeasurementParametersParser:
             image_cycle = self.row[IMAGE_CYCLE]
             mag_bin_overlap = MagBinOverlap.objects.get(name=self.row[MAG_BIN_OVERLAP])
             automated_slide_id = self.row[SLIDE_ID]
+            project = Project.objects.get(key=self.row[PROJECT])
             measurement = MeasurementNumber.objects.get(name=self.row[MEASUREMENT])
             sections = self._parse_sections()
             channel_targets = self._parse_channel_targets()
@@ -157,6 +158,7 @@ class MeasurementParametersParser:
 
         model = Measurement(uuid=uuid,
                             researcher=researcher,
+                            project=project,
                             technology=technology,
                             automated_slide_id=automated_slide_id,
                             automated_plate_id=automated_plate_id,

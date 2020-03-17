@@ -25,13 +25,13 @@ class SlideAdmin(admin.ModelAdmin):
 class MeasurementAdmin(admin.ModelAdmin):
     model = Measurement
     actions = ['copy_measurement']
-    list_display = ["uuid", "researcher", "experiment", "technology", "automated_slide_id",
+    list_display = ["uuid", "researcher", "project", "technology", "automated_slide_id",
                     "automated_plate_id", "automated_slide_num", "image_cycle",
                     "date", "measurement", "low_mag_reference", "mag_bin_overlap", "z_planes",
                     "notes_1", "notes_2", "export_location", "archive_location", "team_directory"]
-    list_filter = ["researcher", "experiment", "technology", "automated_slide_id", "date",
+    list_filter = ["researcher", "project", "technology", "date",
                    "low_mag_reference", "mag_bin_overlap", "z_planes"]
-    search_fields = ["uuid"]
+    search_fields = ["uuid", "automated_slide_id"]
 
     def copy_measurement(self, request, queryset):
         for obj in queryset:
@@ -49,13 +49,6 @@ class MeasurementInline(admin.StackedInline):
     model = Measurement
 
 
-class ExperimentAdmin(admin.ModelAdmin):
-    model = Experiment
-    inlines = [MeasurementInline]
-    list_display = ["name", "project"]
-    search_fields = ['slide__barcode_id', "name"]
-
-
 class AnalysisAdmin(admin.ModelAdmin):
     model = Analysis
     actions = ['start']
@@ -71,7 +64,7 @@ class AnalysisAdmin(admin.ModelAdmin):
 
 
 imaging_tracking_admin.register(Slide, SlideAdmin)
-imaging_tracking_admin.register(CellGenProject)
+imaging_tracking_admin.register(Project)
 imaging_tracking_admin.register(Technology)
 imaging_tracking_admin.register(Microscope)
 imaging_tracking_admin.register(Researcher)
@@ -80,7 +73,6 @@ imaging_tracking_admin.register(TeamDirectory)
 imaging_tracking_admin.register(Sample, SampleAdmin)
 imaging_tracking_admin.register(Channel)
 imaging_tracking_admin.register(Target)
-imaging_tracking_admin.register(Experiment, ExperimentAdmin)
 imaging_tracking_admin.register(PipelineVersion)
 imaging_tracking_admin.register(Registration)
 imaging_tracking_admin.register(Stiching)

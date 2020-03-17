@@ -124,7 +124,7 @@ class SpreadsheetImportTestCase(TestCase):
 
     def _test_row(self, row: RowT):
         self.assertTrue(Researcher.objects.get(employee_key=row[RESEARCHER]))
-        self.assertTrue(CellGenProject.objects.get(key=row[PROJECT]))
+        self.assertTrue(Project.objects.get(key=row[PROJECT]))
         self.assertTrue(Technology.objects.get(name=row[TECHNOLOGY]))
         self.assertTrue(MeasurementNumber.objects.get(name=row[MEASUREMENT]))
         self.assertTrue(LowMagReference.objects.get(name=row[LOW_MAG_REFERENCE]))

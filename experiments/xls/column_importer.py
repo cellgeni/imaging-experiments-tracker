@@ -56,7 +56,7 @@ class ColumnExcelImporter(ExcelImporter):
         self.df[RESEARCHER].apply(lambda key: Researcher.objects.get_or_create(employee_key=key))
 
     def import_project(self) -> None:
-        self.df[PROJECT].apply(lambda key: CellGenProject.objects.get_or_create(key=key))
+        self.df[PROJECT].apply(lambda key: Project.objects.get_or_create(key=key))
 
     def import_low_mag_reference(self) -> None:
         self.df[LOW_MAG_REFERENCE].apply(lambda key: LowMagReference.objects.get_or_create(name=key))

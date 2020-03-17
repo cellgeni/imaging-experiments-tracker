@@ -6,7 +6,6 @@ from typing import Dict
 import pandas as pd
 from django.test import TestCase, TransactionTestCase
 
-from experiments.constants import *
 from experiments.models.measurement import *
 from experiments.populate import MeasurementsPopulator
 from experiments.xls import xls_logger
@@ -36,7 +35,7 @@ class ExcelRowInfoGenerator:
             UUID: str(uuid.uuid4()),
             MODE: CREATE_OR_UPDATE,
             RESEARCHER: str(Researcher.objects.first()),
-            PROJECT: str(CellGenProject.objects.first()),
+            PROJECT: str(Project.objects.first()),
             SLIDE_BARCODE: str(Slide.objects.first()),
             SLIDE_ID: "TM_RCC_00FY",
             AUTOMATED_PLATEID: "smth",
@@ -177,6 +176,7 @@ class MeasurementParametersGenerator:
         cht2 = ChannelTarget.objects.all()[1]
         cht3 = ChannelTarget.objects.all()[2]
         model = Measurement(researcher=Researcher.objects.first(),
+                            project=Project.objects.first(),
                             automated_slide_id="TM_RCC_00FZ",
                             automated_plate_id="kkjk",
                             automated_slide_num=1,
@@ -215,6 +215,7 @@ class MeasurementParametersTestCase(TestCase):
         cht1 = ChannelTarget.objects.all()[1]
         cht5 = ChannelTarget.objects.all()[5]
         model = Measurement(uuid=uuid,
+                            project=Project.objects.last(),
                             researcher=Researcher.objects.last(),
                             technology=Technology.objects.last(),
                             automated_slide_id="TM_RCC_02FZ",
@@ -305,7 +306,7 @@ class MeasurementsImportTestCase(MeasurementsImportBase):
             UUID: row.row[UUID],
             MODE: CREATE_OR_UPDATE,
             RESEARCHER: str(Researcher.objects.last()),
-            PROJECT: str(CellGenProject.objects.last()),
+            PROJECT: str(Project.objects.last()),
             SLIDE_BARCODE: str(Slide.objects.last()),
             SLIDE_ID: "TM_RCC_00FY",
             TECHNOLOGY: str(Technology.objects.last()),
@@ -342,7 +343,7 @@ class MeasurementsImportTestCase(MeasurementsImportBase):
             UUID: uuid.uuid4(),
             MODE: CREATE_OR_UPDATE,
             RESEARCHER: str(Researcher.objects.last()),
-            PROJECT: str(CellGenProject.objects.last()),
+            PROJECT: str(Project.objects.last()),
             SLIDE_BARCODE: str(Slide.objects.last()),
             TECHNOLOGY: str(Technology.objects.first()),
             SLIDE_ID: "TM_RCC_004Y",

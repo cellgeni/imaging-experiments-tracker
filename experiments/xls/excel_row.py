@@ -75,6 +75,7 @@ class ExcelRowComparator:
             return False
         data = list()
         data.append((str(m.researcher), self.row.get(RESEARCHER)))
+        data.append((str(m.project), self.row.get(PROJECT)))
         data.append((m.automated_slide_num, str(self.row.get(AUTOMATED_SLIDEN))))
         data.append((str(m.automated_plate_id), self.row.get(AUTOMATED_PLATEID)))
         data.append((str(m.technology), self.row.get(TECHNOLOGY)))

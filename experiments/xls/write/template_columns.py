@@ -54,7 +54,7 @@ def get_columns() -> List[ImageTrackerColumn]:
                                                  'input_title': "Researcher",
                                                  'input_message': "Choose researcher"})
     project = ImageTrackerColumn(PROJECT, {'validate': 'list',
-                                           'value': [r.key for r in CellGenProject.objects.all()],
+                                           'value': [r.key for r in Project.objects.all()],
                                            'input_title': "Project",
                                            'input_message': "Choose project"})
     slide_id = ImageTrackerColumn(SLIDE_ID, {})
