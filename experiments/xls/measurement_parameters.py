@@ -14,6 +14,7 @@ from experiments.models import Section, Slide, ChannelTarget, Researcher, Techno
     MeasurementNumber, LowMagReference, ZPlanes, MagBinOverlap, Tissue, Background, Genotype, Age, Project
 from experiments.xls.date_parsers import DateParserFactory
 
+# for a given column name, returns a function that will create a corresponding object given an input string
 MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
     ZPLANES: lambda name: ZPlanes.objects.get(name=name),
     TECHNOLOGY: lambda name: Technology.objects.get(name=name),
@@ -27,6 +28,9 @@ MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
 
 
 class MeasurementM2MFields:
+    """
+    A set of many-to-many fields of the Measurement model
+    """
 
     def __init__(self, channel_target_pairs: Set[ChannelTarget],
                  sections: Set[Section]):
@@ -35,6 +39,9 @@ class MeasurementM2MFields:
 
 
 class MeasurementParameters:
+    """
+    Creates/updates a Measurement from a set of fields
+    """
 
     def __init__(self, model: Measurement, m2m_fields: MeasurementM2MFields):
         self.model = model
@@ -72,6 +79,9 @@ class MeasurementParameters:
 
 
 class MeasurementParametersParser:
+    """
+    Parses Measurement fields from a Pandas row
+    """
 
     def __init__(self, row: pd.Series):
         self.row = row

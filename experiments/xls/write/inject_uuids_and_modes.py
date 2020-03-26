@@ -6,6 +6,9 @@ from experiments.constants import UUID, MODE, MeasurementModes
 
 
 class ColumnInjector:
+    """
+    Inserts columns in an Excel file
+    """
 
     def __init__(self, filename):
         self.filename = filename

@@ -5,6 +5,9 @@ from experiments.xls import xls_logger
 
 
 class StreamLogging:
+    """
+    A context manager that captures log messages and retains them in one string
+    """
 
     def __init__(self):
         self._stream = io.StringIO()

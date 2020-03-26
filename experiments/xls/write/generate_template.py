@@ -10,7 +10,7 @@ from experiments.xls.write.template_columns import *
 from experiments.xls import EXCEL_TEMPLATE
 
 
-class ImageTrackerWriter:
+class MeasurementsSubmissionTemplateGenerator:
     def __init__(self, workbook, columns: List[ImageTrackerColumn]):
         self.workbook = workbook
         self.worksheet = workbook.add_worksheet()
@@ -37,4 +37,4 @@ class ImageTrackerWriter:
 
 
 if __name__ == "__main__":
-    ImageTrackerWriter.generate_template()
+    MeasurementsSubmissionTemplateGenerator.generate_template()

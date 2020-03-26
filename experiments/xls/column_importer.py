@@ -12,6 +12,9 @@ from experiments.xls.measurement_parameters import MODELS_MAPPING
 
 
 def log_errors(func):
+    """
+    A decorator that captures an Exception and prints traceback
+    """
     @wraps(func)
     def f(*args, **kwargs):
         try:
@@ -25,6 +28,9 @@ def log_errors(func):
 
 
 class SamplesImporter:
+    """
+    Imports samples from a given row
+    """
 
     def __init__(self, row: Union[pd.Series, Dict[str, str]]):
         self.row = row
@@ -51,6 +57,9 @@ class SamplesImporter:
 
 
 class ColumnExcelImporter(ExcelImporter):
+    """
+    Imports particular columns from an Excel file
+    """
 
     def import_researchers(self) -> None:
         self.df[RESEARCHER].apply(lambda key: Researcher.objects.get_or_create(employee_key=key))

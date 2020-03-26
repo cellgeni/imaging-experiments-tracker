@@ -2,13 +2,13 @@
 from django.urls import path
 from django.views.generic import RedirectView
 
-from experiments.views import MeasurementXLSImportView, XLSTemplateDownloadView, ColumnsXLSImportView, \
+from experiments.views import MeasurementXLSImportView, XLSTemplateDownloadView, WholeFileXLSImportView, \
     UUIDGeneratorView, UUIDAndCreateModeInjectorView
 
 urlpatterns = [
     path('', RedirectView.as_view(url='/import/'), name='go-to-import'),
     path('import/', MeasurementXLSImportView.as_view(), name='upload-xls'),
-    path('columns/', ColumnsXLSImportView.as_view()),
+    path('columns/', WholeFileXLSImportView.as_view()),
     path('inject-uuids/', UUIDAndCreateModeInjectorView.as_view()),
     path('xls-template/', XLSTemplateDownloadView.as_view(), name='xls-template'),
     path('uuids/', UUIDGeneratorView.as_view(), name='uuids-generate'),

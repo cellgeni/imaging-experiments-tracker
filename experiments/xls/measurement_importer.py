@@ -73,6 +73,10 @@ class MeasurementRow:
 
 class MeasurementsExcelImporter(ExcelImporter):
 
+    """
+    Imports measurements from an Excel file
+    """
+
     def __init__(self, file):
         super().__init__(file)
         # TODO: add tests for this

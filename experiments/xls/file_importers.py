@@ -9,7 +9,7 @@ from experiments.xls.measurement_importer import MeasurementsExcelImporter
 
 
 class FileImporterMode(enum.Enum):
-    EVERYTHING = 1
+    WHOLE_FILE = 1
     MEASUREMENTS = 2
 
 
@@ -55,7 +55,7 @@ class FileImporterFactory:
 
     @classmethod
     def get_importer(cls, mode: FileImporterMode) -> Type[FileImporter]:
-        if mode == FileImporterMode.EVERYTHING:
+        if mode == FileImporterMode.WHOLE_FILE:
             return EverythingFileImporter
         elif mode == FileImporterMode.MEASUREMENTS:
             return MeasurementsFileImporter

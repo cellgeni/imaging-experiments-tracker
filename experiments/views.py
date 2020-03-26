@@ -10,12 +10,16 @@ from django.views import View
 from experiments.forms import XLSUploadForm, UUIDGeneratorForm
 from experiments.xls import EXCEL_TEMPLATE
 from experiments.xls.file_importers import FileImporterMode, FileImporterFactory
-from experiments.xls.write.generate_template import ImageTrackerWriter
+from experiments.xls.write.generate_template import MeasurementsSubmissionTemplateGenerator
 from experiments.xls.write.writer import ExcelFileWriter
 from experiments.xls.write.inject_uuids_and_modes import ColumnInjector
 
 
 class XLSImportView(View):
+    """
+    Generic view to serve as a base for other views that import an Excel file
+    """
+
     template_name = "xls.html"
 
     def get(self, request, *args, **kwargs):
@@ -42,15 +46,21 @@ class XLSImportView(View):
 
 
 class MeasurementXLSImportView(XLSImportView):
+    """
+    Imports measurements from an XLS file
+    """
 
     def get_mode(self) -> FileImporterMode:
         return FileImporterMode.MEASUREMENTS
 
 
-class ColumnsXLSImportView(XLSImportView):
+class WholeFileXLSImportView(XLSImportView):
+    """
+    Imports all columns from an XLS file
+    """
 
     def get_mode(self) -> FileImporterMode:
-        return FileImporterMode.EVERYTHING
+        return FileImporterMode.WHOLE_FILE
 
 
 class ExcelDownloadView(View):
@@ -73,7 +83,7 @@ class XLSTemplateDownloadView(ExcelDownloadView):
 
     def get(self, request, *args, **kwargs):
         file = EXCEL_TEMPLATE
-        ImageTrackerWriter.generate_template(file)
+        MeasurementsSubmissionTemplateGenerator.generate_template(file)
         return self.serve_excel(file, request)
 
 

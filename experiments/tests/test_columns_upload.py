@@ -3,14 +3,14 @@ from typing import Iterable
 
 from django.test import TestCase
 
-from constants import *
+from experiments.constants import *
 from experiments.models import *
 from experiments.xls.column_importer import ColumnExcelImporter, SamplesImporter
 from experiments.xls.excel_row import ExcelRowWriter, RowT
 
 
 class SpreadsheetImportTestCase(TestCase):
-    file = 'test_data/columns_input1.xlsx'
+    file = 'columns_input1.xlsx'
 
     def get_data(self) -> Tuple[RowT, RowT]:
         return {

@@ -11,6 +11,10 @@ xls_logger = logging.getLogger(__name__)
 
 class ExcelImporter:
 
+    """
+    Base class for importing Excel files
+    """
+
     def __init__(self, file):
         self.df = pd.read_excel(file).replace({pd.np.nan: None,
                                                'N/A': None})

@@ -31,6 +31,10 @@ class ExcelRowInfoGenerator:
 
     @classmethod
     def get_sample_info(cls) -> Dict:
+        """
+        Generates valid exemplary dictionary of strings for testing that
+        can be interpreted as an Excel row
+        """
         return {
             UUID: str(uuid.uuid4()),
             MODE: CREATE_OR_UPDATE,
@@ -71,7 +75,7 @@ class ExcelRowInfoGenerator:
 
 
 class ExcelRowTestCase(TestCase):
-    file = 'test_data/measurements_input1.xlsx'
+    file = 'measurements_input1.xlsx'
 
     def setUp(self) -> None:
         p = MeasurementsPopulator()
@@ -270,7 +274,7 @@ class StreamLoggingTestCase(TestCase):
 
 
 class MeasurementsImportBase(TransactionTestCase):
-    file = 'test_data/measurements_input2.xlsx'
+    file = 'measurements_input2.xlsx'
     importer = FileImporter(file)
 
     def write_row_dict_in_file(self, row_dict: RowT) -> ExcelRow:
@@ -288,7 +292,7 @@ class MeasurementsImportBase(TransactionTestCase):
 
 
 class MeasurementsImportTestCase(MeasurementsImportBase):
-    file = 'test_data/measurements_input2.xlsx'
+    file = 'measurements_input2.xlsx'
     importer = MeasurementsFileImporter(file)
 
     def setUp(self):
@@ -387,7 +391,7 @@ class MeasurementsImportTestCase(MeasurementsImportBase):
 
 
 class MeasurementsAndColumnsImportTestCase(MeasurementsImportBase):
-    file = 'test_data/measurements_input2.xlsx'
+    file = 'measurements_input2.xlsx'
     importer = EverythingFileImporter(file)
 
     def test_object_creation(self):
