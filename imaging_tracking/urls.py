@@ -19,5 +19,6 @@ from imaging_tracking.admin import imaging_tracking_admin
 
 urlpatterns = [
     path('admin/', imaging_tracking_admin.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('', include('experiments.urls'))
 ]
