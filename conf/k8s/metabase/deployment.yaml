@@ -18,7 +18,7 @@ spec:
           persistentVolumeClaim:
             claimName: imaging-metabase-pvc
       containers:
-      - image: metabase/metabase:v0.35.0
+      - image: metabase/metabase:v0.35.1
         imagePullPolicy: IfNotPresent
         name: imaging-metabase
         ports:
