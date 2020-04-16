@@ -7,10 +7,12 @@
     <meta name="description" content="">
     <title>{% block title %}Imaging experiments tracking{% endblock %}</title>
 
-
     <!-- Bootstrap core CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<meta name="theme-color" content="#563d7c">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="theme-color" content="#563d7c">
+
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
 
     <style>
@@ -37,7 +39,7 @@
     <header>
   <!-- Fixed navbar -->
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="/" >Imaging experiments tracker</a>
+    <a class="navbar-brand" href={% url 'home' %} >IMTR</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -46,20 +48,20 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-                <a class="nav-link" href="/admin">Manage experiments</a>
+                <a class="nav-link" href="/admin">Administration</a>
         </li>
           <li class="nav-item active">
-                <a class="nav-link" href={% url 'upload-xls' %}>Upload from XLS</a>
+                <a class="nav-link" href={% url 'upload-xls' %}>Upload XLS</a>
         </li>
           <li class="nav-item active">
-                <a class="nav-link" href="http://imaging-metabase.cellgeni.sanger.ac.uk/question/1">Database view</a>
+                <a class="nav-link" href="http://imaging-metabase.cellgeni.sanger.ac.uk/question/1">Data view</a>
         </li>
       </ul>
       
       <ul class="nav navbar-nav ml-auto">
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>
-          <div class="dropdown-menu">
+          <div class="dropdown-menu dropdown-menu-right">
             <a class="dropdown-item" href={% url 'logout' %}>Logout</a>
           </div>
         </li>
@@ -80,7 +82,8 @@
 
 <footer class="footer mt-auto py-3">
   <div class="container">
-    <span class="text-muted">Cellular Genetics Informatics</span>
+    <span class="text-muted pull-left">Cellular Genetics Informatics</span>
+    <span class="text-muted pull-right">Support: ak27@sanger.ac.uk</span>
   </div>
 </footer>
 

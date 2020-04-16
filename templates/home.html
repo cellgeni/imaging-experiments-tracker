@@ -1,0 +1,51 @@
+<!-- templates/registration/home.html -->
+{% extends "base.html" %}
+
+{% block title %}Imaging experiments tracking | Home{% endblock %}
+
+{% block content %}
+
+<style>
+    .card-description{
+        font-size: 1.25rem;
+    }
+    .card-header{
+        font-size: 1.5rem;
+        text-align: center;
+    }
+</style>
+    <h1 class="display-3 text-center mt-3">Imaging experiments tracker</h1>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <h5 class="card-header">Administration</h5>
+                <div class="card-body text-center">
+                    <i class="fa text-info fa-object-group fa-5x" aria-hidden="true"></i>
+                    <p class="card-text card-description mt-3">Manage users, permissions, measurements attributes</p>
+                    <a href="/admin" class="btn btn-primary btn-block">Go to management area</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <h5 class="card-header">Upload XLS</h5>
+                <div class="card-body text-center">
+                    <i class="fa text-success fa-file-excel-o fa-5x" aria-hidden="true"></i>
+                    <p class="card-text card-description mt-3">Add, update, and delete measurements in bulk</p>
+                    <a href={% url 'upload-xls' %} class="btn btn-primary btn-block">Upload files</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <h5 class="card-header">Data view</h5>
+                <div class="card-body text-center">
+                    <i class="fa text-warning fa-database fa-5x" aria-hidden="true"></i>
+                    <p class="card-text card-description mt-3">View, filter, search, and export measurements data</p>
+                    <a href="http://imaging-metabase.cellgeni.sanger.ac.uk/question/1" class="btn btn-primary btn-block">Go to databse view</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
