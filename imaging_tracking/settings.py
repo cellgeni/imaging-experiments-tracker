@@ -131,7 +131,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Email
-EMAIL_BACKEND       = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST          = "mail.sanger.ac.uk"
-EMAIL_PORT          = 25
-DEFAULT_FROM_EMAIL  = "no-reply@sanger.ac.uk"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "mail.sanger.ac.uk"
+EMAIL_PORT = 25
+DEFAULT_FROM_EMAIL = "no-reply@cellgeni.sanger.ac.uk"
