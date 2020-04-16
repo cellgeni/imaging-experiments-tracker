@@ -127,7 +127,7 @@ STATIC_ROOT = 'staticfiles/'
 
 # Auth redirects
 # https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-LOGIN_REDIRECT_URL
-LOGIN_REDIRECT_URL = '/import/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Email
