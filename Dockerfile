@@ -7,8 +7,7 @@ RUN apt-get update && \
 	vim \
 	nginx \
 	supervisor \
-	sqlite3 \
-	libsasl2-dev python3-dev libldap2-dev libssl-dev && \
+	sqlite3 && \
 	pip3 install -U pip setuptools && \
    rm -rf /var/lib/apt/lists/*
 
