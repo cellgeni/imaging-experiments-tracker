@@ -1,12 +1,11 @@
-# urls.py
 from django.urls import path
-from django.views.generic import RedirectView
+from django.views.generic import TemplateView
 from django.contrib.auth.decorators import login_required
 
 from experiments.views import MeasurementXLSImportView, XLSTemplateDownloadView, WholeFileXLSImportView, \
     UUIDGeneratorView, UUIDAndCreateModeInjectorView
 
-from django.views.generic import TemplateView
+
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="home.html"), name='home'),

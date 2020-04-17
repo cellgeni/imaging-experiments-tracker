@@ -15,13 +15,16 @@
     <meta name="theme-color" content="#563d7c">
     <link href={% static "css/sticky-footer-navbar.css" %} rel="stylesheet">
     <link href={% static "css/app.css" %} rel="stylesheet">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}/">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
   </head>
 
   <body class="d-flex flex-column h-100">
     <header>
       <!-- Fixed navbar -->
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href={% url 'home' %} >IMTR</a>
+        <a class="navbar-brand" href={% url 'home' %}>IMTR</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
