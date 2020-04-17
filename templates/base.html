@@ -1,74 +1,72 @@
 {% load static %}
 <!doctype html>
 <html lang="en" class="h-100">
+  
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <title>{% block title %}Imaging experiments tracking{% endblock %}</title>
 
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <meta name="theme-color" content="#563d7c">
-
-    <!-- Font Awesome CSS-->
+    <!-- Imported styles -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- Custom styles for this template -->
+    <meta name="theme-color" content="#563d7c">
     <link href={% static "css/sticky-footer-navbar.css" %} rel="stylesheet">
     <link href={% static "css/app.css" %} rel="stylesheet">
   </head>
+
   <body class="d-flex flex-column h-100">
     <header>
-  <!-- Fixed navbar -->
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href={% url 'home' %} >IMTR</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href={% url 'home' %} >IMTR</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-    {% if user.is_authenticated %}
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-                <a class="nav-link" href="/admin">Administration</a>
-        </li>
-          <li class="nav-item active">
-                <a class="nav-link" href={% url 'upload-xls' %}>Upload XLS</a>
-        </li>
-          <li class="nav-item active">
-                <a class="nav-link" href="http://imaging-metabase.cellgeni.sanger.ac.uk/question/1">Data view</a>
-        </li>
-      </ul>
-      
-      <ul class="nav navbar-nav ml-auto">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>
-          <div class="dropdown-menu dropdown-menu-right">
-            <a class="dropdown-item" href={% url 'logout' %}><i class="fa fa-fw fa-sign-out" aria-hidden="true"></i> Logout</a>
-          </div>
-        </li>
-      </ul>
+        {% if user.is_authenticated %}
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/admin">Administration</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href={% url 'upload-xls' %}>Upload XLS</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="http://imaging-metabase.cellgeni.sanger.ac.uk/question/1">Data view</a>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>
+              <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href={% url 'logout' %}><i class="fa fa-fw fa-sign-out" aria-hidden="true"></i> Logout</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+        {% endif %}
+      </nav>
+    </header>
 
-    </div>
-    {% endif %}
-  </nav>
-</header>
+    <main role="main" class="flex-shrink-0">
+      <div class="container">
+        <!-- Begin page content -->
+        {% block content %}
+        {% endblock content %}
+        <!-- End page content -->
+      </div>
+    </main>
 
-<!-- Begin page content -->
-<main role="main" class="flex-shrink-0">
-  <div class="container">
-    {% block content %}
-    {% endblock content %}
-  </div>
-</main>
-
-<footer class="footer mt-auto py-3">
-  <div class="container">
-    <span class="text-muted pull-left">Cellular Genetics Informatics</span>
-    <span class="text-muted pull-right">Support: ak27@sanger.ac.uk</span>
-  </div>
-</footer>
+    <footer class="footer mt-auto py-3">
+      <div class="container">
+        <span class="text-muted pull-left">Cellular Genetics Informatics</span>
+        <span class="text-muted pull-right">Support: ak27@sanger.ac.uk</span>
+      </div>
+    </footer>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
