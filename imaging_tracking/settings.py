@@ -127,20 +127,11 @@ STATIC_ROOT = 'staticfiles/'
 
 # Auth redirects
 # https://docs.djangoproject.com/en/3.0/ref/settings/#std:setting-LOGIN_REDIRECT_URL
-LOGIN_REDIRECT_URL = '/import/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
-# LDAP authentication backend
-# https://django-auth-ldap.readthedocs.io/
-AUTH_LDAP_SERVER_URI = "ldap://ldap-ro.internal.sanger.ac.uk"
-AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=people,dc=sanger,dc=ac,dc=uk"
-AUTH_LDAP_USER_ATTR_MAP = {
-    "username":     "uid",
-    "first_name":   "sangerGivenNameOverride",
-    "last_name":    "sangerSnOverride",
-    "email":        "mail",
-}
-AUTHENTICATION_BACKENDS = [
-    'django_auth_ldap.backend.LDAPBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
+# Email
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "mail.sanger.ac.uk"
+EMAIL_PORT = 25
+DEFAULT_FROM_EMAIL = "no-reply@cellgeni.sanger.ac.uk"
