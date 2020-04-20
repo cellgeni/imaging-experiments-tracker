@@ -81,11 +81,10 @@ DATABASES = {
         {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'postgres',
-            'USER': 'cellgen_admin',
+            'USER': os.getenv("MAIN_DB_USER"),
             'PASSWORD': os.getenv("MAIN_DB_PASSWORD"),
-            'HOST': 'web-pg-cellgen-01.internal.sanger.ac.uk',
-            'PORT': '5432'
-        },
+            'HOST': os.getenv("MAIN_DB_HOST")
+        }
 }
 
 # Password validation
@@ -111,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
@@ -132,6 +131,5 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Email
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "mail.sanger.ac.uk"
-EMAIL_PORT = 25
+EMAIL_HOST = os.getenv('EMAIL_HOST')
 DEFAULT_FROM_EMAIL = "no-reply@cellgeni.sanger.ac.uk"
