@@ -132,8 +132,6 @@ class MeasurementParametersParser:
 
     def _parse_automated_sliden(self, automated_plateid: str) -> str:
         slide_n = self.row.get(AUTOMATED_SLIDEN, None)
-        if automated_plateid and not slide_n:
-            raise ValidationError("Automated slide number is required if automated plate ID is provided")
         return slide_n
 
     def get_params(self) -> MeasurementParameters:

@@ -378,14 +378,6 @@ class MeasurementsImportTestCase(MeasurementsImportBase):
         row4 = self.import_row_dict_into_db(row3.row)
         self.assertFalse(row4.is_in_database())
 
-    def test_row_with_automated_plate_id_and_automated_slide_num(self):
-        row = self.import_sample_row_into_db()
-        self.assertTrue(row.is_in_database())
-        Measurement.objects.get(uuid=row.row[UUID]).delete()
-        row.row.pop(AUTOMATED_SLIDEN)
-        row = self.import_row_dict_into_db(row.row)
-        self.assertFalse(row.is_in_database())
-
     def tearDown(self) -> None:
         os.remove(self.file)
 

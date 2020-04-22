@@ -29,7 +29,7 @@ class Technology(NameModel):
 class Researcher(models.Model):
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)
-    employee_key = models.CharField(max_length=3, primary_key=True)
+    employee_key = models.CharField(max_length=6, primary_key=True)
 
     def __str__(self):
         return self.employee_key
@@ -195,10 +195,6 @@ class Measurement(models.Model):
     REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE, TECHNOLOGY,
                         IMAGE_CYCLE, DATE, MAG_BIN_OVERLAP, SECTION_NUM}
 
-    def _check_slide_num_set_with_plate_id(self):
-        if bool(self.automated_plate_id) != bool(self.automated_slide_num):
-            raise ValidationError('Both of the automated plate id and automated slide number must be present')
-
     def _check_unique_if_plate_id_is_null(self):
         """
         unique together does not treat nulls as expected (null != null), so we need to add one extra check
@@ -215,7 +211,6 @@ class Measurement(models.Model):
                                       'Automated slide id, Automated plate id, Measurement and Date already exists.')
 
     def clean(self):
-        self._check_slide_num_set_with_plate_id()
         self._check_unique_if_plate_id_is_null()
 
     def __str__(self):
