@@ -16,7 +16,7 @@ class Genotype(NameModel):
 
 
 class Background(NameModel):
-    pass
+    name = models.CharField(max_length=100)
 
 
 class Sample(models.Model):
