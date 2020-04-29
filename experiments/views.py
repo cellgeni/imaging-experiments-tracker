@@ -1,11 +1,15 @@
 import uuid
+import jwt
+
 from abc import abstractmethod
 from typing import List
+import datetime
 
 from django.core.files import File
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
+from django.conf import settings
 
 from experiments.forms import XLSUploadForm, UUIDGeneratorForm
 from experiments.xls import EXCEL_TEMPLATE
@@ -125,3 +129,20 @@ class UUIDAndCreateModeInjectorView(XLSImportView, ExcelDownloadView):
             log = ["form invalid"]
         return render(request, self.template_name, {'form': form,
                                                     'log': log})
+
+
+class DataView(View):
+    """
+    View to serve embeded metabase question
+    """
+
+    def get(self, request, *args, **kwargs):
+        payload = {
+            "resource": { "question": 1 },
+            "params": { "authorized_projects": [] },
+            "exp": int((datetime.datetime.now() + datetime.timedelta(minutes = 10)).timestamp()) * 1000 # 10 minute expiration in miliseconds
+        }
+
+        token = jwt.encode(payload, settings.METABASE_SECRET_KEY, algorithm="HS256")
+        iframeUrl = f"{settings.METABASE_SITE_URL}/embed/question/{token.decode('UTF-8')}"
+        return render(request, 'dataview.html', {'iframeUrl': iframeUrl})

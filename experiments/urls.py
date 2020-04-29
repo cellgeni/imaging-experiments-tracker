@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.decorators import login_required
 
 from experiments.views import MeasurementXLSImportView, XLSTemplateDownloadView, WholeFileXLSImportView, \
-    UUIDGeneratorView, UUIDAndCreateModeInjectorView
+    UUIDGeneratorView, UUIDAndCreateModeInjectorView, DataView
 
 
 
@@ -14,6 +14,7 @@ urlpatterns = [
     path('inject-uuids/', UUIDAndCreateModeInjectorView.as_view()),
     path('xls-template/', XLSTemplateDownloadView.as_view(), name='xls-template'),
     path('uuids/', UUIDGeneratorView.as_view(), name='uuids-generate'),
+    path('dataview/', DataView.as_view(), name='data-view'),
 ]
 
 for u in urlpatterns:
