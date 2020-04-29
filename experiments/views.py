@@ -139,7 +139,7 @@ class DataView(View):
     def get(self, request, *args, **kwargs):
         payload = {
             "resource": { "question": 1 },
-            "params": { "authorized_projects": [] },
+            "params": { "authorized_projects": None },
             "exp": int((datetime.datetime.now() + datetime.timedelta(minutes = 10)).timestamp()) * 1000 # 10 minute expiration in miliseconds
         }
 
