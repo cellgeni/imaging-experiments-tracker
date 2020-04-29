@@ -27,3 +27,8 @@
       font-size: 3.5rem;
     }
   }
+
+.metabase-embed{
+  width: 100%;
+  height: calc(100vh - 125px);
+}
