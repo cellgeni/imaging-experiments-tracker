@@ -58,6 +58,10 @@
     <main role="main" class="flex-shrink-0">
       <!-- Begin page content -->
       {% block content %}
+        <div class="container">
+          {% block container-content %}
+          {% endblock container-content %}
+        </div>
       {% endblock content %}
       <!-- End page content -->
     </main>
