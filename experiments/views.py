@@ -152,6 +152,6 @@ class DataView(View):
             payload, settings.METABASE_SECRET_KEY, algorithm="HS256")
 
         iframe_url = "{url}/embed/question/{token}".format(
-            url=settings.METABASE_SITE_URL, token=tokentoken.decode('UTF-8'))
+            url=settings.METABASE_SITE_URL, token=token.decode('UTF-8'))
 
         return render(request, 'dataview.html', {'iframeUrl': iframe_url})
