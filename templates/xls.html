@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container">
+{% block container-content %}
     <div class="file-upload-block">
         <h5>Upload everything from an existing XLS file</h5>
         <form action="/columns/" method="post" enctype="multipart/form-data">
@@ -21,5 +20,4 @@
     {% for log_entry in log %}
         {{ log_entry }}<br>
     {% endfor %}
-</div>
-{% endblock content %}
+{% endblock container-content %}
