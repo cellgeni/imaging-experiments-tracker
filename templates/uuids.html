@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %} Generate UUIDs {% endblock title %}
 {% block content %}
+<div class="container">
     <div class="file-upload-block">
         <h5>How many UUIDs do you want?</h5>
     <form action="" method="get" >
@@ -11,4 +12,5 @@
     {% for uuid in uuids %}
         {{ uuid }}<br>
     {% endfor %}
+</div>
 {% endblock content %}

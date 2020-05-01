@@ -3,10 +3,12 @@
 {% block title %}Data view{% endblock %}
 
 {% block content %}
-<iframe
-    class="metabase-embed"
-    src="{{iframeUrl}}"
-    frameborder="0"
-    allowtransparency
-></iframe>
+<div class="container-fluid">
+    <iframe
+        class="metabase-embed"
+        src="{{iframeUrl}}"
+        frameborder="0"
+        allowtransparency
+    ></iframe>
+</div>
 {% endblock content %}

@@ -3,19 +3,21 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="row mt-5">
-  <div class="col">
-    <h1 class="text-center">Login</h1>
-    <div class="text-center">
-      <form method="post" id="form_login">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-dark" type="submit">Login</button>
+<div class="container">
+  <div class="row mt-5">
+    <div class="col">
+      <h1 class="text-center">Login</h1>
+      <div class="text-center">
+        <form method="post" id="form_login">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button class="btn btn-dark" type="submit">Login</button>
 
-        <p class="mt-2">
-          <a class="btn btn-sm btn-light" href="{% url 'password_reset' %}">Reset password</a>
-        </p>
-      </form>
+          <p class="mt-2">
+            <a class="btn btn-sm btn-light" href="{% url 'password_reset' %}">Reset password</a>
+          </p>
+        </form>
+      </div>
     </div>
   </div>
 </div>
