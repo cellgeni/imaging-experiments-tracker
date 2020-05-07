@@ -1,20 +1,22 @@
 from django.test import TestCase
 
-from experiments.models import ChannelTarget
+from experiments.models import Slot
+from experiments.populate.measurement import MeasurementsPopulator, MeasurementsPrerequisitesPopulator, MAX_SLOTS
 
 
-class ChannelTargetTestCase(TestCase):
+class MeasurementTest(TestCase):
 
-    def test_parse_channel_and_target_name_from_str(self):
-        ch1 = "Atto 425"
-        ch2 = "Opal"
-        t1 = "dapB"
-        cht1 = f'{ch1} -> {t1}'
-        cht2 = f'{ch2} -> {t1}'
-        assert (ch1, t1) == ChannelTarget.get_channel_and_target_from_str(cht1)
-        assert (ch2, t1) == ChannelTarget.get_channel_and_target_from_str(cht2)
-        assert (ch1, t1) != ChannelTarget.get_channel_and_target_from_str(cht2)
-        with self.assertRaises(ValueError):
-            ChannelTarget.get_channel_and_target_from_str(f"{ch1} - {t1}")
-        with self.assertRaises(ValueError):
-            ChannelTarget.get_channel_and_target_from_str(23)
+    def setUp(self) -> None:
+        MeasurementsPrerequisitesPopulator.populate_all_prerequisites()
+
+    def test_has_slide_number(self):
+        m = MeasurementsPopulator.create_automated_measurement_with_multiple_slots()
+        self.assertTrue(m.has_slide_number(1))
+        self.assertTrue(m.has_slide_number(MAX_SLOTS))
+        self.assertFalse(m.has_slide_number(MAX_SLOTS + 1))
+        Slot.objects.get(measurement=m,
+                         automated_slide_num=1).delete()
+        Slot.objects.get(measurement=m,
+                         automated_slide_num=MAX_SLOTS).delete()
+        self.assertFalse(m.has_slide_number(1))
+        self.assertFalse(m.has_slide_number(MAX_SLOTS))

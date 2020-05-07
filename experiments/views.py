@@ -1,22 +1,19 @@
-import uuid
-import jwt
-
+import datetime
 from abc import abstractmethod
 from typing import List
-import datetime
 
+import jwt
+from django.conf import settings
 from django.core.files import File
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
-from django.conf import settings
 
-from experiments.forms import XLSUploadForm, UUIDGeneratorForm
+from experiments.forms import XLSUploadForm
 from experiments.xls import EXCEL_TEMPLATE
 from experiments.xls.file_importers import FileImporterMode, FileImporterFactory
 from experiments.xls.write.generate_template import MeasurementsSubmissionTemplateGenerator
 from experiments.xls.write.writer import ExcelFileWriter
-from experiments.xls.write.inject_uuids_and_modes import ColumnInjector
 
 
 class XLSImportView(View):
@@ -92,46 +89,6 @@ class XLSTemplateDownloadView(ExcelDownloadView):
         return self.serve_excel(file, request)
 
 
-class UUIDGeneratorView(View):
-    """
-    Generates a given number of UUIDs that users can then copy-paste in their Excel spreadsheets to uniquely
-    identify measurements
-    """
-    template_name = "uuids.html"
-
-    def get(self, request, *args, **kwargs):
-        form = UUIDGeneratorForm(request.GET)
-        if form.is_valid():
-            uuids = [uuid.uuid4() for x in range(int(request.GET['quantity']))]
-        else:
-            uuids = []
-            form = UUIDGeneratorForm()
-        return render(request, self.template_name, {'form': form,
-                                                    'uuids': uuids})
-
-
-class UUIDAndCreateModeInjectorView(XLSImportView, ExcelDownloadView):
-    """
-    Accepts an Excel file and returns the same file with UUID and Mode columns populated
-    Mode column has value "Create or update" for all measurements
-    """
-
-    def inject_columns(self, request) -> HttpResponse:
-        filename = request.FILES['file'].name.replace(" ", "_")
-        ExcelFileWriter.dump_file_on_disk(request.FILES['file'], filename)
-        ColumnInjector(filename).inject_uuid_mode_columns()
-        return self.serve_excel(filename, request)
-
-    def post(self, request, *args, **kwargs):
-        form = XLSUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            return self.inject_columns(request)
-        else:
-            log = ["form invalid"]
-        return render(request, self.template_name, {'form': form,
-                                                    'log': log})
-
-
 class DataView(View):
     """
     View to serve embedded metabase question
@@ -142,10 +99,9 @@ class DataView(View):
             "resource": {"question": 1},
             "params": {"authorized_projects": None},
             # 10 minute expiration in miliseconds
-            "exp": int((
-                datetime.datetime.now() +
-                datetime.timedelta(minutes=10)
-            ).timestamp()) * 1000
+            "exp": int((datetime.datetime.now() +
+                        datetime.timedelta(minutes=10)
+                        ).timestamp()) * 1000
         }
 
         token = jwt.encode(
