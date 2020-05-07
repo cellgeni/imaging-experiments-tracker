@@ -20,7 +20,8 @@ class Background(NameModel):
 
 
 class Sample(models.Model):
-    id = models.CharField(max_length=40, primary_key=True)
+    name = models.CharField(max_length=40, unique=True)
+    # TODO: make this a field on Measurement
     species = models.IntegerField(blank=True, null=True, choices=[
         (1, 'Hca'),
         (2, 'Mmu')
@@ -31,4 +32,4 @@ class Sample(models.Model):
     tissue = models.ForeignKey(Tissue, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return self.id
+        return self.name

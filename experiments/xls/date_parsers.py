@@ -5,7 +5,7 @@ from typing import Tuple, Union
 from pandas._libs.tslibs.timestamps import Timestamp
 
 
-class DateParser:
+class AbstractDateParser:
 
     @staticmethod
     def raise_value_error(datestring: str):
@@ -16,7 +16,7 @@ class DateParser:
         pass
 
 
-class StringDateParser(DateParser):
+class StringDateParser(AbstractDateParser):
 
     def __init__(self, datestring: str):
         self.separator = self.get_separator(datestring)
@@ -47,7 +47,7 @@ class StringDateParser(DateParser):
             self.raise_value_error(self.datestring)
 
 
-class TimestampParser(DateParser):
+class TimestampParser(AbstractDateParser):
 
     def __init__(self, datestring: Timestamp):
         self.timestamp = datestring
@@ -59,7 +59,7 @@ class TimestampParser(DateParser):
 class DateParserFactory:
 
     @staticmethod
-    def get_parser(datestring: Union[str, Timestamp]) -> DateParser:
+    def get_parser(datestring: Union[str, Timestamp]) -> AbstractDateParser:
         d_type = type(datestring)
         if d_type is str:
             return StringDateParser(datestring)
@@ -67,4 +67,11 @@ class DateParserFactory:
             return TimestampParser(datestring)
         else:
             # Excel transforms null values into floats like 0.0
-            DateParser.raise_value_error(datestring)
+            AbstractDateParser.raise_value_error(datestring)
+
+
+class DateParser:
+
+    @staticmethod
+    def parse_date(datestring: str) -> datetime.date:
+        return DateParserFactory.get_parser(datestring).parse()

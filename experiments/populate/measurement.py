@@ -1,96 +1,74 @@
 import os, django
 
+from experiments.populate.slide import SlidesPopulator
+
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
     django.setup()
 from experiments.models import *
 
 
-class SamplesPopulator:
+class MeasurementsPrerequisitesPopulator:
 
-    def populate_tissues(self):
-        Tissue.objects.get_or_create(name="Kidney")[0].save()
-        Tissue.objects.get_or_create(name="Adrenal gland")[0].save()
+    @classmethod
+    def populate_projects(cls):
+        Project.objects.get_or_create(name="ML_HEA")[0].save()
+        Project.objects.get_or_create(name="KB_CAH")[0].save()
 
-    def populate_ages(self):
-        Age.objects.get_or_create(name="GA 8.2")[0].save()
-        Age.objects.get_or_create(name="Fetal")[0].save()
+    @classmethod
+    def populate_researchers(cls):
+        Researcher.objects.get_or_create(last_name="Khodak", first_name="Anton", login="A_K")[0].save()
+        Researcher.objects.get_or_create(last_name="Winslet", first_name="Mariam", login="M_W")[0].save()
 
-    def populate_backgrounds(self):
-        Background.objects.get_or_create(name="Unknown")[0].save()
-
-    def populate_genotypes(self):
-        Genotype.objects.get_or_create(name="Unknown")[0].save()
-
-    def populate_samples(self):
-        self.populate_tissues()
-        t1 = Tissue.objects.get(name="Kidney")
-        t2 = Tissue.objects.get(name="Adrenal gland")
-        b = Background.objects.first()
-        g = Genotype.objects.first()
-        a1 = Age.objects.first()
-        a2 = Age.objects.last()
-        s1 = Sample.objects.get_or_create(id="L14-KID-0-FFPE-1-S3i",
-                                          species=1,
-                                          age=a1,
-                                          genotype=g,
-                                          background=b,
-                                          tissue=t1)
-        s2 = Sample.objects.get_or_create(id="L14-ADR-0-FFPE-1-S3i",
-                                          species=2,
-                                          age=a2,
-                                          genotype=g,
-                                          background=b,
-                                          tissue=t2)
-
-
-class MeasurementsPopulator:
-
-    def populate_cellgen_project(self):
-        Project.objects.get_or_create(key="ML_HEA")[0].save()
-        Project.objects.get_or_create(key="KB_CAH")[0].save()
-
-    def populate_researchers(self):
-        Researcher.objects.get_or_create(last_name="Khodak", first_name="Anton", employee_key="A_K")[0].save()
-        Researcher.objects.get_or_create(last_name="Winslet", first_name="Mariam", employee_key="M_W")[0].save()
-
-    def populate_species(self):
-        Tissue.objects.get_or_create(name="Kidney")[0].save()
-        Tissue.objects.get_or_create(name="Adrenal gland")[0].save()
-
-    def populate_microscopes(self):
-        Microscope.objects.get_or_create(name="Phenix_PlateLoader")[0].save()
-        Microscope.objects.get_or_create(name="Phenix")[0].save()
-
-    def populate_technologies(self):
+    @classmethod
+    def populate_technologies(cls):
         Technology.objects.get_or_create(name="RNAscope 4-plex")[0].save()
         Technology.objects.get_or_create(name="RNAscope 8-plex")[0].save()
 
-    def populate_measurement_numbers(self):
+    @classmethod
+    def populate_plates(cls):
+        Plate.objects.get_or_create(name="190711_182307-V")[0].save()
+        Plate.objects.get_or_create(name="2342341-F")[0].save()
+
+    @classmethod
+    def populate_measurement_numbers(cls):
         MeasurementNumber.objects.get_or_create(name="1a")[0].save()
         MeasurementNumber.objects.get_or_create(name="1b")[0].save()
 
-    def populate_low_mag_references(self):
+    @classmethod
+    def populate_low_mag_references(cls):
         LowMagReference.objects.get_or_create(name="Reference")[0].save()
         LowMagReference.objects.get_or_create(name="1a")[0].save()
 
-    def populate_mag_bin_overlap(self):
+    @classmethod
+    def populate_mag_bin_overlap(cls):
         MagBinOverlap.objects.get_or_create(name="10X_Bin2_5 % overlap")[0].save()
         MagBinOverlap.objects.get_or_create(name="20X_Bin1_7 % overlap")[0].save()
 
-    def populate_zplanes(self):
+    @classmethod
+    def populate_zplanes(cls):
         ZPlanes.objects.get_or_create(name="15x7")[0].save()
         ZPlanes.objects.get_or_create(name="10x2")[0].save()
 
-    def populate_team_dirs(self):
+    @classmethod
+    def populate_team_dirs(cls):
         TeamDirectory.objects.get_or_create(name="t283_imaging")[0].save()
         TeamDirectory.objects.get_or_create(name="t876_imaging")[0].save()
 
-    def populate_channels(self):
+    @classmethod
+    def populate_locations(cls):
+        ExportLocation.objects.get_or_create(name="0HarmonyExports\ML_HEA\ML_HEA_1")[0].save()
+        ExportLocation.objects.get_or_create(name="0HarmonyExports\ML_HEA\ML_HEA_2")[0].save()
+        ArchiveLocation.objects.get_or_create(name="0HarmonyArchives\ML_HEA\ML_HEA_1")[0].save()
+        ArchiveLocation.objects.get_or_create(name="0HarmonyArchives\ML_HEA\ML_HEA_2")[0].save()
+
+    @classmethod
+    def populate_channels(cls):
         ch1 = Channel.objects.get_or_create(name="Atto 425")
         ch2 = Channel.objects.get_or_create(name="Opal 520")
 
-    def populate_targets(self):
+    @classmethod
+    def populate_targets(cls):
         t1 = Target.objects.get_or_create(name="MYH11")
         t2 = Target.objects.get_or_create(name="dapB")
         t3 = Target.objects.get_or_create(name="POLR2A")
@@ -99,9 +77,10 @@ class MeasurementsPopulator:
         t6 = Target.objects.get_or_create(name="KCNJ8")
         t7 = Target.objects.get_or_create(name="ACKR1")
 
-    def populate_channel_target_pairs(self):
-        self.populate_channels()
-        self.populate_targets()
+    @classmethod
+    def populate_channel_target_pairs(cls):
+        cls.populate_channels()
+        cls.populate_targets()
         ch1 = Channel.objects.get(name="Atto 425")
         ch2 = Channel.objects.get(name="Opal 520")
         t1 = Target.objects.get(name="MYH11")
@@ -114,146 +93,83 @@ class MeasurementsPopulator:
         cht5 = ChannelTarget.objects.get_or_create(channel=ch2, target=t2)
         cht6 = ChannelTarget.objects.get_or_create(channel=ch2, target=t3)
 
-    def populate_slides(self):
-        s1 = Slide.objects.get_or_create(barcode_id="S000000729")
-        s2 = Slide.objects.get_or_create(barcode_id="S000000724")
-        s3 = Slide.objects.get_or_create(barcode_id="S000000725")
-        s4 = Slide.objects.get_or_create(barcode_id="S000000726")
-
-    def populate_sections(self):
-        sp = SamplesPopulator()
-        sp.populate_samples()
-        self.populate_slides()
-        s1 = Sample.objects.get(id="L14-KID-0-FFPE-1-S3i")
-        s2 = Sample.objects.get(id="L14-ADR-0-FFPE-1-S3i")
-        sl1 = Slide.objects.get(barcode_id="S000000729")
-        sl2 = Slide.objects.get(barcode_id="S000000724")
-        sc11 = Section.objects.get_or_create(number=1, sample=s1, slide=sl1)
-        sc12 = Section.objects.get_or_create(number=2, sample=s1, slide=sl1)
-        sc13 = Section.objects.get_or_create(number=3, sample=s1, slide=sl1)
-        sc21 = Section.objects.get_or_create(number=1, sample=s2, slide=sl2)
-        sc22 = Section.objects.get_or_create(number=2, sample=s2, slide=sl2)
+    @classmethod
+    def populate_all_prerequisites(cls):
+        cls.populate_projects()
+        cls.populate_plates()
+        cls.populate_researchers()
+        cls.populate_technologies()
+        cls.populate_team_dirs()
+        cls.populate_locations()
+        cls.populate_channel_target_pairs()
+        cls.populate_measurement_numbers()
+        cls.populate_low_mag_references()
+        cls.populate_zplanes()
+        cls.populate_mag_bin_overlap()
+        sp = SlidesPopulator()
+        sp.populate_all()
 
 
-    def populate_measurements(self):
-        self.populate_measurement_numbers()
-        self.populate_low_mag_references()
-        self.populate_zplanes()
-        self.populate_mag_bin_overlap()
-        p1 = Project.objects.get(key="ML_HEA")
-        p2 = Project.objects.get(key="KB_CAH")
-        researcher = Researcher.objects.get(employee_key="A_K")
-        sl1 = Slide.objects.get(barcode_id="S000000729")
-        sl2 = Slide.objects.get(barcode_id="S000000724")
+class MeasurementsPopulator:
 
-        t = Technology.objects.get(name="RNAscope 4-plex")
-        td = TeamDirectory.objects.get(name="t283_imaging")
-
-        mn1 = MeasurementNumber.objects.get(name="1a")
-        mn2 = MeasurementNumber.objects.get(name="1b")
+    @staticmethod
+    def get_sample_measurement() -> Measurement:
+        """Create an instance of Measurement for testing."""
+        p1 = Project.objects.first()
+        researcher = Researcher.objects.first()
+        t = Technology.objects.first()
+        td = TeamDirectory.objects.first()
+        mn1 = MeasurementNumber.objects.first()
         lmr1 = LowMagReference.objects.first()
-        lmr2 = LowMagReference.objects.last()
         mbo1 = MagBinOverlap.objects.first()
-        mbo2 = MagBinOverlap.objects.last()
         z1 = ZPlanes.objects.first()
-        z2 = ZPlanes.objects.last()
-        m1 = Measurement.objects.get_or_create(researcher=researcher,
-                                               project=p1,
-                                               technology=t,
-                                               automated_slide_id="TM_RCC_00FZ",
-                                               automated_plate_id="191010_174405-V",
-                                               automated_slide_num=1,
-                                               image_cycle=1,
-                                               measurement=mn1,
-                                               low_mag_reference=lmr1,
-                                               mag_bin_overlap=mbo1,
-                                               z_planes=z1,
-                                               notes_1="Whole section; DAPI 520 570 650 // 425",
-                                               notes_2="Tissue section failed",
-                                               team_directory=td)
-        m2 = Measurement.objects.get_or_create(researcher=researcher,
-                                               project=p2,
-                                               technology=t,
-                                               automated_slide_id="TM_RCC_00FW",
-                                               automated_plate_id="191010_174402-V",
-                                               automated_slide_num=1,
-                                               image_cycle=1,
-                                               measurement=mn2,
-                                               low_mag_reference=lmr2,
-                                               mag_bin_overlap=mbo2,
-                                               z_planes=z2,
-                                               notes_1="Whole section; DAPI 520 570 650 // 425",
-                                               notes_2="Tissue section failed",
-                                               team_directory=td)
-        m3 = Measurement.objects.get_or_create(researcher=researcher,
-                                               project=p2,
-                                               technology=t,
-                                               automated_slide_id="TM_RCC_00FR",
-                                               automated_plate_id="191010_174401-V",
-                                               automated_slide_num=1,
-                                               image_cycle=1,
-                                               measurement=mn1,
-                                               low_mag_reference=lmr2,
-                                               mag_bin_overlap=mbo2,
-                                               z_planes=z1,
-                                               notes_1="Whole section; DAPI 520 570 650 // 425",
-                                               notes_2="Tissue section failed",
-                                               team_directory=td)
+        return Measurement(researcher=researcher,
+                           project=p1,
+                           technology=t,
+                           image_cycle=1,
+                           measurement_number=mn1,
+                           low_mag_reference=lmr1,
+                           mag_bin_overlap=mbo1,
+                           z_planes=z1,
+                           notes_1="Whole section; DAPI 520 570 650 // 425",
+                           notes_2="Tissue section failed",
+                           team_directory=td)
 
-        ch1 = Channel.objects.get(name="Atto 425")
-        ch2 = Channel.objects.get(name="Opal 520")
+    @staticmethod
+    def _create_automated_plate_slots(measurement: Measurement) -> None:
+        """Create instances of Slots obtained through automated Phenix process for a given measurement for testing."""
+        for slot_num in range(1, MAX_SLOTS + 1):
+            automated_slide = AutomatedSlide.objects.get_or_create(name="sssss")[0]
+            p = Slot.objects.get_or_create(measurement=measurement,
+                                           automated_slide=automated_slide,
+                                           automated_slide_num=slot_num)[0]
+            slide = Slide.objects.first()
+            for section in slide.section_set.all():
+                p.sections.add(section)
 
-        t1 = Target.objects.get(name="MYH11")
-        t2 = Target.objects.get(name="dapB")
-        t3 = Target.objects.get(name="POLR2A")
-        cht1 = ChannelTarget.objects.get(channel=ch1, target=t1)
-        cht2 = ChannelTarget.objects.get(channel=ch1, target=t2)
-        cht3 = ChannelTarget.objects.get(channel=ch1, target=t3)
-        cht4 = ChannelTarget.objects.get(channel=ch2, target=t1)
-        cht5 = ChannelTarget.objects.get(channel=ch2, target=t2)
-        cht6 = ChannelTarget.objects.get(channel=ch2, target=t3)
+    @classmethod
+    def create_automated_measurement_with_multiple_slots(cls) -> Measurement:
+        """Create a measurement for testing with instances of Slots obtained through automated Phenix process."""
+        m = cls.get_sample_measurement()
+        m.save()
+        cls._create_automated_plate_slots(m)
+        return m
 
-        m1[0].channel_target_pairs.add(cht1)
-        m1[0].channel_target_pairs.add(cht2)
-        m1[0].channel_target_pairs.add(cht3)
-        m3[0].channel_target_pairs.add(cht1)
-        m3[0].channel_target_pairs.add(cht2)
-        m3[0].channel_target_pairs.add(cht3)
-        m2[0].channel_target_pairs.add(cht4)
-        m2[0].channel_target_pairs.add(cht5)
-        m2[0].channel_target_pairs.add(cht6)
+    @staticmethod
+    def _create_manual_plate_slots(measurement: Measurement) -> None:
+        """Create instances of Slots obtained through manual processing for a given measurement for testing."""
+        pass
 
-        sc11 = Section.objects.get(number=1, slide=sl1)
-        sc12 = Section.objects.get(number=2, slide=sl1)
-        sc13 = Section.objects.get(number=3, slide=sl1)
-        sc21 = Section.objects.get(number=1, slide=sl2)
-        sc22 = Section.objects.get(number=2, slide=sl2)
-
-        m1[0].sections.add(sc11)
-        m1[0].sections.add(sc12)
-        m1[0].sections.add(sc13)
-        m2[0].sections.add(sc21)
-        m2[0].sections.add(sc22)
-        m3[0].sections.add(sc21)
-
-    def populate_all(self):
-        self.populate_cellgen_project()
-        self.populate_researchers()
-        self.populate_microscopes()
-        self.populate_technologies()
-        self.populate_team_dirs()
-        sp = SamplesPopulator()
-        sp.populate_samples()
-        self.populate_slides()
-        self.populate_channel_target_pairs()
-        self.populate_sections()
-        self.populate_measurement_numbers()
-        self.populate_low_mag_references()
-        self.populate_zplanes()
-        self.populate_mag_bin_overlap()
-        self.populate_measurements()
+    @classmethod
+    def create_manual_measurement_with_multiple_slots(cls) -> Measurement:
+        """Create a measurement for testing with instances of Slots obtained through manual imaging."""
+        mn2 = MeasurementNumber.objects.last()
+        m = cls.get_sample_measurement()
+        m.measurement_number = mn2
+        m.save()
+        cls._create_manual_plate_slots(m)
+        return m
 
 
 if __name__ == "__main__":
-    p = MeasurementsPopulator()
-    p.populate_all()
+    MeasurementsPrerequisitesPopulator.populate_all_prerequisites()

@@ -1,80 +1,32 @@
-import uuid
 from datetime import date
-from typing import Tuple
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.utils import timezone
 
-from experiments.models.base import NameModel
-from experiments.models.sample import Sample
 from experiments.constants import *
+from experiments.models.base import NameModel, Path
 
 
-class Project(models.Model):
-    key = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.key
+class Project(NameModel):
+    pass
 
 
-class TeamDirectory(NameModel):
+class Plate(NameModel):
     pass
 
 
 class Technology(NameModel):
-    pass
+    class Meta:
+        verbose_name_plural = "Technologies"
 
 
 class Researcher(models.Model):
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)
-    employee_key = models.CharField(max_length=6, primary_key=True)
+    login = models.CharField(max_length=6, unique=True)
 
     def __str__(self):
-        return self.employee_key
-
-
-class Slide(models.Model):
-    barcode_id = models.CharField(max_length=20, primary_key=True, help_text="This is the slide number "
-                                                                             "or ID assigned during sectioning")
-
-    def __str__(self):
-        return self.barcode_id
-
-    @classmethod
-    def get_random_slide_with_three_sections(cls) -> "Slide":
-        for slide in cls.objects.all():
-            if len(slide.section_set.all()) >= 3:
-                return slide
-
-    @classmethod
-    def get_slide(cls, barcode_id):
-        try:
-            return Slide.objects.get(barcode_id=barcode_id)
-        except ObjectDoesNotExist:
-            raise ValueError(f"Slide with barcode {barcode_id} does not exist")
-
-
-class Section(models.Model):
-    class Meta:
-        unique_together = (('number', 'slide', 'sample'),)
-
-    number = models.IntegerField(help_text="In the case where there are multiple sections on the slide "
-                                           "but only one imaged, which one? (1 = top, 2 = second from top… N = bottom)")
-    sample = models.ForeignKey(Sample, on_delete=models.SET_NULL, null=True)
-    slide = models.ForeignKey(Slide, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.number} {self.sample} {self.slide}"
-
-    @classmethod
-    def get_section(cls, num, slide):
-        try:
-            return cls.objects.get(number=num,
-                                   slide=slide)
-        except ObjectDoesNotExist:
-            raise ValueError(f"Section number {num} does not exist for slide {slide}")
+        return self.login
 
 
 class Channel(NameModel):
@@ -97,16 +49,9 @@ class ChannelTarget(models.Model):
     def __str__(self):
         return str(self.channel) + self.SEPARATOR + str(self.target)
 
-    @classmethod
-    def get_channel_and_target_from_str(cls, name: str) -> Tuple[str, str]:
-        if type(name) is not str or cls.SEPARATOR not in name:
-            raise ValueError(f"The string '{name}' is not a ChannelTarget string")
-        channel, target = name.split(cls.SEPARATOR)
-        return channel, target
-
 
 class Experiment(NameModel):
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
+    pass
 
 
 class MeasurementNumber(NameModel):
@@ -122,35 +67,41 @@ class MagBinOverlap(NameModel):
 
 
 class ZPlanes(NameModel):
+    class Meta:
+        verbose_name_plural = "ZPlanes"
+
+
+class TeamDirectory(NameModel):
+    class Meta:
+        verbose_name_plural = "TeamDirectories"
+
+
+class ExportLocation(Path):
+    pass
+
+
+class ArchiveLocation(Path):
     pass
 
 
 class Measurement(models.Model):
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['automated_slide_id', 'automated_plate_id',
-                                            'measurement', 'date'], name="unique_measurement"),
+            models.UniqueConstraint(fields=['plate',
+                                            'measurement_number', 'date'], name="unique_measurement"),
         ]
 
-    uuid = models.UUIDField(unique=True, default=uuid.uuid4)
-    sections = models.ManyToManyField(Section)
-    researcher = models.ForeignKey(Researcher, on_delete=models.CASCADE,
+    researcher = models.ForeignKey(Researcher, on_delete=models.SET_NULL, null=True,
                                    help_text="Pre-validated list of Phenix users")
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True,
+    project = models.ForeignKey(Project, on_delete=models.CASCADE,
                                 help_text="Pre-validated list of T283 projects")
+    experiment = models.ForeignKey(Experiment, on_delete=models.CASCADE, null=True, blank=True,
+                                   help_text="Pre-validated list of T283 projects")
     technology = models.ForeignKey(Technology, on_delete=models.CASCADE,
                                    help_text="How was the slide stained?")
-    automated_slide_id = models.CharField(max_length=20,
-                                          help_text="This is the ID entered into the Phenix when imaging. "
-                                                    "It should comprise the project code and then the slide ID "
-                                                    "from the BOND or a manual ID of the form ABXXXX "
-                                                    "where AB is the researcher's initials.")
-    automated_plate_id = models.CharField(max_length=30, null=True, blank=True,
-                                          help_text="These columns are needed only "
-                                                    "when using the automated plate handler.")
-    automated_slide_num = models.CharField(max_length=20, blank=True, null=True,
-                                           help_text="These columns are needed only "
-                                                     "when using the automated plate handler.")
+    plate = models.ForeignKey(Plate, null=True, blank=True, on_delete=models.SET_NULL,
+                              help_text="A plate name given by automated microscopy system "
+                                        "when imaged automatically")
     image_cycle = models.IntegerField(help_text="Every time the coverslip is removed, "
                                                 "the section restained with something, "
                                                 "the image cycle increases incrementally")
@@ -158,17 +109,17 @@ class Measurement(models.Model):
                                                   help_text="Which channels are being used in imaging, "
                                                             "and what targets do they represent? The channel name "
                                                             "selected should exactly match "
-                                                            "the channels used on the Phenix.													")
+                                                            "the channels used on the Phenix.")
     date = models.DateField(default=date.today,
                             help_text="Date that the image was taken")
-    measurement = models.ForeignKey(MeasurementNumber, on_delete=models.CASCADE,
-                                    help_text="Measurement number, assigned automatically by the Phenix")
-    low_mag_reference = models.ForeignKey(LowMagReference, on_delete=models.SET_NULL, blank=True, null=True,
+    measurement_number = models.ForeignKey(MeasurementNumber, on_delete=models.CASCADE,
+                                           help_text="Measurement number assigned automatically by the Phenix")
+    low_mag_reference = models.ForeignKey(LowMagReference, on_delete=models.SET_NULL, null=True,
                                           help_text="A low magnification image (e.g. 5X or 10X scan "
                                                     "of the whole slide with DAPI only) may be used as a reference "
                                                     "for other images, in alignment and/or viewing. For other images, "
                                                     "the related image number should be referenced.")
-    mag_bin_overlap = models.ForeignKey(MagBinOverlap, models.CASCADE,
+    mag_bin_overlap = models.ForeignKey(MagBinOverlap, models.SET_NULL, null=True,
                                         help_text="Magnification, binning level, and tile overlap for the image")
     z_planes = models.ForeignKey(ZPlanes, on_delete=models.SET_NULL, blank=True, null=True,
                                  help_text="Number of z-planes x depth of each z-plane")
@@ -179,39 +130,23 @@ class Measurement(models.Model):
     notes_2 = models.TextField(max_length=200, blank=True, null=True,
                                help_text="Notes about the resulting image: "
                                          "out of focus, poor signal in a channel, good, etc.")
-    export_location = models.CharField(max_length=200, blank=True, null=True,
-                                       help_text="If the image dataset has been exported as a measurement "
-                                                 "via data management, this is the export location. "
-                                                 "This is NOT the same as basic image exports "
-                                                 "for presentations, lab notes, etc.")
-    archive_location = models.CharField(max_length=200, blank=True, null=True,
-                                        help_text="If the image dataset has been exported as an archived measurement, "
-                                                  "this is the export location")
+    post_stain = models.TextField(max_length=200, blank=True, null=True,
+                                  help_text="Notes about additional chemical treatments used "
+                                            "to improve imaging without changing the targets or fluorophores.")
+    harmony_copy_deleted = models.BooleanField(default=False, blank=True)
+    export_location = models.ForeignKey(ExportLocation, blank=True, null=True, on_delete=models.SET_NULL,
+                                        help_text="Folder with the resulting image")
+    archive_location = models.ForeignKey(ArchiveLocation, blank=True, null=True, on_delete=models.SET_NULL,
+                                         help_text="Folder with the resulting image if archived")
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True, blank=True)
-    imported_on = models.DateTimeField(default=timezone.now)
+    imported_on = models.DateTimeField(default=timezone.now, editable=False)
 
     DATE_FORMAT = "%d.%m.%Y"
-    COLUMNS = [RESEARCHER, PROJECT, TECHNOLOGY, LOW_MAG_REFERENCE, MAG_BIN_OVERLAP, MEASUREMENT, ZPLANES, TEAM_DIR]
-    REQUIRED_COLUMNS = {UUID, MODE, RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE, TECHNOLOGY,
-                        IMAGE_CYCLE, DATE, MAG_BIN_OVERLAP, SECTION_NUM}
-
-    def _check_unique_if_plate_id_is_null(self):
-        """
-        unique together does not treat nulls as expected (null != null), so we need to add one extra check
-        to prevent null plate_ids to be treated as unique entries
-        https://code.djangoproject.com/ticket/28545
-        """
-        if not self.automated_plate_id:
-            duplicates = Measurement.objects.filter(measurement=self.measurement,
-                                                    automated_slide_id=self.automated_slide_id,
-                                                    date=self.date,
-                                                    automated_plate_id=self.automated_plate_id)
-            if duplicates:
-                raise ValidationError('Measurement with this '
-                                      'Automated slide id, Automated plate id, Measurement and Date already exists.')
-
-    def clean(self):
-        self._check_unique_if_plate_id_is_null()
+    VALIDATION_NEEDED = {RESEARCHER, PROJECT, SPECIES, TECHNOLOGY, CHANNEL}
 
     def __str__(self):
-        return f"{self.sections} {self.date} {self.measurement}"
+        return f"{self.id} {self.date}"
+
+    def has_slide_number(self, slide_number: int) -> bool:
+        """Return True if measurement has this automated_slide_num among its slots."""
+        return slide_number in {slot.automated_slide_num for slot in self.slot_set.all()}

@@ -4,8 +4,8 @@ from abc import abstractmethod
 from typing import List, Type
 
 from experiments.xls.stream_logging import StreamLogging
-from experiments.xls.column_importer import ColumnExcelImporter
-from experiments.xls.measurement_importer import MeasurementsExcelImporter
+from experiments.xls.keys_importer import ColumnXLSImporter
+from experiments.xls.measurement_xls_importer import MeasurementsXLSImporter
 
 
 class FileImporterMode(enum.Enum):
@@ -38,15 +38,15 @@ class FileImporter:
 class MeasurementsFileImporter(FileImporter):
 
     def import_file(self) -> None:
-        si = MeasurementsExcelImporter(self.filename)
+        si = MeasurementsXLSImporter(self.filename)
         si.import_measurements()
 
 
-class EverythingFileImporter(FileImporter):
+class KeysFileImporter(FileImporter):
 
     def import_file(self) -> None:
-        ci = ColumnExcelImporter(self.filename)
-        ri = MeasurementsExcelImporter(self.filename)
+        ci = ColumnXLSImporter(self.filename)
+        ri = MeasurementsXLSImporter(self.filename)
         ci.import_all_columns()
         ri.import_measurements()
 
@@ -56,7 +56,7 @@ class FileImporterFactory:
     @classmethod
     def get_importer(cls, mode: FileImporterMode) -> Type[FileImporter]:
         if mode == FileImporterMode.WHOLE_FILE:
-            return EverythingFileImporter
+            return KeysFileImporter
         elif mode == FileImporterMode.MEASUREMENTS:
             return MeasurementsFileImporter
 
