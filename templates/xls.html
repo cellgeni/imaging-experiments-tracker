@@ -5,7 +5,15 @@
         <form action={% url 'upload-xls'  %} method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form }}
-            <button class="btn btn-primary" type="submit" id="everything-upload-button">Upload</button>
+            <button class="btn btn-primary" type="submit">Upload</button>
+        </form>
+    </div>
+    <div class="file-upload-block">
+        <h5>Delete measurements from an XLS file</h5>
+        <form action={% url 'delete'  %} method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form }}
+            <button class="btn btn-primary" type="submit">Upload</button>
         </form>
     </div>
 

@@ -16,7 +16,7 @@ from experiments.xls.write.generate_template import MeasurementsSubmissionTempla
 from experiments.xls.write.writer import ExcelFileWriter
 
 
-class XLSImportView(View):
+class XLSProcessView(View):
     """
     Generic view to serve as a base for other views that import an Excel file
     """
@@ -47,7 +47,7 @@ class XLSImportView(View):
                                                     'log': log})
 
 
-class MeasurementXLSImportView(XLSImportView):
+class MeasurementXLSImportView(XLSProcessView):
     """
     Imports measurements from an XLS file
     """
@@ -56,13 +56,20 @@ class MeasurementXLSImportView(XLSImportView):
         return FileImporterMode.MEASUREMENTS
 
 
-class WholeFileXLSImportView(XLSImportView):
+class WholeFileXLSImportView(XLSProcessView):
     """
     Imports all columns from an XLS file
     """
 
     def get_mode(self) -> FileImporterMode:
         return FileImporterMode.WHOLE_FILE
+
+
+class XLSDeleteView(XLSProcessView):
+    """Delete measurements from a file"""
+
+    def get_mode(self) -> FileImporterMode:
+        return FileImporterMode.DELETE
 
 
 class ExcelDownloadView(View):
