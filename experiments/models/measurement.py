@@ -150,3 +150,21 @@ class Measurement(models.Model):
     def has_slide_number(self, slide_number: int) -> bool:
         """Return True if measurement has this automated_slide_num among its slots."""
         return slide_number in {slot.automated_slide_num for slot in self.slot_set.all()}
+
+    def copy_non_core_attributes(self, new: 'Measurement') -> None:
+        """Copy attributes that do not make a measurement unique from a new measurement"""
+        self.researcher = new.researcher
+        self.image_cycle = new.image_cycle
+        self.mag_bin_overlap = new.mag_bin_overlap
+        self.project = new.project
+        self.technology = new.technology
+        self.low_mag_reference = new.low_mag_reference
+        self.z_planes = new.z_planes
+        self.notes_1 = new.notes_1
+        self.notes_2 = new.notes_2
+        self.export_location = new.export_location
+        self.archive_location = new.archive_location
+        self.team_directory = new.team_directory
+        self.harmony_copy_deleted = new.harmony_copy_deleted
+        self.post_stain = new.post_stain
+        self.save()
