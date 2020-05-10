@@ -3,6 +3,7 @@ import datetime
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
+from experiments import helpers
 from experiments.constants import *
 from experiments.populate.measurement import MeasurementsPrerequisitesPopulator
 from experiments.xls.date_parsers import DateParser
@@ -21,16 +22,6 @@ class XLSMeasurementsParserTestCase(TestCase):
     def test_parse_sections(self):
         # TODO: check section number correspond to samples
         pass
-
-    #     slide = Slide.get_random_slide_with_three_sections()
-    #     row = {
-    #         SLIDE_BARCODE: str(slide),
-    #         SECTION_NUM: "1,3",
-    #     }
-    #     mpp = XLSRowParser(row)
-    #     section1 = Section.objects.get(number=1, slide=slide)
-    #     section3 = Section.objects.get(number=3, slide=slide)
-    #     self.assertEqual(mpp.parse_sections(), {section1, section3})
 
     def test_parse_channel_targets(self):
         # TODO: test if channel and target are not present together
@@ -54,8 +45,8 @@ class XLSMeasurementsParserTestCase(TestCase):
         mpp = XLSRowParser(row)
         channel_targets = mpp.parse_channel_targets()
         for i in range(1, MAX_CHANNELS + 1):
-            self.assertEqual(row[CHANNEL + f"{i}"], channel_targets[i - 1].channel.name)
-            self.assertEqual(row[TARGET + f"{i}"], channel_targets[i - 1].target.name)
+            self.assertEqual(row[helpers.get_channel_column_name(i)], channel_targets[i - 1].channel.name)
+            self.assertEqual(row[helpers.get_target_column_name(i)], channel_targets[i - 1].target.name)
 
     def test_parse_section_numbers(self):
         self.assertEqual([1, 2, 3], XLSRowParser._parse_section_numbers_string("1,2,3"))

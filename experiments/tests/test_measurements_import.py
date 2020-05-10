@@ -20,23 +20,31 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
         row = ExcelRowInfoGenerator.get_sample_info()
         MeasurementImporter(row).import_measurement()
         self.check_row_is_in_database(row)
-        ch1 = Channel.objects.get_or_create(name="channel1")
-        ch2 = Channel.objects.get_or_create(name="channel2")
-        t1 = Target.objects.get_or_create(name="t1")
-        t2 = Target.objects.get_or_create(name="t2")
-        t3 = Target.objects.get_or_create(name="t3")
-        new_row_info = {
+        ch1 = Channel.objects.get_or_create(name="channel1")[0]
+        ch2 = Channel.objects.get_or_create(name="channel2")[0]
+        t1 = "t1"
+        t2 = "t2"
+        t3 = "t3"
+        new_row = {
             RESEARCHER: str(Researcher.objects.last()),
             PROJECT: str(Project.objects.last()),
-            SLIDE_BARCODE: str(Slide.objects.last().barcode),
             TECHNOLOGY: str(Technology.objects.last()),
+            MEASUREMENT_NUMBER: row[MEASUREMENT_NUMBER],
+            DATE: row[DATE],
+            AUTOMATED_PLATEID: row.get(AUTOMATED_PLATEID),
+            AUTOMATED_SLIDEN: row[AUTOMATED_SLIDEN],
+            SLIDE_ID: row[SLIDE_ID],
+            SLIDE_BARCODE: "4",
             IMAGE_CYCLE: 4,
             TISSUE1: "some",
             SAMPLE1: "some",
+            AGE1: "age1",
             TISSUE2: "some2",
             SAMPLE2: "some2",
+            GENOTYPE2: "genotype2",
             TISSUE3: "some3",
             SAMPLE3: "some3",
+            AGE3: "some3",
             CHANNEL1: str(ch1),
             TARGET1: str(t1),
             CHANNEL2: str(ch2),
@@ -47,20 +55,19 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
             TARGET4: str(t3),
             CHANNEL5: str(ch2),
             TARGET5: str(t3),
-            LOW_MAG_REFERENCE: str(LowMagReference.objects.last()),
-            MAG_BIN_OVERLAP: str(MagBinOverlap.objects.last()),
+            LOW_MAG_REFERENCE: "some",
+            MAG_BIN_OVERLAP: "some",
             SECTION_NUM: "2, 3",
-            ZPLANES: str(ZPlanes.objects.last()),
+            ZPLANES: "some",
             NOTES_1: "SMTH2",
             NOTES_2: "SMTH2",
             POST_STAIN: "smth2",
             HARMONY_COPY: "No",
-            EXPORT_LOCATION: str(ExportLocation.objects.last()),
-            ARCHIVE_LOCATION: str(ArchiveLocation.objects.last()),
-            TEAM_DIR: str(TeamDirectory.objects.last()),
+            EXPORT_LOCATION: "some",
+            ARCHIVE_LOCATION: "some",
+            TEAM_DIR: "some",
         }
-        new_row = row.copy()
-        new_row.update(new_row_info)
+        MeasurementImporter(new_row).import_measurement()
         self.check_row_is_in_database(new_row)
         with self.assertRaises(AssertionError):
             self.check_row_is_in_database(row)

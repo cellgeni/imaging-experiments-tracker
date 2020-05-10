@@ -4,6 +4,7 @@ from typing import List, Union, Dict
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 
+from experiments import helpers
 from experiments.constants import *
 from experiments.helpers import is_empty
 from experiments.models import ChannelTarget, Researcher, Measurement, \
@@ -14,11 +15,47 @@ from experiments.xls.date_parsers import DateParser
 from experiments.xls.slides_importer import SamplesImporter, SlidesImporter
 
 
-class XLSRowParser:
-    """A class to implement parsing a Measurement object and related objects from a Pandas row."""
+class RowParser:
 
     def __init__(self, row: Dict):
         self.row = row
+
+
+class ChannelTargetParser(RowParser):
+
+    def check_channels(self) -> None:
+        """Raise an error if any of the channels doesn't exist in a database."""
+        for i in range(1, MAX_CHANNELS + 1):
+            channel = self.row.get(helpers.get_channel_column_name(i))
+            if channel:
+                try:
+                    _ = Channel.objects.get(name=channel)
+                except ObjectDoesNotExist:
+                    raise ValueError(f"Channel {channel} does not exist")
+
+    def parse_channel_targets(self) -> List[ChannelTarget]:
+        """Get or create ChannelTarget objects from a row."""
+        self.check_channels()
+        result = []
+        for i in range(1, MAX_CHANNELS + 1):
+            # TODO: refactor
+            channel_column = helpers.get_channel_column_name(i)
+            target_column = helpers.get_target_column_name(i)
+            channel_name = self.row.get(channel_column)
+            target_name = self.row.get(target_column)
+            if bool(channel_name) != bool(target_name):
+                raise ValueError("Channel and target must be present together, "
+                                 f"problematic columns are: {channel_column}, {target_column}")
+            if channel_name and target_name:
+                channel = Channel.objects.get(name=channel_name)
+                target = Target.objects.get_or_create(name=target_name)[0]
+                cht = ChannelTarget.objects.get_or_create(channel=channel, target=target)[0]
+                result.append(cht)
+        return result
+
+
+class XLSRowParser(RowParser):
+    """A class to implement parsing a Measurement object and related objects from a Pandas row."""
 
     @staticmethod
     def _parse_section_numbers_string(sections_string: str) -> List[int]:
@@ -43,21 +80,8 @@ class XLSRowParser:
 
     def parse_channel_targets(self) -> List[ChannelTarget]:
         """Get or create ChannelTarget objects from a row."""
-        result = []
-        for i in range(1, MAX_CHANNELS + 1):
-            channel_column = CHANNEL + f"{i}"
-            target_column = TARGET + f"{i}"
-            channel_name = self.row.get(channel_column)
-            target_name = self.row.get(target_column)
-            if bool(channel_name) != bool(target_name):
-                raise ValueError("Channel and target must be present together, "
-                                 f"problematic columns are: {channel_column}, {target_column}")
-            if channel_name and target_name:
-                channel = Channel.objects.get_or_create(name=channel_name)[0]
-                target = Target.objects.get_or_create(name=target_name)[0]
-                cht = ChannelTarget.objects.get_or_create(channel=channel, target=target)[0]
-                result.append(cht)
-        return result
+        parser = ChannelTargetParser(self.row)
+        return parser.parse_channel_targets()
 
     def _get_or_create_model_instance(self, column: str, value: str) -> Union[models.Model, None]:
         try:
