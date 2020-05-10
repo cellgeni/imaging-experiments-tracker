@@ -1,25 +1,29 @@
 import datetime
 from typing import Union
 
+from experiments import RowT
 from experiments.models import Measurement, Slot, AutomatedSlide, Plate, MeasurementNumber
 from experiments.constants import *
 from experiments.xls import EntitiesImporter, xls_logger as logger
-from experiments.xls.row_parser import XLSRowParser
+from experiments.xls.row_parser import XLSRowParser, ChannelTargetParser
 
 
 class MeasurementModifier(EntitiesImporter):
 
-    def __init__(self, row):
+    def __init__(self, row: RowT):
         super(MeasurementModifier, self).__init__(row)
         self.parser = XLSRowParser(row)
 
-    def create_slot(self, measurement) -> None:
-        """Create new slot and add it to the measurement."""
+    def get_or_create_slot(self, measurement: Measurement) -> Slot:
         automated_slide = self.parser.parse_automated_slide()
         slot_num = self.parser.parse_automated_slide_num()
-        slot = Slot.objects.create(automated_slide=automated_slide,
-                                   automated_slide_num=slot_num,
-                                   measurement=measurement)
+        return Slot.objects.get_or_create(automated_slide=automated_slide,
+                                          automated_slide_num=slot_num,
+                                          measurement=measurement)[0]
+
+    def create_slot(self, measurement) -> None:
+        """Create new slot and add it to the measurement."""
+        slot = self.get_or_create_slot(measurement)
         self.add_sections(slot)
 
     def add_sections(self, slot) -> None:
@@ -27,6 +31,10 @@ class MeasurementModifier(EntitiesImporter):
         for section in self.parser.parse_sections():
             if section.number in numbers:
                 slot.sections.add(section)
+
+    def create_channel_targets(self, measurement: Measurement) -> None:
+        for chtp in self.parser.parse_channel_targets():
+            measurement.channel_target_pairs.add(chtp)
 
 
 class MeasurementCreator(MeasurementModifier):
@@ -39,16 +47,35 @@ class MeasurementCreator(MeasurementModifier):
         self.create_channel_targets(measurement)
         return measurement
 
-    def create_channel_targets(self, measurement: Measurement) -> None:
-        for chtp in self.parser.parse_channel_targets():
-            measurement.channel_target_pairs.add(chtp)
-
 
 class MeasurementUpdater(MeasurementModifier):
 
-    def update(self, measurement: Measurement) -> None:
+    def __init__(self, row: RowT, original_measurement: Measurement):
+        super().__init__(row)
+        self.original_measurement = original_measurement
+
+    def update(self) -> None:
         """Walk through the fields of all of the related entities and modify them if needed."""
-        pass
+        self.update_measurement_attributes()
+        self.update_slot()
+
+    def update_measurement_attributes(self) -> None:
+        """Update Measurement object."""
+        updated_measurement = self.parser.get_measurement()
+        self.original_measurement.copy_non_core_attributes(updated_measurement)
+        self.update_channel_targets()
+
+    def update_channel_targets(self) -> None:
+        """Remove the old channel targets if all new channel names are valid
+        and add the new ones."""
+        ChannelTargetParser(self.row).check_channels()
+        self.original_measurement.channel_target_pairs.clear()
+        self.create_channel_targets(self.original_measurement)
+
+    def update_slot(self):
+        slot = self.get_or_create_slot(self.original_measurement)
+        slot.sections.clear()
+        self.add_sections(slot)
 
 
 class MeasurementImporter(MeasurementModifier):
@@ -64,7 +91,7 @@ class MeasurementImporter(MeasurementModifier):
 
     def extend_or_update(self, existing_measurement: Measurement) -> Measurement:
         if existing_measurement.has_slide_number(self.parser.parse_automated_slide_num()):
-            MeasurementUpdater(self.row).update(existing_measurement)
+            MeasurementUpdater(self.row, existing_measurement).update()
             logger.info(f"Updated measurement with id {existing_measurement.id}")
         else:
             self.create_slot(existing_measurement)
