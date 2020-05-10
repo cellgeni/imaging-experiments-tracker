@@ -11,6 +11,7 @@ from experiments.xls.measurement_xls_importer import MeasurementsXLSImporter
 class FileImporterMode(enum.Enum):
     WHOLE_FILE = 1
     MEASUREMENTS = 2
+    DELETE = 3
 
 
 class FileImporter:
@@ -46,17 +47,23 @@ class KeysFileImporter(FileImporter):
 
     def import_file(self) -> None:
         ci = ColumnXLSImporter(self.filename)
-        ri = MeasurementsXLSImporter(self.filename)
         ci.import_all_columns()
-        ri.import_measurements()
+
+
+class DeletionFileImporter(FileImporter):
+
+    def import_file(self) -> None:
+        si = MeasurementsXLSImporter(self.filename)
+        si.delete_measurements()
 
 
 class FileImporterFactory:
 
     @classmethod
     def get_importer(cls, mode: FileImporterMode) -> Type[FileImporter]:
-        if mode == FileImporterMode.WHOLE_FILE:
-            return KeysFileImporter
-        elif mode == FileImporterMode.MEASUREMENTS:
-            return MeasurementsFileImporter
-
+        mapping = {
+            FileImporterMode.WHOLE_FILE: KeysFileImporter,
+            FileImporterMode.MEASUREMENTS: MeasurementsFileImporter,
+            FileImporterMode.DELETE: DeletionFileImporter
+        }
+        return mapping[mode]

@@ -33,3 +33,15 @@ class MeasurementsXLSImporter(XLSImporter):
                 logger.error(f"Failed to import measurement with row number {i+1}")
                 logger.error(e)
                 traceback.print_exc()
+
+    def delete_measurements(self):
+        for i, row in enumerate(self.get_rows()):
+            try:
+                if MeasurementImporter(row).delete_measurement():
+                    logger.info(f"Deleted measurement with row number {i+1}")
+                else:
+                    logger.info(f"Measurement with row number {i+1} does not exist in the database")
+            except Exception as e:
+                logger.error(f"Failed to delete measurement with row number {i+1}")
+                logger.error(e)
+                traceback.print_exc()

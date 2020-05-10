@@ -98,6 +98,14 @@ class MeasurementImporter(MeasurementModifier):
             logger.info(f"Created new slot in measurement with id {existing_measurement.id}")
         return existing_measurement
 
+    def delete_measurement(self) -> bool:
+        """Delete a measurement and return True if was deleted or False if not found"""
+        existing_measurement = self.find_existing_measurement()
+        if existing_measurement:
+            existing_measurement.delete()
+            return True
+        return False
+
     def find_existing_measurement(self) -> Union[Measurement, None]:
         """Find existing measurement from a row."""
         automated_slide = self.parser.parse_automated_slide()
