@@ -1,6 +1,8 @@
-from typing import Any
+from typing import Any, Union
 
 from experiments.constants import CHANNEL, TARGET
+
+NumStr = Union[int, str]
 
 
 def is_empty(s: Any):
@@ -9,14 +11,19 @@ def is_empty(s: Any):
     return s is None or s == "" or s == "nan" or s == "None"
 
 
-def get_channel_column_name(i: int) -> str:
+def get_channel_column_name(i: NumStr) -> str:
     """Return the name of a channel column with number i
     Needed if the rule for creating channel columns changes."""
     return f"{CHANNEL}{i}"
 
 
-def get_target_column_name(i: int) -> str:
+def get_target_column_name(i: NumStr) -> str:
     """Return the name of a target column with number i
     Needed if the rule for creating target columns changes."""
     return f"{TARGET}{i}"
 
+
+def get_sample_attributes_column_name(column: str, i: NumStr) -> str:
+    """Return the name of a samples attribute column with number i
+    Needed if the rule for creating samples attributes columns changes."""
+    return f"{column}_{i}"

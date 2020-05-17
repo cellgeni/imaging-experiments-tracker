@@ -3,7 +3,6 @@ from typing import Union
 
 from experiments import RowT
 from experiments.models import Measurement, Slot, AutomatedSlide, Plate, MeasurementNumber
-from experiments.constants import *
 from experiments.xls import EntitiesImporter, xls_logger as logger
 from experiments.xls.row_parser import XLSRowParser, ChannelTargetParser
 

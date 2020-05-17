@@ -46,6 +46,13 @@ class ChannelTarget(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     target = models.ForeignKey(Target, on_delete=models.SET_NULL, null=True)
 
+    @classmethod
+    def create_channel_target(cls, channel_name: str, target_name: str) -> 'ChannelTarget':
+        """Create ChannelTarget object from channel name and target name."""
+        channel = Channel.objects.get(name=channel_name)
+        target = Target.objects.get_or_create(name=target_name)[0]
+        return cls.objects.get_or_create(channel=channel, target=target)[0]
+
     def __str__(self):
         return str(self.channel) + self.SEPARATOR + str(self.target)
 
@@ -141,7 +148,6 @@ class Measurement(models.Model):
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True, blank=True)
     imported_on = models.DateTimeField(default=timezone.now, editable=False)
 
-    DATE_FORMAT = "%d.%m.%Y"
     VALIDATION_NEEDED = {RESEARCHER, PROJECT, SPECIES, TECHNOLOGY, CHANNEL}
 
     def __str__(self):

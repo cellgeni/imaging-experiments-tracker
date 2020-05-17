@@ -14,36 +14,6 @@ EXCEL_TEMPLATE = os.path.join(os.path.dirname(__file__), "measurements_input.xls
 logging.basicConfig(level=logging.INFO)
 xls_logger = logging.getLogger(__name__)
 
-
-class XLSImporter:
-    """Base class for importing Excel files, contains Pandas dataframe with data."""
-
-    def __init__(self, file):
-        RESEARCHER_MAPPING = {
-            'K_R': 'kr19',
-            'KR': 'kr19',
-            'ET': 'et2',
-            'OB': 'ob5',
-            'SP': 'sp25',
-            'AA': 'aa16',
-            'CJ': 'cj7',
-            'CS': 'cs41',
-            'EE': 'ee2',
-            'JH': 'jh38',
-            'JP': 'jp27',
-            'KK': 'kk15',
-            'LR': 'lr17',
-            'MD': 'md18',
-            'TL': 'tl10'
-        }
-        replacements = {pd.np.nan: None,
-                        'N/A': None}
-        self.df = pd.read_excel(file).replace(replacements)
-        self.df.Researcher = self.df.Researcher.replace(RESEARCHER_MAPPING)
-
-    # for a given column name, returns a function that will create
-
-
 # a corresponding object given an input string
 MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
     ZPLANES: lambda name: ZPlanes.objects.get_or_create(name=name)[0],

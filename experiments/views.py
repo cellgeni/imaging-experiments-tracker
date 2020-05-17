@@ -1,6 +1,7 @@
 import datetime
+import os
 from abc import abstractmethod
-from typing import List
+from typing import List, Type
 
 import jwt
 from django.conf import settings
@@ -11,7 +12,8 @@ from django.views import View
 
 from experiments.forms import XLSUploadForm
 from experiments.xls import EXCEL_TEMPLATE
-from experiments.xls.file_importers import FileImporterMode, FileImporterFactory
+from experiments.xls.view_importers import ViewImporter, \
+    MeasurementsViewImporter, KeysViewImporter, DeletionViewImporter
 from experiments.xls.write.generate_template import MeasurementsSubmissionTemplateGenerator
 from experiments.xls.write.writer import ExcelFileWriter
 
@@ -29,11 +31,13 @@ class XLSProcessView(View):
 
     def dump_file_on_disk_import_it_and_get_import_log(self, f: File) -> List[str]:
         filename = ExcelFileWriter.dump_file_on_disk(f)
-        mode = self.get_mode()
-        return FileImporterFactory.get_importer(mode)(filename).import_and_get_log()
+        importer = self.get_importer()
+        log = importer(filename).import_and_get_log()
+        os.remove(filename)
+        return log
 
     @abstractmethod
-    def get_mode(self) -> FileImporterMode:
+    def get_importer(self) -> Type[ViewImporter]:
         pass
 
     def post(self, request, *args, **kwargs):
@@ -52,8 +56,8 @@ class MeasurementXLSImportView(XLSProcessView):
     Imports measurements from an XLS file
     """
 
-    def get_mode(self) -> FileImporterMode:
-        return FileImporterMode.MEASUREMENTS
+    def get_importer(self) -> Type[ViewImporter]:
+        return MeasurementsViewImporter
 
 
 class WholeFileXLSImportView(XLSProcessView):
@@ -61,15 +65,15 @@ class WholeFileXLSImportView(XLSProcessView):
     Imports all columns from an XLS file
     """
 
-    def get_mode(self) -> FileImporterMode:
-        return FileImporterMode.WHOLE_FILE
+    def get_importer(self) -> Type[ViewImporter]:
+        return KeysViewImporter
 
 
 class XLSDeleteView(XLSProcessView):
     """Delete measurements from a file"""
 
-    def get_mode(self) -> FileImporterMode:
-        return FileImporterMode.DELETE
+    def get_importer(self) -> Type[ViewImporter]:
+        return DeletionViewImporter
 
 
 class ExcelDownloadView(View):
