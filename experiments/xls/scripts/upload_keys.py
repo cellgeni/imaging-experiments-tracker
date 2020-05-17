@@ -11,7 +11,7 @@ if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
     django.setup()
 
-from experiments.xls.keys_importer import ColumnXLSImporter
+from experiments.xls.xls_importers import ColumnXLSImporter
 
 filename = sys.argv[1]
 ColumnXLSImporter(filename).import_all_columns()

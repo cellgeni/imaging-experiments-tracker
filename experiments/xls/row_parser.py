@@ -1,14 +1,14 @@
 import datetime
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Iterable, Tuple
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db import models
+from django.db import models, DataError
 
 from experiments import helpers
 from experiments.constants import *
 from experiments.helpers import is_empty
 from experiments.models import ChannelTarget, Researcher, Measurement, \
-    MeasurementNumber, MagBinOverlap, Project, Channel, Target, AutomatedSlide, Technology, LowMagReference, Plate
+    MeasurementNumber, MagBinOverlap, Project, Channel, AutomatedSlide, Technology, LowMagReference, Plate
 from experiments.models.slide import Section
 from experiments.xls import MODELS_MAPPING
 from experiments.xls.date_parsers import DateParser
@@ -23,6 +23,15 @@ class RowParser:
 
 class ChannelTargetParser(RowParser):
 
+    def get_channel_targets(self) -> Iterable[Tuple[str, str]]:
+        """Iterate through columns and return pairs of a channel and a target."""
+        for i in range(1, MAX_CHANNELS + 1):
+            channel_column = helpers.get_channel_column_name(i)
+            target_column = helpers.get_target_column_name(i)
+            channel_name = self.row.get(channel_column)
+            target_name = self.row.get(target_column)
+            yield channel_name, target_name
+
     def check_channels(self) -> None:
         """Raise an error if any of the channels doesn't exist in a database."""
         for i in range(1, MAX_CHANNELS + 1):
@@ -33,24 +42,21 @@ class ChannelTargetParser(RowParser):
                 except ObjectDoesNotExist:
                     raise ValueError(f"Channel {channel} does not exist")
 
+    @staticmethod
+    def _check_channel_and_target_set_together(channel_name: str, target_name: str, i: int):
+        """Check whether either channel or target is set just on its own and raise an error if so."""
+        if bool(channel_name) != bool(target_name):
+            raise ValueError("Channel and target must be present together, "
+                             f"problematic columns are: {helpers.get_channel_column_name(i)}, {helpers.get_target_column_name(i)}")
+
     def parse_channel_targets(self) -> List[ChannelTarget]:
         """Get or create ChannelTarget objects from a row."""
         self.check_channels()
         result = []
-        for i in range(1, MAX_CHANNELS + 1):
-            # TODO: refactor
-            channel_column = helpers.get_channel_column_name(i)
-            target_column = helpers.get_target_column_name(i)
-            channel_name = self.row.get(channel_column)
-            target_name = self.row.get(target_column)
-            if bool(channel_name) != bool(target_name):
-                raise ValueError("Channel and target must be present together, "
-                                 f"problematic columns are: {channel_column}, {target_column}")
+        for i, (channel_name, target_name) in enumerate(self.get_channel_targets()):
+            self._check_channel_and_target_set_together(channel_name, target_name, i)
             if channel_name and target_name:
-                channel = Channel.objects.get(name=channel_name)
-                target = Target.objects.get_or_create(name=target_name)[0]
-                cht = ChannelTarget.objects.get_or_create(channel=channel, target=target)[0]
-                result.append(cht)
+                result.append(ChannelTarget.create_channel_target(channel_name, target_name))
         return result
 
 
@@ -88,6 +94,12 @@ class XLSRowParser(RowParser):
             return MODELS_MAPPING[column](value)
         except KeyError:
             raise NotImplementedError(f"Column {column} is not mapped to a processing function")
+        except ObjectDoesNotExist:
+            raise ValueError(f"{column} does not have an object {value}")
+        except DataError as e:
+            raise NotImplementedError(f"Value {value} in column {column} is too long for the database. "
+                                      f"If everything is correct, please ask the administrator "
+                                      f"to change character limits")
 
     @staticmethod
     def _handle_empty_value(column_name: str) -> None:

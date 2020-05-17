@@ -6,7 +6,7 @@ from django.test import TestCase
 from experiments import RowT
 from experiments.models import *
 from experiments.tests.helpers import ExcelRowWriter
-from experiments.xls.keys_importer import ColumnXLSImporter
+from experiments.xls.xls_importers import ColumnXLSImporter
 
 
 class SpreadsheetImportTestCase(TestCase):

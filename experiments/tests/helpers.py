@@ -14,7 +14,6 @@ from experiments.helpers import is_empty
 from experiments.models import Measurement, Researcher, Project, Slide, Technology, MeasurementNumber, \
     LowMagReference, MagBinOverlap, ZPlanes, TeamDirectory, ExportLocation, ArchiveLocation, Channel, Target, Section, \
     Slot, ChannelTarget
-from experiments.populate.measurement import MeasurementsPrerequisitesPopulator
 from experiments.xls import EXCEL_TEMPLATE
 from experiments.xls.measurement_importer import MeasurementImporter
 
@@ -64,7 +63,8 @@ class ExcelRowInfoGenerator:
 
     @staticmethod
     def get_todays_date():
-        return datetime.date.today().strftime(Measurement.DATE_FORMAT)
+        """Generate today's date in a valid format. """
+        return datetime.date.today().strftime(DATE_FORMAT)
 
     @classmethod
     def get_sample_info(cls) -> Dict:
@@ -161,7 +161,7 @@ class MeasurementImportBaseTestCase(TestCase):
         data.append((str(m.plate), row.get(AUTOMATED_PLATEID)))
         data.append((str(m.technology), row.get(TECHNOLOGY)))
         data.append((m.image_cycle, row.get(IMAGE_CYCLE)))
-        data.append((m.date.strftime(Measurement.DATE_FORMAT), row.get(DATE)))
+        data.append((m.date.strftime(DATE_FORMAT), row.get(DATE)))
         data.append((str(m.measurement_number), str(row.get(MEASUREMENT_NUMBER))))
         data.append((str(m.low_mag_reference), row.get(LOW_MAG_REFERENCE)))
         data.append((str(m.mag_bin_overlap), row.get(MAG_BIN_OVERLAP)))

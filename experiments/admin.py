@@ -7,7 +7,7 @@ from experiments.models.slide import Slide, Section
 
 class SampleAdmin(admin.ModelAdmin):
     model = Sample
-    list_display = ["id", "tissue", "species", "age", "genotype", "background"]
+    list_display = ["name", "tissue", "species", "age", "genotype", "background"]
     list_filter = ["tissue", "species", "age", "genotype", "background"]
 
 
@@ -24,20 +24,19 @@ class SlideAdmin(admin.ModelAdmin):
 
 class MeasurementAdmin(admin.ModelAdmin):
     model = Measurement
-    actions = ['copy_measurement']
     list_display = ["researcher", "project", "technology",
-                    "plate",  "image_cycle",
-                    "date", "measurement_number", "low_mag_reference", "mag_bin_overlap", "z_planes",
-                    "notes_1", "notes_2", "export_location", "archive_location", "team_directory"]
+                    "plate", "image_cycle",
+                    "date", "measurement_number", "export_location", "archive_location", "team_directory"]
+
     list_filter = ["researcher", "project", "technology", "date",
                    "low_mag_reference", "mag_bin_overlap", "z_planes"]
-    search_fields = ["automated_slide_id"]
+    search_fields = [
+        "researcher__login", "technology__name", "project__name", "notes_1",
+        "notes_2"]
 
 
 class MeasurementInline(admin.StackedInline):
     model = Measurement
-
-
 
 
 imaging_tracking_admin.register(Slide, SlideAdmin)
@@ -48,4 +47,9 @@ imaging_tracking_admin.register(Measurement, MeasurementAdmin)
 imaging_tracking_admin.register(TeamDirectory)
 imaging_tracking_admin.register(Sample, SampleAdmin)
 imaging_tracking_admin.register(Channel)
+imaging_tracking_admin.register(ChannelTarget)
 imaging_tracking_admin.register(Target)
+imaging_tracking_admin.register(Plate)
+imaging_tracking_admin.register(Experiment)
+imaging_tracking_admin.register(ExportLocation)
+imaging_tracking_admin.register(ArchiveLocation)

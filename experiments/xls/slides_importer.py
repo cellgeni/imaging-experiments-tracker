@@ -3,11 +3,10 @@ from typing import Union, List
 from django.db import models
 
 from experiments.constants import *
+from experiments.helpers import is_empty
 from experiments.models import Sample, SlideBarcode
 from experiments.models.slide import Slide, Section
-from experiments.helpers import is_empty
 from experiments.xls import xls_logger as logger, MODELS_MAPPING, EntitiesImporter
-from experiments.xls.keys_importer import log_errors
 
 
 class SamplesImporter(EntitiesImporter):
@@ -60,16 +59,17 @@ class SlidesImporter(EntitiesImporter):
         """Return a list of sample ids from this row"""
         sample_ids = []
         for s_column in SAMPLES:
-            sample_ids.append(self.row.get(s_column))
+            s_id = self.row.get(s_column)
+            if s_id:
+                sample_ids.append(s_id)
         return sample_ids
 
-    @log_errors
     def import_sections(self, slide: Slide) -> None:
         """Create slots from a row and attach them to a given slide."""
         for number, sample_id in enumerate(self.sample_ids):
             if sample_id:
                 sample = Sample.objects.get_or_create(name=sample_id)[0]
-                Section.objects.update_or_create(number=number+1, sample=sample, slide=slide)
+                Section.objects.update_or_create(number=number + 1, sample=sample, slide=slide)
 
     def import_slide(self) -> Slide:
         """Create barcodes, slides and slots from a row."""

@@ -1,6 +1,5 @@
 from experiments.constants import *
-from experiments.models import Researcher, Project, Slide, Technology, LowMagReference, \
-    MagBinOverlap, ZPlanes, TeamDirectory, ExportLocation, ArchiveLocation, Channel, Target
+from experiments.models import Researcher, Project, Slide, Technology, Channel
 from experiments.populate.measurement import MeasurementsPrerequisitesPopulator
 from experiments.tests.helpers import ExcelRowInfoGenerator, MeasurementImportBaseTestCase
 from experiments.xls.measurement_importer import MeasurementImporter
@@ -123,12 +122,6 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
         m2 = MeasurementImporter(new_row).import_measurement()
         self.check_row_is_in_database(new_row)
         self.assertEqual(m1.id, m2.id)
-
-    def test_update_slot_in_existing_manual_measurement(self):
-        pass
-
-    def test_update_slot_in_existing_automated_measurement(self):
-        pass
 
     def test_required_missing(self):
         pass

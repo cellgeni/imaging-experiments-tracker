@@ -60,6 +60,15 @@ class SlidesImportTestCase(TestCase):
         row.update({SLIDE_BARCODE: self.test_barcode})
         return row
 
+    def test_get_sample_ids(self):
+        s1 = "s1"
+        s4 = "s4"
+        row = {
+            SAMPLE1: s1,
+            SAMPLE4: s4
+        }
+        self.assertEqual([s1, s4], SlidesImporter(row).get_sample_ids())
+
     def _test_sections(self, row: RowT, slide: Slide):
         sections = slide.section_set.all().order_by('number')
         for i, s in enumerate(sections):
