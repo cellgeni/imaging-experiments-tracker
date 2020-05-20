@@ -28,38 +28,39 @@ class StreamLogging:
 
 class LogParser(object):
     """
-    A parser that converts raw logs into dicts for ease of use
+    Current logging records are generated as strings with the following
+    format "LEVEL::MESSAGE". This parser takes the raw log strings and turns
+    them into a dictionary for ease of access of the level and message props.
     """
 
-    def __init__(self, raw_logs=[]):
+    def __init__(self, raw_logs: [str] = []):
         self.raw_logs = raw_logs
         self.logs = []
         self.parse_logs(self.raw_logs)
 
-    def parse_logs(self, raw_logs):
+    def parse_logs(self, raw_logs: [str]):
         for log in raw_logs:
-            self.parse(log)
+            self.parse_log_line(log)
 
-    def parse(self, raw_log):
+    def parse_log_line(self, raw_log: str):
+        """
+        Example:
+            - input [raw_log] = "INFO::Imported with id 99"
+            - output [dict] = {"level": "INFO", "message": "Imported with id 99"}
+        """
         if not raw_log:
             return
         log_tuple = raw_log.split('::')
         if len(log_tuple) == 2:
-            self.add(log_tuple[0], log_tuple[1])
+            self.add_message(log_tuple[0], log_tuple[1])
         else:
-            self.add_error(raw_log)
+            self.add_error_message(raw_log)
 
-    def add(self, level, message):
+    def add_message(self, level: str, message: str) -> dict():
         self.logs.append({"level": level, "message": message})
 
-    def add_error(self, message):
-        self.logs.append({"level": "ERROR", "message": message})
+    def add_error_message(self, message: str) -> dict():
+        self.add("ERROR", message)
 
-    def get_logs(self):
-        return self.logs
-
-    def get_raw_logs(self):
-        return self.raw_logs
-
-    def get_error_count(self):
-        return len([l for l in self.logs if l['level'] != "INFO"])
+    def get_error_count(self) -> int:
+        return len([l for l in self.logs if l['level'] == "ERROR"])

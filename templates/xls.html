@@ -20,7 +20,7 @@
     {% if log %}
     <div class="row mt-4">
         <div class="col-md-12">
-        <h3>Upload results {% if errors != 0 %}&mdash; <span class="badge badge-warning">there were errors during the import</span>{% endif %}</h3>
+        <h3>Upload results {% if error_count != 0 %}&mdash; <span class="badge badge-warning">there were errors during the import</span>{% endif %}</h3>
         <ul class="list-group">
             {% for log_entry in log %}
             <li class="list-group-item">

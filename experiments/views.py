@@ -49,11 +49,11 @@ class XLSProcessView(View):
                 request.FILES['file'])
             log_parser.parse_logs(log)
         else:
-            log_parser.add_error("Invalid submission")
+            log_parser.add_error_message("Invalid submission")
         return render(request, self.template_name, {
             'form': form,
-            'log': log_parser.get_logs(),
-            'errors': log_parser.get_error_count()})
+            'log': log_parser.logs,
+            'error_count': log_parser.get_error_count()})
 
 
 class MeasurementXLSImportView(XLSProcessView):
