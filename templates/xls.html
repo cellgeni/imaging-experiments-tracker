@@ -17,7 +17,25 @@
         </form>
     </div>
 
-    {% for log_entry in log %}
-        {{ log_entry }}<br>
-    {% endfor %}
+    {% if log %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+        <h3>Upload results {% if errors != 0 %}&mdash; <span class="badge badge-warning">there were errors during the import</span>{% endif %}</h3>
+        <ul class="list-group">
+            {% for log_entry in log %}
+            <li class="list-group-item">
+                {% if log_entry.level == "INFO" %}
+                    <span class="badge badge-success mr-3">
+                {% elif log_entry.level == "ERROR"  %}
+                    <span class="badge badge-danger mr-3">
+                {% else  %}
+                    <span class="badge badge-warning mr-3">
+                {% endif %}
+                {{ log_entry.level }}</span>{{ log_entry.message }}
+            </li>
+            {% endfor %}
+        </ul>        
+        </div>
+    </div>
+    {% endif %}
 {% endblock container-content %}
