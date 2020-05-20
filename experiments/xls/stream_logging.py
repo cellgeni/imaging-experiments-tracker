@@ -56,10 +56,10 @@ class LogParser(object):
         else:
             self.add_error_message(raw_log)
 
-    def add_message(self, level: str, message: str) -> Dict[str, str]:
+    def add_message(self, level: str, message: str) -> None:
         self.logs.append({"level": level, "message": message})
 
-    def add_error_message(self, message: str) -> Dict[str, str]:
+    def add_error_message(self, message: str) -> None:
         self.add_message("ERROR", message)
 
     def get_error_count(self) -> int:
