@@ -16,6 +16,7 @@ from experiments.xls.view_importers import ViewImporter, \
     MeasurementsViewImporter, KeysViewImporter, DeletionViewImporter
 from experiments.xls.write.generate_template import MeasurementsSubmissionTemplateGenerator
 from experiments.xls.write.writer import ExcelFileWriter
+from experiments.xls.stream_logging import LogParser
 
 
 class XLSProcessView(View):
@@ -42,13 +43,17 @@ class XLSProcessView(View):
 
     def post(self, request, *args, **kwargs):
         form = XLSUploadForm(request.POST, request.FILES)
+        log_parser = LogParser()
         if form.is_valid():
             log = self.dump_file_on_disk_import_it_and_get_import_log(
                 request.FILES['file'])
+            log_parser.parse_logs(log)
         else:
-            log = ["Invalid submission"]
-        return render(request, self.template_name, {'form': form,
-                                                    'log': log})
+            log_parser.add_error_message("Invalid submission")
+        return render(request, self.template_name, {
+            'form': form,
+            'log': log_parser.logs,
+            'error_count': log_parser.get_error_count()})
 
 
 class MeasurementXLSImportView(XLSProcessView):
