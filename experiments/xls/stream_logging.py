@@ -1,6 +1,6 @@
 import io
 import logging
-
+from typing import Dict, List
 from experiments.xls import xls_logger
 
 
@@ -33,16 +33,16 @@ class LogParser(object):
     them into a dictionary for ease of access of the level and message props.
     """
 
-    def __init__(self, raw_logs: [str] = []):
+    def __init__(self, raw_logs: List[str] = []):
         self.raw_logs = raw_logs
         self.logs = []
         self.parse_logs(self.raw_logs)
 
-    def parse_logs(self, raw_logs: [str]):
+    def parse_logs(self, raw_logs: List[str]) -> None:
         for log in raw_logs:
             self.parse_log_line(log)
 
-    def parse_log_line(self, raw_log: str):
+    def parse_log_line(self, raw_log: str) -> None:
         """
         Example:
             - input [raw_log] = "INFO::Imported with id 99"
@@ -56,11 +56,11 @@ class LogParser(object):
         else:
             self.add_error_message(raw_log)
 
-    def add_message(self, level: str, message: str) -> dict():
+    def add_message(self, level: str, message: str) -> Dict[str, str]:
         self.logs.append({"level": level, "message": message})
 
-    def add_error_message(self, message: str) -> dict():
-        self.add("ERROR", message)
+    def add_error_message(self, message: str) -> Dict[str, str]:
+        self.add_message("ERROR", message)
 
     def get_error_count(self) -> int:
         return len([l for l in self.logs if l['level'] == "ERROR"])
