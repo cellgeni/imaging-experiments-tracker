@@ -1,6 +1,6 @@
 import io
 import logging
-from typing import Dict, List
+from typing import List
 from experiments.xls import xls_logger
 
 
@@ -45,8 +45,9 @@ class LogParser(object):
     def parse_log_line(self, raw_log: str) -> None:
         """
         Example:
-            - input [raw_log] = "INFO::Imported with id 99"
-            - output [dict] = {"level": "INFO", "message": "Imported with id 99"}
+            raw_log = "INFO::Imported with id 99"
+            dict = {"level": "INFO", "message": "Imported with id 99"}
+        The parsed line is added as a dict to the logs list of this parser.
         """
         if not raw_log:
             return
