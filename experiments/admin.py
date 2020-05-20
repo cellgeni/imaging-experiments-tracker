@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
 from experiments.models import *
 from imaging_tracking.admin import imaging_tracking_admin
@@ -53,3 +54,41 @@ imaging_tracking_admin.register(Plate)
 imaging_tracking_admin.register(Experiment)
 imaging_tracking_admin.register(ExportLocation)
 imaging_tracking_admin.register(ArchiveLocation)
+
+
+class ProfileInline(admin.StackedInline):
+    model = Profile
+    can_delete = False
+    readonly_fields = ('api_token',)
+
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (ProfileInline,)
+
+
+class ProjectRolAdmin(admin.ModelAdmin):
+    model = ProjectRole
+    list_display = ["role", "project"]
+    ordering = ["project__name"]
+
+
+class PermissionAdmin(admin.ModelAdmin):
+    model = Permission
+    list_display = ["codename", "description"]
+    ordering = ["codename"]
+
+
+class RoleAdmin(admin.ModelAdmin):
+    model = Role
+    list_display = ["name", "role_permissions"]
+    ordering = ["name"]
+
+    def role_permissions(self, obj):
+        return ', '.join([p.codename for p in obj.permissions.all()])
+
+
+imaging_tracking_admin.unregister(User)
+imaging_tracking_admin.register(User, CustomUserAdmin)
+imaging_tracking_admin.register(Role, RoleAdmin)
+imaging_tracking_admin.register(Permission, PermissionAdmin)
+imaging_tracking_admin.register(ProjectRole, ProjectRolAdmin)

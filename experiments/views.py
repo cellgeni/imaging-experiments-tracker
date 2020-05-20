@@ -111,9 +111,13 @@ class DataView(View):
     """
 
     def get(self, request, *args, **kwargs):
+        authorized_projects = [
+            p.name for p in request.user.profile.get_projects(
+                'view_project_measurements')]
+
         payload = {
             "resource": {"question": 1},
-            "params": {"authorized_projects": None},
+            "params": {"authorized_projects": [authorized_projects]},
             # 10 minute expiration in miliseconds
             "exp": int((datetime.datetime.now() +
                         datetime.timedelta(minutes=10)
