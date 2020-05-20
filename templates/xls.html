@@ -1,22 +1,39 @@
 {% extends "base.html" %}
 {% block container-content %}
-    <div class="file-upload-block">
-        <h5>Upload everything from an existing XLS file</h5>
-        <form action={% url 'upload-xls'  %} method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form }}
-            <button class="btn btn-primary" type="submit">Upload</button>
-        </form>
-    </div>
-    <div class="file-upload-block">
-        <h5>Delete measurements from an XLS file</h5>
-        <form action={% url 'delete'  %} method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form }}
-            <button class="btn btn-primary" type="submit">Upload</button>
-        </form>
-    </div>
+    <div class="row">
+        <div class="col-md-6 file-upload-block">
+            <div class=" card">
+                <div class="card-header"><strong>Upload</strong> everything from an existing XLS file</div>
+                <div class="card-body">
+                    <form action={% url 'upload-xls'  %} method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form }}
+                        <button class="btn btn-primary" type="submit">
+                            <span class="d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
+        <div class="col-md-6 file-upload-block">
+            <div class=" card">
+                <div class="card-header"><strong>Delete</strong> measurements from an XLS file</div>
+                <div class="card-body">
+                    <form action={% url 'delete'  %} method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form }}
+                        <button class="btn btn-primary" type="submit">
+                            <span class="d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>    
+    </div>
+    
     {% if log %}
     <div class="row mt-4 mb-4">
         <div class="col-md-12">
@@ -39,3 +56,14 @@
     </div>
     {% endif %}
 {% endblock container-content %}
+
+{% block javascript %}
+<script>
+    $('form').on("submit",function(event) {
+        $(event.target)
+            .find(".spinner-border")
+            .removeClass("d-none")
+            .parent().prop('disabled', true);
+    });
+</script>
+{% endblock javascript %}
