@@ -11,3 +11,5 @@ uuid==1.30
 xlrd==1.2.0
 XlsxWriter==1.2.7
 PyJWT==1.7.1
+casbin==0.8.4
+casbin_sqlalchemy_adapter==0.1.0
