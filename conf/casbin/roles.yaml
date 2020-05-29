@@ -1,0 +1,9 @@
+roles:
+- name: owner
+  permissions:
+  - view
+  - create
+  - delete
+- name: viewer
+  permissions:
+  - view
