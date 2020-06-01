@@ -9,7 +9,7 @@ class StreamLoggingTestCase(TestCase):
     def test_logging(self):
         s1 = "a test string"
         s2 = "another test string"
-        result = f"{s1}\n{s2}\n"
+        result = f"INFO::{s1}\nERROR::{s2}\n"
         with StreamLogging() as stream:
             xls_logger.info(s1)
             xls_logger.error(s2)
