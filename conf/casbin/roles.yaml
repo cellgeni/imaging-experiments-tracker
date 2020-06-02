@@ -4,6 +4,10 @@ roles:
   - view
   - create
   - delete
+- name: simple user
+  permissions:
+    - view
+    - create
 - name: viewer
   permissions:
   - view

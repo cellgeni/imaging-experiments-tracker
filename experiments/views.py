@@ -30,15 +30,15 @@ class XLSProcessView(View):
         form = XLSUploadForm()
         return render(request, 'xls.html', {'form': form})
 
-    def dump_file_on_disk_import_it_and_get_import_log(self, f: File) -> List[str]:
+    def dump_file_on_disk_import_it_and_get_import_log(self, user_id: int, f: File) -> List[str]:
         filename = ExcelFileWriter.dump_file_on_disk(f)
-        importer = self.get_importer()
-        log = importer(filename).import_and_get_log()
+        view_importer = self.get_view_importer()
+        log = view_importer(filename, user_id).import_and_get_log()
         os.remove(filename)
         return log
 
     @abstractmethod
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
         pass
 
     def post(self, request, *args, **kwargs):
@@ -46,6 +46,7 @@ class XLSProcessView(View):
         log_parser = LogParser()
         if form.is_valid():
             log = self.dump_file_on_disk_import_it_and_get_import_log(
+                request.user.id,
                 request.FILES['file'])
             log_parser.parse_logs(log)
         else:
@@ -61,7 +62,7 @@ class MeasurementXLSImportView(XLSProcessView):
     Imports measurements from an XLS file
     """
 
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
         return MeasurementsViewImporter
 
 
@@ -70,14 +71,14 @@ class WholeFileXLSImportView(XLSProcessView):
     Imports all columns from an XLS file
     """
 
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
         return KeysViewImporter
 
 
 class XLSDeleteView(XLSProcessView):
     """Delete measurements from a file"""
 
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
         return DeletionViewImporter
 
 

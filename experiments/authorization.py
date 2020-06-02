@@ -63,8 +63,10 @@ class Authorization:
     def _attach_role_definition(self, user_id: int, project_id: int, role_definition: RoleDefinitionT, role_name: str) -> None:
         """Add a role and permissions from a role definition to a user in a given project."""
         self.remove_existing_role(user_id, project_id)
-        self._add_permissions_from_a_role_definition(role_definition, user_id, project_id)
-        self._enforcer.add_role_for_user_in_domain(str(user_id), role_name, str(project_id))
+        self._add_permissions_from_a_role_definition(
+            role_definition, user_id, project_id)
+        self._enforcer.add_role_for_user_in_domain(
+            str(user_id), role_name, str(project_id))
 
     def _add_permissions_from_a_role_definition(self, role_definition: RoleDefinitionT, user_id: int, project_id: int) -> None:
         for permission in role_definition['permissions']:
@@ -88,7 +90,8 @@ class Authorization:
         roles = self._enforcer.get_roles_for_user_in_domain(
             str(user_id), str(project_id))
         if len(roles) > 1:
-            raise AttributeError("A user should not have more than one role for a project")
+            raise AttributeError(
+                "A user should not have more than one role for a project")
         elif roles:
             return roles[0]
         else:
@@ -101,6 +104,6 @@ class Authorization:
         for policy in self._enforcer.get_permissions_for_user_in_domain(str(user_id), str(project_id)):
             self.remove_permission(policy[0], policy[1], policy[-1])
 
-    def check_permission(self, user_id: int, project_id: str, permission: str) -> bool:
+    def check_permission(self, user_id: int, project_id: int, permission: str) -> bool:
         """Check if a user has permission on an object."""
         return self._enforcer.enforce(str(user_id), str(project_id), str(project_id), permission)

@@ -18,7 +18,7 @@ class ExcelRowTestCase(TestCase):
 
     def test_write_row(self) -> None:
         """Test whether ExcelRow correctly writes information in an Excel spreadsheet."""
-        sample_info = ExcelRowInfoGenerator.get_sample_info()
+        sample_info = ExcelRowInfoGenerator.get_sample_row()
         self.assertTrue(sample_info[RESEARCHER])
         row = ExcelRow(sample_info)
         row.write_to_file(self.file)
@@ -31,8 +31,8 @@ class ExcelRowTestCase(TestCase):
             self.assertEqual(value, spreadsheet_value)
 
     def _write_in_file(self, row: Dict[str, str]):
-        row = ExcelRow(row)
-        row.write_to_file(self.file, 0)
+        excel_row = ExcelRow(row)
+        excel_row.write_to_file(self.file, 0)
 
     def test_overwriting_old_values(self):
         """Test whether ExcelRow correctly overwrites old information in an Excel spreadsheet."""

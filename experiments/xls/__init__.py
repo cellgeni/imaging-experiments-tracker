@@ -1,13 +1,17 @@
 import logging
 import os
-from typing import Dict, Callable, Union
+from typing import Callable, Dict, Union
 
 import pandas as pd
 from django.db import models
 
+from experiments import RowT
 from experiments.constants import *
-from experiments.models import ZPlanes, Technology, LowMagReference, TeamDirectory, Tissue, Background, Genotype, Age, \
-    ExportLocation, ArchiveLocation, Plate, Researcher, AutomatedSlide, Project, MeasurementNumber, MagBinOverlap
+from experiments.models import (Age, ArchiveLocation, AutomatedSlide,
+                                Background, ExportLocation, Genotype,
+                                LowMagReference, MagBinOverlap,
+                                MeasurementNumber, Plate, Project, Researcher,
+                                TeamDirectory, Technology, Tissue, ZPlanes)
 
 EXCEL_TEMPLATE = os.path.join(os.path.dirname(__file__), "measurements_input.xlsx")
 
@@ -38,5 +42,5 @@ MODELS_MAPPING: Dict[str, Callable[[str], models.Model]] = {
 class EntitiesImporter:
     """Base class for importing entities from a row. Contains a row"""
 
-    def __init__(self, row: Union[pd.Series, Dict[str, str]]):
+    def __init__(self, row: Union[pd.Series, RowT]):
         self.row = row
