@@ -7,6 +7,8 @@ from casbin_sqlalchemy_adapter import Adapter
 from django.conf import settings
 from django.db import connections
 
+from experiments.constants import Role
+
 RoleDefinitionT = Dict[str, List[str]]
 
 
@@ -60,7 +62,7 @@ class Authorization:
         self._enforcer.delete_permission_for_user(
             str(user_id), str(project_id), str(project_id), permission)
 
-    def _attach_role_definition(self, user_id: int, project_id: int, role_definition: RoleDefinitionT, role_name: str) -> None:
+    def _attach_role_definition(self, user_id: int, project_id: int, role_definition: RoleDefinitionT, role_name: Role) -> None:
         """Add a role and permissions from a role definition to a user in a given project."""
         self.remove_existing_role(user_id, project_id)
         self._add_permissions_from_a_role_definition(
@@ -76,16 +78,17 @@ class Authorization:
         """Remove an existing role if any from a user for a project."""
         current_role = self.get_role(user_id, project_id)
         if current_role:
-            self.remove_role(user_id, project_id, current_role)
+            self._remove_role(user_id, project_id, current_role)
 
-    def add_role(self, user_id: int, project_id: int, role_name: str) -> None:
+    def add_role(self, user_id: int, project_id: int, role_name: Union[Role, None]) -> None:
         """Find a role in the list of roles and give it to a user in a given project."""
-        for role in self.roles['roles']:
-            if role['name'] == role_name:
-                return self._attach_role_definition(user_id, project_id, role, role_name)
-        raise ValueError("Unknown role")
+        if role_name:
+            for role in self.roles['roles']:
+                if role['name'] == role_name.value:
+                    return self._attach_role_definition(user_id, project_id, role, role_name.value)
+            raise ValueError("Unknown role")
 
-    def get_role(self, user_id: int, project_id: int) -> Union[str, None]:
+    def get_role(self, user_id: int, project_id: int) -> Union[Role, None]:
         """Return a role for a user in a given project."""
         roles = self._enforcer.get_roles_for_user_in_domain(
             str(user_id), str(project_id))
@@ -93,14 +96,14 @@ class Authorization:
             raise AttributeError(
                 "A user should not have more than one role for a project")
         elif roles:
-            return roles[0]
+            return Role(roles[0])
         else:
             return None
 
-    def remove_role(self, user_id: int, project_id: int, role_name: str) -> None:
+    def _remove_role(self, user_id: int, project_id: int, role_name: Role) -> None:
         """Remove a role for a user in a given project."""
         self._enforcer.delete_roles_for_user_in_domain(
-            str(user_id), role_name, str(project_id))
+            str(user_id), role_name.value, str(project_id))
         for policy in self._enforcer.get_permissions_for_user_in_domain(str(user_id), str(project_id)):
             self.remove_permission(policy[0], policy[1], policy[-1])
 

@@ -1,3 +1,5 @@
+import enum
+
 ID = 'ID'
 RESEARCHER = "Researcher"
 PROJECT = "Project"
@@ -159,6 +161,9 @@ REQUIRED_COLUMNS = {RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE, TISSUE1, SAMPL
 DELETE_PERMISSION = "delete"
 VIEW_PERMISSION = "view"
 CREATE_OR_UPDATE_PERMISSION = "create"
-OWNER_ROLE = "owner"
-SIMPLE_USER_ROLE = "simple user"
-VIEWER_ROLE = "viewer"
+
+
+class Role(enum.Enum):
+    OWNER = "owner"
+    SIMPLE_USER = "simple user"
+    VIEWER = "viewer"

@@ -1,5 +1,3 @@
-import django
-
 from experiments.populate.slide import SlidesPopulator
 
 from experiments.models import *

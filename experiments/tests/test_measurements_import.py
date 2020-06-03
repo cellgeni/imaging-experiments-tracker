@@ -120,11 +120,15 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
         self.check_row_is_in_database(new_row)
         self.assertEqual(m1.id, m2.id)
 
-    def test_authorized_creation(self):
+    def test_authorized_creation_for_roles(self):
+        """
+        Test that a user with creation permission on a project can create a measurement. 
+        Test a user without creation permission on a project cannot create a measurement.
+        """
         row = ExcelRowInfoGenerator.get_sample_row()
         user = User.objects.create(username="Some", password="some")
         authorized_project_name = row[PROJECT]
-        auth.add_role(user.id, get_obj_id_from_name("project", authorized_project_name), SIMPLE_USER_ROLE)
+        auth.add_role(user.id, get_obj_id_from_name("project", authorized_project_name), Role.SIMPLE_USER)
         MeasurementImporter(row, self.user_id).import_measurement()
         self.check_row_is_in_database(row)
 
@@ -136,5 +140,22 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
             MeasurementImporter(row, self.user_id).import_measurement()
         self.check_row_is_not_in_database(row)
 
-    def test_authorized_deletion(self):
-        pass
+    def test_authorized_deletion_for_roles(self):
+        """
+        Test that an owner user on a project can delete a measurement. 
+        Test that a simple user on a project cannot delete a measurement.
+        """
+        row = ExcelRowInfoGenerator.get_sample_row()
+        project_name = row[PROJECT]
+        MeasurementImporter(row, self.user_id).import_measurement()
+        self.check_row_is_in_database(row)
+
+        simple_user = User.objects.create(username="simple", password="simple")
+        auth.add_role(simple_user.id, get_obj_id_from_name("project", project_name), Role.SIMPLE_USER)
+        assert not auth.check_permission(simple_user.id, get_obj_id_from_name("project", project_name), DELETE_PERMISSION)
+        with self.assertRaises(PermissionError):
+            MeasurementImporter(row, simple_user.id).delete_measurement()
+        self.check_row_is_in_database(row)
+
+        MeasurementImporter(row, self.user_id).delete_measurement()
+        self.check_row_is_not_in_database(row)

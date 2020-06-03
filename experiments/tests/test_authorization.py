@@ -2,8 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from experiments import auth
-from experiments.constants import (DELETE_PERMISSION, OWNER_ROLE,
-                                   VIEW_PERMISSION, VIEWER_ROLE)
+from experiments.constants import DELETE_PERMISSION, Role, VIEW_PERMISSION
 from experiments.models import Project
 
 
@@ -29,11 +28,11 @@ class AuthorisationTestCase(TestCase):
 
     def test_add_role(self):
         """Check if a user has a role added to them."""
-        role = OWNER_ROLE
+        role = Role.OWNER
         auth.add_role(self.user.id, self.project.id, role)
         self.assertEqual(role, auth.get_role(
             self.user.id, self.project.id))
-        auth.remove_role(self.user.id, self.project.id, role)
+        auth._remove_role(self.user.id, self.project.id, role)
         self.assertEqual(None, auth.get_role(
             self.user.id, self.project.id))
     
@@ -42,11 +41,11 @@ class AuthorisationTestCase(TestCase):
         Check if permission is assigned if a role is assigned. 
         Check if permission is removed if the role is removed.
         """
-        role = OWNER_ROLE
+        role = Role.OWNER
         auth.add_role(self.user.id, self.project.id, role)
         self.assertTrue(auth.check_permission(
             self.user.id, self.project.id, DELETE_PERMISSION))
-        auth.remove_role(self.user.id, self.project.id, role)
+        auth._remove_role(self.user.id, self.project.id, role)
         self.assertFalse(auth.check_permission(
             self.user.id, self.project.id, DELETE_PERMISSION))
     
@@ -55,13 +54,13 @@ class AuthorisationTestCase(TestCase):
         Check if permission is assigned if a role is assigned. 
         Check if permission is removed if the other role is assigned. 
         """
-        role = OWNER_ROLE
+        role = Role.OWNER
         auth.add_role(self.user.id, self.project.id, role)
         self.assertTrue(auth.check_permission(
             self.user.id, self.project.id, DELETE_PERMISSION))
         self.assertTrue(auth.check_permission(
             self.user.id, self.project.id, VIEW_PERMISSION))
-        new_role = VIEWER_ROLE
+        new_role = Role.VIEWER
         auth.add_role(self.user.id, self.project.id, new_role)
         self.assertFalse(auth.check_permission(
             self.user.id, self.project.id, DELETE_PERMISSION))

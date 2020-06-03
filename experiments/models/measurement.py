@@ -6,17 +6,10 @@ from django.dispatch import receiver
 
 from experiments.constants import *
 from experiments.models.base import NameModel, Path
-from experiments.models.casbin import CasbinRule
 
 
 class Project(NameModel):
     pass
-
-
-@receiver(models.signals.post_delete, sender=Project)
-def cleanup_casbin_rules_after_project_deletion(sender, instance, *args, **kwargs):
-    """ Deletes casbin_rules after deleting a Project."""
-    CasbinRule.objects.filter(obj_type="project").filter(obj_id=instance.id).delete()
 
 
 class Plate(NameModel):

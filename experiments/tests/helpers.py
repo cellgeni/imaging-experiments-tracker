@@ -24,8 +24,7 @@ from experiments.models import (ArchiveLocation, Channel, ChannelTarget,
                                 TeamDirectory, Technology, ZPlanes)
 from experiments.populate.measurement import MeasurementsPrerequisitesPopulator
 from experiments.xls import EXCEL_TEMPLATE
-from experiments.xls.measurement_importer import (ExistingMeasurementFinder,
-                                                  MeasurementImporter)
+from experiments.xls.measurement_importer import ExistingMeasurementFinder
 
 
 class ExcelRowWriter:
@@ -136,7 +135,7 @@ class MeasurementImportBaseTestCase(TestCase):
         """Create a user that has Owner role on all projects and return user id."""
         user = User.objects.get_or_create(username="test", password="test")[0]
         for project in Project.objects.all():
-            auth.add_role(user.id, project.id, OWNER_ROLE)
+            auth.add_role(user.id, project.id, Role.OWNER)
         return user.id
 
     def compare_pair(self, pair):
