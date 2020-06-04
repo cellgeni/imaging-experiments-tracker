@@ -1,6 +1,5 @@
 from typing import Union
 from django.db import models
-from django.dispatch import receiver
 from django.contrib.auth.models import User
 
 from experiments.constants import Role
@@ -18,8 +17,7 @@ class Profile(models.Model):
                 return Role.VIEWER
         return None
 
-@receiver(models.signals.post_save, sender=User)
-def create_user_profile_signal(sender, instance, created, **kwargs):
-    """Create Profile for every new User."""
-    if created:
-        Profile.objects.create(user=instance)
+    def __str__(self) -> str:
+        if self.is_external:
+            return f"External group member"
+        return f"Group member"
