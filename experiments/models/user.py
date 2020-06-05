@@ -1,6 +1,7 @@
 from typing import Union
-from django.db import models
+
 from django.contrib.auth.models import User
+from django.db import models
 
 from experiments.constants import Role
 
@@ -10,6 +11,7 @@ class Profile(models.Model):
     is_external = models.BooleanField('External group member', default=False)
 
     def get_default_role(self) -> Union[Role, None]:
+        """Get a default role depending on the kind of this user."""
         if not self.is_external:
             if self.user.is_superuser:
                 return Role.OWNER

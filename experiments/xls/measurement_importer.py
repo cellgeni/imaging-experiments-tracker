@@ -121,8 +121,9 @@ class MeasurementImporter(MeasurementModifier):
 
     def _check_permission_on_project(self, permission: str) -> None:
         """Check whether a user is authorized to do an action on measurements within a project from this row."""
-        if not auth.check_permission(self.user_id, self.get_project().id, permission):
-            raise PermissionError("Unauthorized project")
+        project = self.get_project()
+        if not auth.check_permission(self.user_id, project.id, permission):
+            raise PermissionError(f"User does not have {permission} permission on the project {project.name}")
 
     def import_measurement(self) -> Measurement:
         """Create or update a measurement from a row."""
