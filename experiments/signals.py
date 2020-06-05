@@ -1,11 +1,10 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver
-from django.contrib.auth.models import User
 
-from experiments.constants import Role
-from experiments.models import Project
-from experiments.constants import *
 from experiments import auth
+from experiments.models import Project
+from experiments.models.user import Profile
 
 
 @receiver(models.signals.post_save, sender=Project)
@@ -22,11 +21,19 @@ def delete_user_roles_after_deleting_a_project(sender, instance, *args, **kwargs
     for user in User.objects.all():
         auth.remove_existing_role(user.id, instance.id)
 
+
 @receiver(models.signals.post_delete, sender=User)
 def delete_user_roles_after_deleting_a_user(sender, instance, *args, **kwargs):
     """Delete all roles for a deleted user attached to any project."""
     for project in Project.objects.all():
         auth.remove_existing_role(instance.id, project.id)
+
+
+@receiver(models.signals.post_save, sender=User)
+def create_user_profile_signal(sender, instance, created, **kwargs):
+    """Create Profile for every new User."""
+    if created:
+        Profile.objects.create(user=instance)
 
 
 @receiver(models.signals.post_save, sender=User)

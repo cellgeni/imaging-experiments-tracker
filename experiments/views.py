@@ -5,18 +5,20 @@ from typing import List, Type
 
 import jwt
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.files import File
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
+from experiments.authorization.user_permissions import UserPermissions
 from experiments.forms import XLSUploadForm
 from experiments.xls import EXCEL_TEMPLATE
+from experiments.xls.stream_logging import LogParser
 from experiments.xls.view_importers import ViewImporter, \
     MeasurementsViewImporter, KeysViewImporter, DeletionViewImporter
 from experiments.xls.write.generate_template import MeasurementsSubmissionTemplateGenerator
 from experiments.xls.write.writer import ExcelFileWriter
-from experiments.xls.stream_logging import LogParser
 
 
 class XLSProcessView(View):
@@ -110,11 +112,18 @@ class DataView(View):
     """
     View to serve embedded metabase question
     """
+    template_name = "dataview.html"
+
+    @staticmethod
+    def get_authorized_project_ids(user: User) -> List[int]:
+        """Return a list of names of authorized projects for a user."""
+        return [project.id for project in UserPermissions(user).get_projects_with_viewing_permissions()]
 
     def get(self, request, *args, **kwargs):
+        authorized_project_ids = self.get_authorized_project_ids(request.user)
         payload = {
             "resource": {"question": 1},
-            "params": {"authorized_projects": None},
+            "params": {"authorized_projects": authorized_project_ids},
             # 10 minute expiration in miliseconds
             "exp": int((datetime.datetime.now() +
                         datetime.timedelta(minutes=10)
@@ -127,4 +136,4 @@ class DataView(View):
         iframe_url = "{url}/embed/question/{token}".format(
             url=settings.METABASE_SITE_URL, token=token.decode('UTF-8'))
 
-        return render(request, 'dataview.html', {'iframeUrl': iframe_url})
+        return render(request, self.template_name, {'iframeUrl': iframe_url})

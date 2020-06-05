@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 
-from experiments import auth
+from experiments import auth, RowT
 from experiments.constants import *
 from experiments.helpers import get_obj_id_from_name
 from experiments.models import Channel, Project, Researcher, Slide, Technology
@@ -122,17 +122,24 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
 
     def test_authorized_creation_for_roles(self):
         """
-        Test that a user with creation permission on a project can create a measurement. 
-        Test a user without creation permission on a project cannot create a measurement.
+        Test that a user with owner role on a project can create a measurement.
+        Test that a user with viewer role on a project cannot create a measurement. 
+        Test a user without any role on a project cannot create a measurement.
         """
         row = ExcelRowInfoGenerator.get_sample_row()
         user = User.objects.create(username="Some", password="some")
         authorized_project_name = row[PROJECT]
-        auth.add_role(user.id, get_obj_id_from_name("project", authorized_project_name), Role.SIMPLE_USER)
+        auth.add_role(user.id, get_obj_id_from_name("project", authorized_project_name), Role.OWNER)
         MeasurementImporter(row, self.user_id).import_measurement()
         self.check_row_is_in_database(row)
 
-        unauthorized_project = Project.objects.create(name="unauthorized")
+        project_without_role = Project.objects.create(name="project_without_role")
+        self.check_project_cannot_be_created(row.copy(), project_without_role)
+
+        auth.add_role(self.user_id, project_without_role.id, Role.VIEWER)
+        self.check_project_cannot_be_created(row.copy(), project_without_role)
+    
+    def check_project_cannot_be_created(self, row: RowT, unauthorized_project: Project) -> None:
         assert not auth.check_permission(self.user_id, unauthorized_project.id, CREATE_OR_UPDATE_PERMISSION)
         row[PROJECT] = unauthorized_project.name
         row[MEASUREMENT_NUMBER] = "some"
@@ -143,19 +150,28 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
     def test_authorized_deletion_for_roles(self):
         """
         Test that an owner user on a project can delete a measurement. 
-        Test that a simple user on a project cannot delete a measurement.
+        Test that a viewer or anonymous user on a project cannot delete a measurement.
         """
         row = ExcelRowInfoGenerator.get_sample_row()
-        project_name = row[PROJECT]
+        project_id = get_obj_id_from_name("project", row[PROJECT])
         MeasurementImporter(row, self.user_id).import_measurement()
         self.check_row_is_in_database(row)
 
-        simple_user = User.objects.create(username="simple", password="simple")
-        auth.add_role(simple_user.id, get_obj_id_from_name("project", project_name), Role.SIMPLE_USER)
-        assert not auth.check_permission(simple_user.id, get_obj_id_from_name("project", project_name), DELETE_PERMISSION)
-        with self.assertRaises(PermissionError):
-            MeasurementImporter(row, simple_user.id).delete_measurement()
-        self.check_row_is_in_database(row)
+        # check viewer
+        viewer = User.objects.create(username="viewer", password="simple")
+        auth.add_role(viewer.id, project_id, Role.VIEWER)
+        self.try_deleting_row_and_check_it_was_not_deleted(viewer, project_id, row)
 
+        # check anonymous
+        auth.remove_existing_role(viewer.id, project_id)
+        self.try_deleting_row_and_check_it_was_not_deleted(viewer, project_id, row)
+
+        # check owner
         MeasurementImporter(row, self.user_id).delete_measurement()
         self.check_row_is_not_in_database(row)
+
+    def try_deleting_row_and_check_it_was_not_deleted(self, user: User, project_id: int, row: RowT):
+        assert not auth.check_permission(user.id, project_id, DELETE_PERMISSION)
+        with self.assertRaises(PermissionError):
+            MeasurementImporter(row, user.id).delete_measurement()
+        self.check_row_is_in_database(row)
