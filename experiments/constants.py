@@ -166,3 +166,6 @@ CREATE_OR_UPDATE_PERMISSION = "create"
 class Role(enum.Enum):
     OWNER = "owner"
     VIEWER = "viewer"
+
+PERMISSION_POLICY_TYPE = "p"
+ROLE_POLICY_TYPE = "g"
