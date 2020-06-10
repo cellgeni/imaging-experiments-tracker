@@ -5,18 +5,20 @@ from typing import List, Type
 
 import jwt
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.files import File
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
 
+from experiments.authorization.user_permissions import UserPermissions
 from experiments.forms import XLSUploadForm
 from experiments.xls import EXCEL_TEMPLATE
+from experiments.xls.stream_logging import LogParser
 from experiments.xls.view_importers import ViewImporter, \
     MeasurementsViewImporter, KeysViewImporter, DeletionViewImporter
 from experiments.xls.write.generate_template import MeasurementsSubmissionTemplateGenerator
 from experiments.xls.write.writer import ExcelFileWriter
-from experiments.xls.stream_logging import LogParser
 
 
 class XLSProcessView(View):
@@ -30,15 +32,16 @@ class XLSProcessView(View):
         form = XLSUploadForm()
         return render(request, 'xls.html', {'form': form})
 
-    def dump_file_on_disk_import_it_and_get_import_log(self, f: File) -> List[str]:
+    def dump_file_on_disk_import_it_and_get_import_log(self, user_id: int, f: File) -> List[str]:
         filename = ExcelFileWriter.dump_file_on_disk(f)
-        importer = self.get_importer()
-        log = importer(filename).import_and_get_log()
+        view_importer = self.get_view_importer()
+        log = view_importer(filename, user_id).import_and_get_log()
         os.remove(filename)
         return log
 
     @abstractmethod
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
+        """Get a ViewImporter class of this particular view that implements importing logic."""
         pass
 
     def post(self, request, *args, **kwargs):
@@ -46,6 +49,7 @@ class XLSProcessView(View):
         log_parser = LogParser()
         if form.is_valid():
             log = self.dump_file_on_disk_import_it_and_get_import_log(
+                request.user.id,
                 request.FILES['file'])
             log_parser.parse_logs(log)
         else:
@@ -61,7 +65,7 @@ class MeasurementXLSImportView(XLSProcessView):
     Imports measurements from an XLS file
     """
 
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
         return MeasurementsViewImporter
 
 
@@ -70,14 +74,14 @@ class WholeFileXLSImportView(XLSProcessView):
     Imports all columns from an XLS file
     """
 
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
         return KeysViewImporter
 
 
 class XLSDeleteView(XLSProcessView):
     """Delete measurements from a file"""
 
-    def get_importer(self) -> Type[ViewImporter]:
+    def get_view_importer(self) -> Type[ViewImporter]:
         return DeletionViewImporter
 
 
@@ -109,21 +113,26 @@ class DataView(View):
     """
     View to serve embedded metabase question
     """
+    template_name = "dataview.html"
+
+    @staticmethod
+    def get_authorized_project_ids(user: User) -> List[int]:
+        """Return a list of names of authorized projects for a user."""
+        return [project.id for project in UserPermissions(user).get_projects_with_viewing_permissions()]
 
     def get(self, request, *args, **kwargs):
+        authorized_project_ids = self.get_authorized_project_ids(request.user)
         payload = {
             "resource": {"question": 1},
-            "params": {"authorized_projects": None},
+            "params": {"authorized_projects": authorized_project_ids},
             # 10 minute expiration in miliseconds
             "exp": int((datetime.datetime.now() +
                         datetime.timedelta(minutes=10)
                         ).timestamp()) * 1000
         }
 
-        token = jwt.encode(
-            payload, settings.METABASE_SECRET_KEY, algorithm="HS256")
+        token = jwt.encode(payload, settings.METABASE_SECRET_KEY, algorithm="HS256")
 
-        iframe_url = "{url}/embed/question/{token}".format(
-            url=settings.METABASE_SITE_URL, token=token.decode('UTF-8'))
+        iframe_url = "{url}/embed/question/{token}".format(url=settings.METABASE_SITE_URL, token=token.decode('UTF-8'))
 
-        return render(request, 'dataview.html', {'iframeUrl': iframe_url})
+        return render(request, self.template_name, {'iframeUrl': iframe_url})

@@ -3,19 +3,20 @@ import os
 from typing import Dict, List, Set
 
 import pandas as pd
+from django.contrib.auth.models import User
 from django.test import TestCase
 
-from experiments import RowT
+from experiments import RowT, auth
 from experiments.constants import *
-from experiments.constants import SECTION_NUM, SLIDE_BARCODE, AUTOMATED_SLIDEN, SLIDE_ID, MAX_CHANNELS, CHANNEL, TARGET, \
-    RESEARCHER, PROJECT, AUTOMATED_PLATEID, TECHNOLOGY, IMAGE_CYCLE, DATE, MEASUREMENT_NUMBER, LOW_MAG_REFERENCE, \
-    MAG_BIN_OVERLAP, ZPLANES, NOTES_1, NOTES_2, POST_STAIN, EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR
 from experiments.helpers import is_empty
-from experiments.models import Measurement, Researcher, Project, Slide, Technology, MeasurementNumber, \
-    LowMagReference, MagBinOverlap, ZPlanes, TeamDirectory, ExportLocation, ArchiveLocation, Channel, Target, Section, \
-    Slot, ChannelTarget
+from experiments.models import (ArchiveLocation, Channel, ChannelTarget,
+                                ExportLocation, LowMagReference, MagBinOverlap,
+                                Measurement, MeasurementNumber, Project,
+                                Researcher, Section, Slide, Slot, Target,
+                                TeamDirectory, Technology, ZPlanes)
+from experiments.populate.measurement import MeasurementsPrerequisitesPopulator
 from experiments.xls import EXCEL_TEMPLATE
-from experiments.xls.measurement_importer import MeasurementImporter
+from experiments.xls.measurement_importer import ExistingMeasurementFinder
 
 
 class ExcelRowWriter:
@@ -67,7 +68,7 @@ class ExcelRowInfoGenerator:
         return datetime.date.today().strftime(DATE_FORMAT)
 
     @classmethod
-    def get_sample_info(cls) -> Dict:
+    def get_sample_row(cls) -> RowT:
         """
         Generate valid (all keys must be present in the databases, all required keys are present)
         exemplary dictionary of strings for testing that can be interpreted as an Excel row
@@ -118,6 +119,17 @@ class ExcelRowInfoGenerator:
 
 class MeasurementImportBaseTestCase(TestCase):
 
+    def setUp(self):
+        MeasurementsPrerequisitesPopulator.populate_all_prerequisites()
+        self.user_id = self._create_owner_user()
+
+    def _create_owner_user(self) -> int:
+        """Create a user that has Owner role on all projects and return user id."""
+        user = User.objects.get_or_create(username="test", password="test")[0]
+        for project in Project.objects.all():
+            auth.add_role(user.id, project.id, Role.OWNER)
+        return user.id
+
     def compare_pair(self, pair):
         if not (is_empty(pair[0]) and is_empty(pair[1])):
             self.assertEqual(pair[0], pair[1])
@@ -151,7 +163,8 @@ class MeasurementImportBaseTestCase(TestCase):
 
     def check_row_is_in_database(self, row: RowT):
         """Check whether a measurement that corresponds to this row is in the database."""
-        m = MeasurementImporter(row).find_existing_measurement()
+        
+        m = ExistingMeasurementFinder(row).get_existing_measurement_from_a_row()
         self.assertTrue(m)
         if not m:
             return
@@ -178,3 +191,7 @@ class MeasurementImportBaseTestCase(TestCase):
         data.append((row_channel_targets, measurement_channel_targets))
         self._compare_fields(data)
         self._compare_sections(m, row)
+
+    def check_row_is_not_in_database(self, row: RowT):
+        with self.assertRaises(AssertionError):
+            self.check_row_is_in_database(row)

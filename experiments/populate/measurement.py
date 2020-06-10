@@ -1,10 +1,5 @@
-import os, django
-
 from experiments.populate.slide import SlidesPopulator
 
-if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "imaging_tracking.settings")
-    django.setup()
 from experiments.models import *
 
 

@@ -6,9 +6,8 @@ from django.test import TransactionTestCase
 from experiments import RowT
 from experiments.constants import *
 from experiments.models import Channel, Researcher, Project, Technology
-from experiments.populate.measurement import MeasurementsPrerequisitesPopulator
 from experiments.tests.helpers import ExcelRow, ExcelRowInfoGenerator, MeasurementImportBaseTestCase
-from experiments.xls.view_importers import MeasurementsViewImporter, ViewImporter
+from experiments.xls.view_importers import MeasurementsViewImporter
 from experiments.xls.xls_converters import MetabaseToTemplateConverter, MetabaseColumnGenerator
 
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +16,10 @@ logger = logging.getLogger(__name__)
 
 class MeasurementsUploadBase(MeasurementImportBaseTestCase, TransactionTestCase):
     file = 'measurements_input2.xlsx'
-    importer = ViewImporter(file)
+
+    def setUp(self):
+        super().setUp()
+        self.importer = MeasurementsViewImporter(self.file, self.user_id)
 
     def write_row_dict_in_file(self, row_dict: RowT) -> RowT:
         row = ExcelRow(row_dict)
@@ -30,32 +32,20 @@ class MeasurementsUploadBase(MeasurementImportBaseTestCase, TransactionTestCase)
         return row
 
     def import_sample_row_into_db(self) -> RowT:
-        row = self.import_row_dict_into_db(ExcelRowInfoGenerator.get_sample_info())
+        row = self.import_row_dict_into_db(ExcelRowInfoGenerator.get_sample_row())
         self.check_row_is_in_database(row)
         return row
 
 
-class TemplateUploadTestCase(MeasurementsUploadBase):
-    file = 'measurements_input2.xlsx'
-    importer = MeasurementsViewImporter(file)
-
-    def setUp(self):
-        p = MeasurementsPrerequisitesPopulator()
-        p.populate_all_prerequisites()
-
-    def test_object_creation(self):
-        self.import_sample_row_into_db()
-
-
-class MetabaseRowImportTestCase(MeasurementsUploadBase, MeasurementImportBaseTestCase):
-    importer = MeasurementsViewImporter(MeasurementsUploadBase.file)
-
-    def setUp(self):
-        MeasurementsPrerequisitesPopulator.populate_all_prerequisites()
+class MetabaseRowImportTestCase(MeasurementsUploadBase):
 
     def check_metabase_row_is_in_database(self, row):
         template_row = MetabaseToTemplateConverter(pd.DataFrame(row)).convert()
         self.check_row_is_in_database(template_row[0].to_dict())
+
+    def test_object_creation(self):
+        """Test creating a measurement from an XLS file in template format."""
+        self.import_sample_row_into_db()
 
     def test_update(self):
         """
@@ -147,7 +137,7 @@ class MetabaseRowImportTestCase(MeasurementsUploadBase, MeasurementImportBaseTes
         new_row_template.update(template_channel_targets)
         file = "metabase.xlsx"
         pd.DataFrame([new_row_metabase]).to_excel(file)
-        MeasurementsViewImporter(file).import_file()
+        MeasurementsViewImporter(file, self.user_id).import_file()
         self.check_row_is_in_database(new_row_template)
         with self.assertRaises(AssertionError):
             self.check_row_is_in_database(row)

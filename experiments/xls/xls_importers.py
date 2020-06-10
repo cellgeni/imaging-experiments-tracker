@@ -13,7 +13,7 @@ from experiments.xls.xls_converters import MetabaseToTemplateConverter
 class XLSImporter:
     """Base class for importing Excel files, contains Pandas dataframe with data."""
 
-    def __init__(self, file):
+    def __init__(self, file: str):
         replacements = {pd.np.nan: None,
                         'N/A': None}
         self.df = pd.read_excel(file).replace(replacements)
@@ -22,11 +22,12 @@ class XLSImporter:
 class MeasurementsXLSImporter(XLSImporter):
     """Class that implements importing measurements from an Excel file"""
 
-    def __init__(self, file):
+    def __init__(self, file: str, user_id: int):
         super().__init__(file)
         self.check_metabase_format()
         self.replace_old_researchers()
         self.check_required_columns()
+        self.user_id = user_id
 
     def replace_old_researchers(self) -> None:
         """Function to replace old-style researcher abbreviations.
@@ -56,8 +57,8 @@ class MeasurementsXLSImporter(XLSImporter):
         # TODO: tests
         absent_required_columns = set(REQUIRED_COLUMNS).difference(set(self.df.columns))
         if absent_required_columns:
-            logger.error(
-                f"Required columns are absent from the spreadsheet or named incorrectly: {absent_required_columns}")
+            logger.error(f"Required columns are absent from the spreadsheet "
+                         f"or named incorrectly: {absent_required_columns}")
             raise ValueError()
 
     def check_metabase_format(self) -> None:
@@ -72,7 +73,7 @@ class MeasurementsXLSImporter(XLSImporter):
     def import_measurements(self) -> None:
         for i, row in enumerate(self.get_rows()):
             try:
-                MeasurementImporter(row).import_measurement()
+                MeasurementImporter(row, self.user_id).import_measurement()
             except Exception as e:
                 logger.error(f"Failed to import measurement with row number {i + 1}")
                 logger.error(e)
@@ -81,7 +82,7 @@ class MeasurementsXLSImporter(XLSImporter):
     def delete_measurements(self):
         for i, row in enumerate(self.get_rows()):
             try:
-                if MeasurementImporter(row).delete_measurement():
+                if MeasurementImporter(row, self.user_id).delete_measurement():
                     logger.info(f"Deleted measurement with row number {i + 1}")
                 else:
                     logger.info(f"Measurement with row number {i + 1} does not exist in the database")

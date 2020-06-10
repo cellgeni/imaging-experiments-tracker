@@ -146,3 +146,6 @@ DEFAULT_FROM_EMAIL = "no-reply@cellgeni.sanger.ac.uk"
 # Metabase
 METABASE_SITE_URL = os.getenv('METABASE_SITE_URL')
 METABASE_SECRET_KEY = os.getenv('METABASE_SECRET_KEY')
+
+# Authz
+CASBIN_ROOT = os.path.join(BASE_DIR, 'conf', 'casbin')
