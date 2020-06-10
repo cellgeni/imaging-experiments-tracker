@@ -55,11 +55,10 @@ class MeasurementsXLSImporter(XLSImporter):
     def check_required_columns(self) -> None:
         """Check that the spreadsheet has all the required columns."""
         # TODO: tests
-        absent_required_columns = set(
-            REQUIRED_COLUMNS).difference(set(self.df.columns))
+        absent_required_columns = set(REQUIRED_COLUMNS).difference(set(self.df.columns))
         if absent_required_columns:
-            logger.error(
-                f"Required columns are absent from the spreadsheet or named incorrectly: {absent_required_columns}")
+            logger.error(f"Required columns are absent from the spreadsheet "
+                         f"or named incorrectly: {absent_required_columns}")
             raise ValueError()
 
     def check_metabase_format(self) -> None:
@@ -76,8 +75,7 @@ class MeasurementsXLSImporter(XLSImporter):
             try:
                 MeasurementImporter(row, self.user_id).import_measurement()
             except Exception as e:
-                logger.error(
-                    f"Failed to import measurement with row number {i + 1}")
+                logger.error(f"Failed to import measurement with row number {i + 1}")
                 logger.error(e)
                 traceback.print_exc()
 
@@ -87,11 +85,9 @@ class MeasurementsXLSImporter(XLSImporter):
                 if MeasurementImporter(row, self.user_id).delete_measurement():
                     logger.info(f"Deleted measurement with row number {i + 1}")
                 else:
-                    logger.info(
-                        f"Measurement with row number {i + 1} does not exist in the database")
+                    logger.info(f"Measurement with row number {i + 1} does not exist in the database")
             except Exception as e:
-                logger.error(
-                    f"Failed to delete measurement with row number {i + 1}")
+                logger.error(f"Failed to delete measurement with row number {i + 1}")
                 logger.error(e)
                 traceback.print_exc()
 
@@ -102,20 +98,16 @@ class ColumnXLSImporter(XLSImporter):
     """
 
     def import_researchers(self) -> None:
-        self.df[RESEARCHER].apply(
-            lambda key: Researcher.objects.get_or_create(login=key) if key else None)
+        self.df[RESEARCHER].apply(lambda key: Researcher.objects.get_or_create(login=key) if key else None)
 
     def import_projects(self) -> None:
-        self.df[PROJECT].apply(
-            lambda name: Project.objects.get_or_create(name=name) if name else None)
+        self.df[PROJECT].apply(lambda name: Project.objects.get_or_create(name=name) if name else None)
 
     def import_technology(self) -> None:
-        self.df[TECHNOLOGY].apply(
-            lambda name: Technology.objects.get_or_create(name=name) if name else None)
+        self.df[TECHNOLOGY].apply(lambda name: Technology.objects.get_or_create(name=name) if name else None)
 
     def import_channels(self) -> None:
-        self.df[CHANNEL].apply(
-            lambda name: Channel.objects.get_or_create(name=name) if name else None)
+        self.df[CHANNEL].apply(lambda name: Channel.objects.get_or_create(name=name) if name else None)
 
     def import_all_columns(self):
         self.df.dropna()

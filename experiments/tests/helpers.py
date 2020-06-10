@@ -8,14 +8,6 @@ from django.test import TestCase
 
 from experiments import RowT, auth
 from experiments.constants import *
-from experiments.constants import (ARCHIVE_LOCATION, AUTOMATED_PLATEID,
-                                   AUTOMATED_SLIDEN, CHANNEL, DATE,
-                                   EXPORT_LOCATION, IMAGE_CYCLE,
-                                   LOW_MAG_REFERENCE, MAG_BIN_OVERLAP,
-                                   MAX_CHANNELS, MEASUREMENT_NUMBER, NOTES_1,
-                                   NOTES_2, POST_STAIN, PROJECT, RESEARCHER,
-                                   SECTION_NUM, SLIDE_BARCODE, SLIDE_ID,
-                                   TARGET, TEAM_DIR, TECHNOLOGY, ZPLANES)
 from experiments.helpers import is_empty
 from experiments.models import (ArchiveLocation, Channel, ChannelTarget,
                                 ExportLocation, LowMagReference, MagBinOverlap,

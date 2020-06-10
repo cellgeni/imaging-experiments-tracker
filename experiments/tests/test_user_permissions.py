@@ -23,6 +23,10 @@ class UserPermissionTestCase(TestCase):
         return project
 
     def test_get_projects_with_viewing_permissions(self):
+        """
+        Check that a user doesn't have viewing permissions on projects
+        they weren't explicitly assigned permissions for.
+        """
         user = User.objects.create_user(username="some")
         authorized_project = self.create_project_with_permission(user, VIEW_PERMISSION)
         _ = self.create_project_without_permission(user, VIEW_PERMISSION)

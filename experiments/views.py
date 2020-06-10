@@ -41,6 +41,7 @@ class XLSProcessView(View):
 
     @abstractmethod
     def get_view_importer(self) -> Type[ViewImporter]:
+        """Get a ViewImporter class of this particular view that implements importing logic."""
         pass
 
     def post(self, request, *args, **kwargs):
@@ -130,10 +131,8 @@ class DataView(View):
                         ).timestamp()) * 1000
         }
 
-        token = jwt.encode(
-            payload, settings.METABASE_SECRET_KEY, algorithm="HS256")
+        token = jwt.encode(payload, settings.METABASE_SECRET_KEY, algorithm="HS256")
 
-        iframe_url = "{url}/embed/question/{token}".format(
-            url=settings.METABASE_SITE_URL, token=token.decode('UTF-8'))
+        iframe_url = "{url}/embed/question/{token}".format(url=settings.METABASE_SITE_URL, token=token.decode('UTF-8'))
 
         return render(request, self.template_name, {'iframeUrl': iframe_url})

@@ -12,10 +12,8 @@ class MeasurementsPrerequisitesPopulator:
 
     @classmethod
     def populate_researchers(cls):
-        Researcher.objects.get_or_create(
-            last_name="Khodak", first_name="Anton", login="A_K")[0].save()
-        Researcher.objects.get_or_create(
-            last_name="Winslet", first_name="Mariam", login="M_W")[0].save()
+        Researcher.objects.get_or_create(last_name="Khodak", first_name="Anton", login="A_K")[0].save()
+        Researcher.objects.get_or_create(last_name="Winslet", first_name="Mariam", login="M_W")[0].save()
 
     @classmethod
     def populate_technologies(cls):
@@ -39,10 +37,8 @@ class MeasurementsPrerequisitesPopulator:
 
     @classmethod
     def populate_mag_bin_overlap(cls):
-        MagBinOverlap.objects.get_or_create(
-            name="10X_Bin2_5 % overlap")[0].save()
-        MagBinOverlap.objects.get_or_create(
-            name="20X_Bin1_7 % overlap")[0].save()
+        MagBinOverlap.objects.get_or_create(name="10X_Bin2_5 % overlap")[0].save()
+        MagBinOverlap.objects.get_or_create(name="20X_Bin1_7 % overlap")[0].save()
 
     @classmethod
     def populate_zplanes(cls):
@@ -56,14 +52,10 @@ class MeasurementsPrerequisitesPopulator:
 
     @classmethod
     def populate_locations(cls):
-        ExportLocation.objects.get_or_create(
-            name="0HarmonyExports\ML_HEA\ML_HEA_1")[0].save()
-        ExportLocation.objects.get_or_create(
-            name="0HarmonyExports\ML_HEA\ML_HEA_2")[0].save()
-        ArchiveLocation.objects.get_or_create(
-            name="0HarmonyArchives\ML_HEA\ML_HEA_1")[0].save()
-        ArchiveLocation.objects.get_or_create(
-            name="0HarmonyArchives\ML_HEA\ML_HEA_2")[0].save()
+        ExportLocation.objects.get_or_create(name="0HarmonyExports\ML_HEA\ML_HEA_1")[0].save()
+        ExportLocation.objects.get_or_create(name="0HarmonyExports\ML_HEA\ML_HEA_2")[0].save()
+        ArchiveLocation.objects.get_or_create(name="0HarmonyArchives\ML_HEA\ML_HEA_1")[0].save()
+        ArchiveLocation.objects.get_or_create(name="0HarmonyArchives\ML_HEA\ML_HEA_2")[0].save()
 
     @classmethod
     def populate_channels(cls):
@@ -142,8 +134,7 @@ class MeasurementsPopulator:
     def _create_automated_plate_slots(measurement: Measurement) -> None:
         """Create instances of Slots obtained through automated Phenix process for a given measurement for testing."""
         for slot_num in range(1, MAX_SLOTS + 1):
-            automated_slide = AutomatedSlide.objects.get_or_create(name="sssss")[
-                0]
+            automated_slide = AutomatedSlide.objects.get_or_create(name="sssss")[0]
             p = Slot.objects.get_or_create(measurement=measurement,
                                            automated_slide=automated_slide,
                                            automated_slide_num=slot_num)[0]

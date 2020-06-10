@@ -2,7 +2,6 @@ from datetime import date
 
 from django.db import models
 from django.utils import timezone
-from django.dispatch import receiver
 
 from experiments.constants import *
 from experiments.models.base import NameModel, Path

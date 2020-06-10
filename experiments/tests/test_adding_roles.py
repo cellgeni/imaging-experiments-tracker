@@ -1,4 +1,3 @@
-
 from django.test import TestCase
 from experiments.models.measurement import Project
 from experiments import auth
@@ -32,16 +31,17 @@ class AddingRolesPerProjectTestCase(TestCase):
         """"Test that different kinds of users get their default roles on a newly created project"""
         self.create_test_users_of_all_kinds("new_projects")
         project = Project.objects.create(name="new")
-        for user in User.objects.all():
-            self.assert_user_role_in_project(user, project)
+        self.check_all_user_roles_correspond_to_their_defaults(project)
 
     def test_roles_for_new_users(self):
         """Test that all new users get a role for every project."""
-        # Project.objects.get_or_create(name="new_user_project")
-        # for user in self.create_test_users_of_all_kinds("i"):
-        #     for project in Project.objects.all():
-        #         self.assert_user_role_in_project(user, project)
-        pass
+        project = Project.objects.create(name="new_user_project")
+        self.create_test_users_of_all_kinds("new_users")
+        self.check_all_user_roles_correspond_to_their_defaults(project)
+
+    def check_all_user_roles_correspond_to_their_defaults(self, project: Project) -> None:
+        for user in User.objects.all():
+            self.assert_user_role_in_project(user, project)
 
     def assert_user_role_in_project(self, user: User, project: Project) -> None:
         """Check that a superuser has an owner role on a project, otherwise a viewer role."""

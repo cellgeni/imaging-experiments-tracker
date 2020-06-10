@@ -32,8 +32,7 @@ class MeasurementsUploadBase(MeasurementImportBaseTestCase, TransactionTestCase)
         return row
 
     def import_sample_row_into_db(self) -> RowT:
-        row = self.import_row_dict_into_db(
-            ExcelRowInfoGenerator.get_sample_row())
+        row = self.import_row_dict_into_db(ExcelRowInfoGenerator.get_sample_row())
         self.check_row_is_in_database(row)
         return row
 
@@ -71,8 +70,7 @@ class MetabaseRowImportTestCase(MeasurementsUploadBase):
             CHANNEL5: str(ch2),
             TARGET5: str(t3)
         }
-        metabase_channel_targets = MetabaseColumnGenerator.generate_channel_targets(
-            template_channel_targets)
+        metabase_channel_targets = MetabaseColumnGenerator.generate_channel_targets(template_channel_targets)
         template_samples = {
             SAMPLE1: "A29-HEA-2-FFPE-1-S14-iii",
             TISSUE1: "Heart (R ventricle)",
@@ -88,8 +86,7 @@ class MetabaseRowImportTestCase(MeasurementsUploadBase):
             TISSUE3: "tissue4",
             SECTION_NUM: "1, 2, 3"
         }
-        metabase_samples = MetabaseColumnGenerator.generate_samples(
-            template_samples)
+        metabase_samples = MetabaseColumnGenerator.generate_samples(template_samples)
         new_row_metabase = {
             METABASE_RESEARCHER: str(Researcher.objects.last()),
             METABASE_PROJECT: str(Project.objects.last()),
