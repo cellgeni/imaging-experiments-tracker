@@ -30,10 +30,10 @@ class CasbinEnforcerFactory:
     @classmethod
     def _create_adapter(cls):
         """Create database adapter for casbin enforcer."""
-        if connections['default'].vendor == "sqlite":
-            connection_string = "sqlite://"
-        else:
+        if connections['default'].get_connection_params().get('user'):
             connection_string = cls._create_connection_string()
+        else:
+            connection_string = "sqlite://"  # in-memory database
         return Adapter(connection_string)
 
     @classmethod
@@ -57,12 +57,13 @@ class Authorization:
         self._enforcer.add_permission_for_user(
             str(user_id), str(project_id), str(project_id), permission)
 
-    def remove_permission(self, user_id: str, project_id: str,  permission: str) -> None:
+    def remove_permission(self, user_id: str, project_id: str, permission: str) -> None:
         """Delete permission from casbin rules."""
         self._enforcer.delete_permission_for_user(
             str(user_id), str(project_id), str(project_id), permission)
 
-    def _attach_role_definition(self, user_id: int, project_id: int, role_definition: RoleDefinitionT, role_name: Role) -> None:
+    def _attach_role_definition(self, user_id: int, project_id: int, role_definition: RoleDefinitionT,
+                                role_name: Role) -> None:
         """Add a role and permissions from a role definition to a user in a given project."""
         self.remove_existing_role(user_id, project_id)
         self._add_permissions_from_a_role_definition(
@@ -70,7 +71,8 @@ class Authorization:
         self._enforcer.add_role_for_user_in_domain(
             str(user_id), role_name, str(project_id))
 
-    def _add_permissions_from_a_role_definition(self, role_definition: RoleDefinitionT, user_id: int, project_id: int) -> None:
+    def _add_permissions_from_a_role_definition(self, role_definition: RoleDefinitionT, user_id: int,
+                                                project_id: int) -> None:
         for permission in role_definition['permissions']:
             self.add_permission(user_id, project_id, permission)
 

@@ -33,6 +33,7 @@ COPY experiments /home/docker/code/experiments
 COPY imaging_tracking /home/docker/code/imaging_tracking
 COPY templates /home/docker/code/templates
 COPY manage.py /home/docker/code/manage.py
+COPY conf/casbin /home/docker/code/conf/casbin
 
 WORKDIR /home/docker/code
 
