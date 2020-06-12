@@ -3,8 +3,10 @@ from django.contrib import admin
 from django.contrib.admin import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
+from django.db.models import QuerySet
 
 from experiments import auth
+from experiments.authorization.user_permissions import UserPermissions
 from experiments.constants import Role, ROLE_POLICY_TYPE
 from experiments.models.casbin import CasbinRule
 from experiments.models.measurement import Project
@@ -116,6 +118,24 @@ class ProfileInline(admin.StackedInline):
 
 class CustomUserAdmin(UserAdmin):
     inlines = [ProfileInline]
+    actions = ["assign_owner_iin_all_projects", "assign_viewer_iin_all_projects", "remove_all_roles"]
+
+    def assign_a_role_in_all_projects(self, queryset: QuerySet, role: Role) -> None:
+        for obj in queryset:
+            UserPermissions(obj).assign_a_role_in_all_projects(role)
+
+    def assign_owner_iin_all_projects(self, request, queryset: QuerySet) -> None:
+        self.assign_a_role_for_all_projects(queryset, Role.OWNER)
+    assign_owner_iin_all_projects.short_description = "Assign an owner role to a user in all projects"
+
+    def assign_viewer_iin_all_projects(self, request, queryset: QuerySet) -> None:
+        self.assign_a_role_for_all_projects(queryset, Role.VIEWER)
+    assign_viewer_iin_all_projects.short_description = "Assign a viewer role to a user in all projects"
+
+    def remove_all_roles(self, request, queryset: QuerySet) -> None:
+        for obj in queryset:
+            UserPermissions(obj).delete_all_roles()
+    remove_all_roles.short_description = "Remove all roles from a user"
 
 
 imaging_tracking_admin = ImagingTrackingAdminSite(name="admin")

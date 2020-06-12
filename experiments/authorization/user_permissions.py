@@ -3,7 +3,7 @@ from typing import List
 from django.contrib.auth.models import User
 
 from experiments import auth
-from experiments.constants import VIEW_PERMISSION
+from experiments.constants import VIEW_PERMISSION, Role
 from experiments.models.measurement import Project
 
 
@@ -19,3 +19,14 @@ class UserPermissions:
             if auth.check_permission(self.user.id, project.id, VIEW_PERMISSION):
                 res.append(project)
         return res
+
+    def assign_a_role_in_all_projects(self, role: Role):
+        """Assign a user a role in all projects."""
+        for project in Project.objects.all():
+            auth.add_role(self.user.id, project.id, role)
+
+    def delete_all_roles(self):
+        """Remove roles for a user in all projects."""
+        for project in Project.objects.all():
+            auth.remove_existing_role(self.user.id, project.id)
+
