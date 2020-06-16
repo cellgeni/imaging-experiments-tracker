@@ -4,7 +4,7 @@ from typing import Tuple, Union
 
 from pandas._libs.tslibs.timestamps import Timestamp
 
-ValidDateType = Union[str, Timestamp]
+ValidDateType = Union[str, Timestamp, datetime.datetime, datetime.date]
 
 
 class AbstractDateParser:
@@ -66,6 +66,19 @@ class TimestampParser(AbstractDateParser):
         return self.timestamp.date()
 
 
+class DatetimeDateParser(AbstractDateParser):
+    def __init__(self, date: datetime.date):
+        self.date = date
+
+    def parse(self) -> datetime.date:
+        """
+        Return a date object from a date object.
+        This class is needed to comply with the interface of AbstractDateParser
+        even if date is already a datetime.date object.
+        """
+        return self.date
+
+
 class DateParserFactory:
 
     @staticmethod
@@ -74,8 +87,10 @@ class DateParserFactory:
         d_type = type(date_object)
         if d_type is str:
             return StringDateParser(date_object)
-        elif d_type is Timestamp:
+        elif d_type is Timestamp or d_type is datetime.datetime:
             return TimestampParser(date_object)
+        elif d_type is datetime.date:
+            return DatetimeDateParser(date_object)
         else:
             # Excel transforms null values into floats like 0.0
             AbstractDateParser.raise_value_error(date_object)
