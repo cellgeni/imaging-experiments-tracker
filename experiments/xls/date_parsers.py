@@ -11,7 +11,8 @@ class AbstractDateParser:
 
     @staticmethod
     def raise_value_error(date_string: str):
-        raise ValueError(f"Date must be in format DD.MM.YYYY or DD/MM/YYYY. The problematic string is: {date_string}")
+        raise ValueError(f"Date must be in format DD.MM.YYYY or DD/MM/YYYY or DD-MM-YYYY. "
+                         f"The problematic string is: {date_string}")
 
     @abstractmethod
     def parse(self) -> datetime.date:
