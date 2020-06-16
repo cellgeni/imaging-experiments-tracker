@@ -4,8 +4,6 @@ from django.dispatch import receiver
 
 from experiments.models import Project, Profile
 from experiments import auth
-from experiments.models import Project
-from experiments.models.user import Profile
 
 
 @receiver(models.signals.post_save, sender=Project)
@@ -36,12 +34,14 @@ def create_roles_for_user(user: User) -> None:
     for project in Project.objects.all():
         auth.add_role(user.id, project.id, user.profile.get_default_role())
 
+
 def create_profile_if_not_present_in_user(user: User) -> None:
     """Check if user has a profile, if it does not create one for it.
-    When a user is created from the admin interaface and no Profile properties are set,
+    When a user is created from the admin interface and no Profile properties are set,
     django does not create a profile for that user."""
     if not hasattr(user, 'profile'):
         Profile.objects.create(user=user)
+
 
 @receiver(models.signals.post_save, sender=User)
 def add_profile_and_roles_for_a_new_user(sender, instance, created, **kwargs):
