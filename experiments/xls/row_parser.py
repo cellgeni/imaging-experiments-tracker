@@ -95,7 +95,7 @@ class XLSRowParser(RowParser):
         except KeyError:
             raise NotImplementedError(f"Column {column} is not mapped to a processing function")
         except ObjectDoesNotExist:
-            raise ValueError(f"{column} does not have an object {value}")
+            raise ValueError(f"There is no such {column} in the database: {value}")
         except DataError as e:
             raise NotImplementedError(f"Value {value} in column {column} is too long for the database. "
                                       f"If everything is correct, please ask the administrator "

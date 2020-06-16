@@ -64,10 +64,15 @@ class XLSMeasurementsParserTestCase(TestCase):
             XLSRowParser._parse_section_numbers_string("cat, dog, 2")
 
     def test_parse_date(self):
-        sample_date = datetime.date(2019, 2, 2)
-        self.assertEqual(sample_date, DateParser.parse_date("2.2.2019"))
-        self.assertEqual(sample_date, DateParser.parse_date("02/02/2019"))
-        self.assertEqual(sample_date, DateParser.parse_date("02-02-2019"))
+        year = 2019
+        month = 2
+        day = 2
+        sample_date = datetime.date(year, month, day)
+        self.assertEqual(sample_date, DateParser.parse_date(f"{day}.{month}.{year}"))
+        self.assertEqual(sample_date, DateParser.parse_date(f"0{day}/0{month}/{year}"))
+        self.assertEqual(sample_date, DateParser.parse_date(f"0{day}-0{month}-{year}"))
+        self.assertEqual(sample_date, DateParser.parse_date(datetime.date(month=month, year=year, day=day)))
+        self.assertEqual(sample_date, DateParser.parse_date(datetime.datetime(month=month, year=year, day=day)))
         wrong_dates = ["1.13.2018", "some word", "1 02 2019", "2019.12.3", '0.0', 0.0, 0]
         for wrong_date in wrong_dates:
             with self.assertRaises(ValueError):
