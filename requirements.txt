@@ -14,3 +14,4 @@ PyJWT==1.7.1
 casbin==0.8.4
 casbin_sqlalchemy_adapter==0.1.0
 pyyaml==5.3.1
+requests

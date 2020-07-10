@@ -2,9 +2,10 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver
 
-from experiments.models import Project, Profile
 from experiments import auth
-from experiments.models import Project
+from experiments.constants import ExportStatus
+from experiments.image_file_checker import ImagePathChecker
+from experiments.models import Project, Measurement
 from experiments.models.user import Profile
 
 
@@ -36,12 +37,16 @@ def create_roles_for_user(user: User) -> None:
     for project in Project.objects.all():
         auth.add_role(user.id, project.id, user.profile.get_default_role())
 
+
 def create_profile_if_not_present_in_user(user: User) -> None:
-    """Check if user has a profile, if it does not create one for it.
-    When a user is created from the admin interaface and no Profile properties are set,
-    django does not create a profile for that user."""
+    """
+    Check if user has a profile, if it does not create one for it.
+    When a user is created from the admin interface and no Profile properties are set,
+    django does not create a profile for that user.
+    """
     if not hasattr(user, 'profile'):
         Profile.objects.create(user=user)
+
 
 @receiver(models.signals.post_save, sender=User)
 def add_profile_and_roles_for_a_new_user(sender, instance, created, **kwargs):
@@ -49,3 +54,10 @@ def add_profile_and_roles_for_a_new_user(sender, instance, created, **kwargs):
     if created:
         create_profile_if_not_present_in_user(instance)
         create_roles_for_user(instance)
+
+
+# @receiver(models.signals.post_save, sender=Measurement)
+def check_image_file_paths_signal(sender, instance, *args, **kwargs):
+    if instance.exported and instance.export_status in (ExportStatus.NOT_VERIFIED, ExportStatus.FILES_NOT_PRESENT):
+        ipc = ImagePathChecker(instance)
+        ipc.check_paths()

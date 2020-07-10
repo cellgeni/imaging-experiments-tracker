@@ -114,8 +114,14 @@ class XLSRowParser(RowParser):
             return self._handle_empty_value(column)
         return self._get_or_create_model_instance(column, value)
 
+    def _parse_yes_field(self, column: str) -> bool:
+        return self.row.get(column) == 'Yes'
+
     def parse_harmony_copy_deleted(self) -> bool:
-        return self.row.get(HARMONY_COPY) == 'Yes'
+        return self._parse_yes_field(HARMONY_COPY)
+
+    def parse_exported(self) -> bool:
+        return self._parse_yes_field(EXPORTED)
 
     def parse_researcher(self) -> Researcher:
         return self._parse_column(RESEARCHER)
@@ -187,6 +193,7 @@ class XLSRowParser(RowParser):
             arch_location = self.parse_location(ARCHIVE_LOCATION)
             team_dir = self.parse_location(TEAM_DIR)
             harmony_copy_deleted = self.parse_harmony_copy_deleted()
+            exported = self.parse_exported()
             post_stain = self.parse_text_column(POST_STAIN)
         except KeyError as e:
             raise ValidationError(f"A required column is absent: {e}")
@@ -206,6 +213,7 @@ class XLSRowParser(RowParser):
                            export_location=exp_location,
                            archive_location=arch_location,
                            team_directory=team_dir,
+                           exported=exported,
                            measurement_number=measurement,
                            date=date,
                            image_cycle=image_cycle,

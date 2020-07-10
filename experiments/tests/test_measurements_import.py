@@ -69,6 +69,7 @@ class MeasurementImportTestCase(MeasurementImportBaseTestCase):
             EXPORT_LOCATION: "some",
             ARCHIVE_LOCATION: "some",
             TEAM_DIR: "some",
+            EXPORTED: "No"
         }
         MeasurementImporter(new_row, self.user_id).import_measurement()
         self.check_row_is_in_database(new_row)

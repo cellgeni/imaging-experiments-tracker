@@ -1,13 +1,11 @@
 from django.db import models
 
 from experiments.models.base import NameModel
-from experiments.models.measurement import Measurement, MeasurementNumber
+from experiments.models.measurement import Measurement
 from experiments.models.slide import Section
 
 
 class AutomatedSlide(NameModel):
-    """Really this model should be called 'AutomatedSlide' but I decided to keep it this way to prevent
-    mental converting every time someone stumbles on AUTOMATED_SLIDE_ID in a spreadsheet"""
     pass
 
 
@@ -24,3 +22,7 @@ class Slot(models.Model):
     automated_slide_num = models.IntegerField(help_text="Number of a slot on a plate, for Phoenix it's from 1 to 4",
                                               null=True, blank=True)
     sections = models.ManyToManyField(Section)
+
+    @classmethod
+    def get_automated_slide(cls, measurement: Measurement) -> AutomatedSlide:
+        return Slot.objects.filter(measurement=measurement)[0].automated_slide

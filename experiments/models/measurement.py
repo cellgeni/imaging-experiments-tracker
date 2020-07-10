@@ -3,7 +3,7 @@ from datetime import date
 from django.db import models
 from django.utils import timezone
 
-from experiments.constants import *
+from experiments.constants import EXPORT_STATUS_CHOICES, ExportStatus
 from experiments.models.base import NameModel, Path
 
 
@@ -146,9 +146,13 @@ class Measurement(models.Model):
     archive_location = models.ForeignKey(ArchiveLocation, blank=True, null=True, on_delete=models.SET_NULL,
                                          help_text="Folder with the resulting image if archived")
     team_directory = models.ForeignKey(TeamDirectory, on_delete=models.SET_NULL, null=True, blank=True)
+    exported = models.BooleanField(blank=True, default=False,
+                                   help_text="Has this image been exported by Harmony?")
+    export_status = models.IntegerField(blank=True, default=ExportStatus.NOT_VERIFIED, choices=EXPORT_STATUS_CHOICES,
+                                        help_text="The status of image export checks")
+    files_path = models.CharField(max_length=400, blank=True, null=True,
+                                  help_text="Relative path to exported images from this measurement")
     imported_on = models.DateTimeField(default=timezone.now, editable=False)
-
-    VALIDATION_NEEDED = {RESEARCHER, PROJECT, SPECIES, TECHNOLOGY, CHANNEL}
 
     def __str__(self):
         return f"{self.id} {self.date}"
@@ -173,4 +177,7 @@ class Measurement(models.Model):
         self.team_directory = new.team_directory
         self.harmony_copy_deleted = new.harmony_copy_deleted
         self.post_stain = new.post_stain
+        self.exported = new.exported
+        self.export_status = new.export_status
+        self.files_path = self.files_path
         self.save()

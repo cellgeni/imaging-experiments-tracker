@@ -71,6 +71,7 @@ EXPORT_LOCATION = "Export_location"
 ARCHIVE_LOCATION = "Archive_location"
 TEAM_DIR = "Team_dir"
 HARMONY_COPY = "Harmony_copy_deleted"
+EXPORTED = "Exported"
 MAX_CHANNELS = 7  # maximum number of channels per measurement
 MAX_SLOTS = 4  # maximum number of slots in a plate
 DATE_FORMAT = "%d.%m.%Y"
@@ -83,6 +84,23 @@ CHANNEL_TARGET_MAPPING = {
     CHANNEL4: TARGET4,
     CHANNEL5: TARGET5
 }
+
+
+class ExportStatus:
+    NOT_VERIFIED = 0
+    FILES_PRESENT = 1
+    FILES_NOT_PRESENT = 2
+    VERIFICATION_IN_PROGRESS = 3
+    METADATA_MISSING = 4
+
+
+EXPORT_STATUS_CHOICES = [
+    (ExportStatus.NOT_VERIFIED, "Not verified"),
+    (ExportStatus.FILES_PRESENT, "Files present"),
+    (ExportStatus.FILES_NOT_PRESENT, "Files not present"),
+    (ExportStatus.VERIFICATION_IN_PROGRESS, "Verification in progress"),
+    (ExportStatus.METADATA_MISSING, "Some metadata is missing"),
+]
 
 METABASE_ID = "measurement_id"
 METABASE_RESEARCHER = "researcher"
@@ -102,6 +120,7 @@ METABASE_NOTES_1 = "notes_1"
 METABASE_NOTES_2 = "notes_2"
 METABASE_POST_STAIN = "post_stain"
 METABASE_HARMONY_COPY = "harmony_copy_deleted"
+METABASE_EXPORTED = "exported"
 METABASE_EXPORT_LOCATION = "export_location"
 METABASE_ARCHIVE_LOCATION = "archive_location"
 METABASE_TEAM_DIR = "team_directory"
@@ -130,6 +149,7 @@ METABASE_TO_TEMPLATE_MAPPING = {
     METABASE_NOTES_2: NOTES_2,
     METABASE_POST_STAIN: POST_STAIN,
     METABASE_HARMONY_COPY: HARMONY_COPY,
+    METABASE_EXPORTED: EXPORTED,
     METABASE_EXPORT_LOCATION: EXPORT_LOCATION,
     METABASE_ARCHIVE_LOCATION: ARCHIVE_LOCATION,
     METABASE_TEAM_DIR: TEAM_DIR
@@ -152,7 +172,7 @@ EXCEL_COLUMNS = [RESEARCHER, PROJECT, SLIDE_ID, AUTOMATED_PLATEID, AUTOMATED_SLI
                  CHANNEL7, TARGET7,
                  DATE, MAG_BIN_OVERLAP, LOW_MAG_REFERENCE, SECTION_NUM, NOTES_1, NOTES_2, POST_STAIN,
                  ZPLANES,
-                 EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, HARMONY_COPY
+                 EXPORT_LOCATION, ARCHIVE_LOCATION, TEAM_DIR, HARMONY_COPY, EXPORTED
                  ]
 
 REQUIRED_COLUMNS = {RESEARCHER, PROJECT, SLIDE_ID, SLIDE_BARCODE, TISSUE1, SAMPLE1, CHANNEL1, TARGET1,
@@ -166,6 +186,7 @@ CREATE_OR_UPDATE_PERMISSION = "create"
 class Role(enum.Enum):
     OWNER = "owner"
     VIEWER = "viewer"
+
 
 PERMISSION_POLICY_TYPE = "p"
 ROLE_POLICY_TYPE = "g"

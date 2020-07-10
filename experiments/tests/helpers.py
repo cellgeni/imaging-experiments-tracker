@@ -183,6 +183,7 @@ class MeasurementImportBaseTestCase(TestCase):
         data.append((str(m.notes_2), row.get(NOTES_2)))
         data.append((str(m.post_stain), row.get(POST_STAIN)))
         # TODO: data.append((str(m.harmony_copy_deleted), row.get(HARMONY_COPY)))
+        # TODO: exported
         data.append((str(m.export_location), row.get(EXPORT_LOCATION)))
         data.append((str(m.archive_location), row.get(ARCHIVE_LOCATION)))
         data.append((str(m.team_directory), row.get(TEAM_DIR)))

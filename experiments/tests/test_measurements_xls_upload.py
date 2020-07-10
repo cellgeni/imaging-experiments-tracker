@@ -107,6 +107,7 @@ class MetabaseRowImportTestCase(MeasurementsUploadBase):
             METABASE_NOTES_2: "SMTH2",
             METABASE_POST_STAIN: "smth2",
             METABASE_HARMONY_COPY: False,
+            METABASE_EXPORTED: True,
             METABASE_EXPORT_LOCATION: "some",
             METABASE_ARCHIVE_LOCATION: "some",
             METABASE_TEAM_DIR: "some",

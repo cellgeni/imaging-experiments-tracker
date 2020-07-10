@@ -1,6 +1,7 @@
 import datetime
-from experiments.constants import CREATE_OR_UPDATE_PERMISSION, DELETE_PERMISSION
-from experiments.models.measurement import Project, Measurement
+from experiments.constants import CREATE_OR_UPDATE_PERMISSION, DELETE_PERMISSION, ExportStatus
+from experiments.image_file_checker import ImagePathChecker
+from experiments.models.measurement import Project
 from typing import Union
 
 from experiments import RowT
@@ -8,6 +9,12 @@ from experiments import auth
 from experiments.models import Measurement, Slot, AutomatedSlide, Plate, MeasurementNumber
 from experiments.xls import EntitiesImporter, xls_logger as logger
 from experiments.xls.row_parser import XLSRowParser, ChannelTargetParser
+
+
+def check_image_file_paths(measurement: Measurement):
+    if measurement.exported and measurement.export_status in (ExportStatus.NOT_VERIFIED, ExportStatus.FILES_NOT_PRESENT):
+        ipc = ImagePathChecker(measurement)
+        ipc.check_paths()
 
 
 class MeasurementModifier(EntitiesImporter):
@@ -129,9 +136,14 @@ class MeasurementImporter(MeasurementModifier):
         """Create or update a measurement from a row."""
         existing_measurement = self.find_existing_measurement()
         if existing_measurement:
-            return self.extend_or_update(existing_measurement)
+            measurement = self.extend_or_update(existing_measurement)
         else:
-            return self.create_measurement()
+            measurement = self.create_measurement()
+        try:
+            check_image_file_paths(measurement)
+        except Exception: # todo: handle more gracefully
+            pass
+        return measurement
 
     def create_measurement(self) -> Measurement:
         """Create measurement from a row."""

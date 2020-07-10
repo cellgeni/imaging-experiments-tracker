@@ -4,6 +4,7 @@ from typing import Iterable
 from django.test import TestCase
 
 from experiments import RowT
+from experiments.constants import RESEARCHER, PROJECT, TECHNOLOGY, CHANNEL
 from experiments.models import *
 from experiments.tests.helpers import ExcelRowWriter
 from experiments.xls.xls_importers import ColumnXLSImporter

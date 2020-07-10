@@ -72,13 +72,15 @@ class MetabaseToTemplateConverter:
                 self.df.loc[index, helpers.get_target_column_name(i + 1)] = target
         self.df.drop(METABASE_CHANNEL_TARGETS, axis=1, inplace=True)
 
-    def _convert_harmony_copy(self):
-        self.df = self.df.astype({HARMONY_COPY: str})
+    def _convert_boolean_fields(self):
+        self.df = self.df.astype({HARMONY_COPY: str,
+                                  EXPORTED: str})
         replacements = {
             "False": "No",
             "True": "Yes"
         }
         self.df[HARMONY_COPY] = self.df[HARMONY_COPY].replace(replacements)
+        self.df[EXPORTED] = self.df[EXPORTED].replace(replacements)
 
     @staticmethod
     def generate_template_date(date_string: str) -> str:
@@ -88,7 +90,7 @@ class MetabaseToTemplateConverter:
         self.df[DATE] = self.df[DATE].apply(self.generate_template_date)
 
     def convert_values(self) -> None:
-        self._convert_harmony_copy()
+        self._convert_boolean_fields()
         self._convert_date()
 
     def cleanup(self):

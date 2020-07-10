@@ -1,3 +1,4 @@
+from experiments.constants import MAX_SLOTS
 from experiments.populate.slide import SlidesPopulator
 
 from experiments.models import *

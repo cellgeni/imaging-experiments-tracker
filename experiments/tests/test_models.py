@@ -1,7 +1,8 @@
 from django.test import TestCase
 
+from experiments.constants import MAX_SLOTS
 from experiments.models import Slot
-from experiments.populate.measurement import MeasurementsPopulator, MeasurementsPrerequisitesPopulator, MAX_SLOTS
+from experiments.populate.measurement import MeasurementsPopulator, MeasurementsPrerequisitesPopulator
 
 
 class MeasurementTest(TestCase):
