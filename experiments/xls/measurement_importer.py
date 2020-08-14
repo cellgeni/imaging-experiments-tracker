@@ -1,6 +1,6 @@
 import datetime
 from experiments.constants import CREATE_OR_UPDATE_PERMISSION, DELETE_PERMISSION, ExportStatus
-from experiments.image_file_checker import ImagePathChecker
+from experiments.image_files_operations import ImagePathChecker, Stitcher
 from experiments.models.measurement import Project
 from typing import Union
 
@@ -141,7 +141,10 @@ class MeasurementImporter(MeasurementModifier):
             measurement = self.create_measurement()
         try:
             check_image_file_paths(measurement)
-        except Exception: # todo: handle more gracefully
+            if measurement.files_path:
+                Stitcher().stitch(measurement)
+        except Exception as e: # todo: handle more gracefully
+            logger.error(e)
             pass
         return measurement
 

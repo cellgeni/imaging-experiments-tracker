@@ -9,7 +9,7 @@ if __name__ == "__main__":
     django.setup()
 
 from experiments.models import Measurement, TeamDirectory
-from experiments.image_file_checker import ImagePathChecker
+from experiments.image_files_operations import ImagePathChecker
 
 # td = TeamDirectory.objects.get_or_create(name="team283_imaging")[0]
 # for m in Measurement.objects.all():

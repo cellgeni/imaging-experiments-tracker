@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Tuple
+from urllib.parse import urljoin
 
 import requests
 
@@ -67,3 +68,17 @@ class ImagePathChecker:
     def set_export_status(self, status: ExportStatus) -> None:
         self.m.export_status = status
         self.m.save()
+
+
+class Stitcher:
+
+    STITCHING_DIR = "/nfs/team283_imaging/0HarmonyStitched"
+    STITCHING_URL = urljoin(FS_SERVER, "stitching")
+
+    def stitch(self, measurement: Measurement):
+        measurement_relative_dir = measurement.files_path.split("/")[-1]
+        params = {
+            "input_dir": os.path.join(measurement.files_path, "Images", "Index.idx.xml"),
+            "output_dir": os.path.join(self.STITCHING_DIR, measurement.project.name, measurement_relative_dir)
+        }
+        requests.post(self.STITCHING_URL, json=params)

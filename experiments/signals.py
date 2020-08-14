@@ -4,7 +4,7 @@ from django.dispatch import receiver
 
 from experiments import auth
 from experiments.constants import ExportStatus
-from experiments.image_file_checker import ImagePathChecker
+from experiments.image_files_operations import ImagePathChecker
 from experiments.models import Project, Measurement
 from experiments.models.user import Profile
 
