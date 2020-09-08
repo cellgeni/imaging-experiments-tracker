@@ -43,5 +43,6 @@ Connect to the IMTR database (take credentials from IMTR).
 ## Count measurements by project 
 
 Use "Ask question -> Custom question"
-(to be continued)
+
+![Count](count_measurements_by_project.png)
 
